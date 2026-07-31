@@ -16,3 +16,6 @@ Here is a summary of the changes we've made to get the CLIP-LoRA setup running p
 
 5. **Fixing PyTorch AMP and Scheduler Warnings**
    - We encountered deprecation and step-order warnings from PyTorch during training: so we updated the `GradScaler` initialization in `lora.py` to use the modern `torch.amp.GradScaler('cuda')` API, and wrapped the `scheduler.step()` call in a scale check to ensure it doesn't prematurely step when the optimizer skips due to inf/nan gradients.
+
+6. **Restoring Original Batch Size**
+   - We needed to restore the original batch size to match the original implementation: so we changed the default `--batch_size` argument in `run_utils.py` back to `32`.

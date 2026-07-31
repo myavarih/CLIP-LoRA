@@ -14,6 +14,13 @@ def main():
     # Load config file
     args = get_arguments()
     
+    if args.clear_vis:
+        import os
+        import shutil
+        if os.path.exists('visualizations'):
+            print("Clearing old visualizations directory...")
+            shutil.rmtree('visualizations')
+    
     set_random_seed(args.seed)
     
     # CLIP

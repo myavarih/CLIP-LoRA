@@ -1,7 +1,16 @@
 import os
 from .utils import Datum, DatasetBase
 
-template = ['a photo of a {}, a type of walnut.']
+template = ['a photo of a {} walnut, a type of walnut.']
+
+CLASS_MAP = {
+    'brown momtaz': 'premium brown',
+    'brown plus': 'high-quality brown',
+    'lux': 'luxury extra light',
+    'siah goshti': 'dark meaty',
+    'white mamooli': 'standard white',
+    'white momtaz': 'premium white'
+}
 
 class Walnut(DatasetBase):
     dataset_dir = 'Walnut_Color_Parvizi_3'
@@ -24,13 +33,17 @@ class Walnut(DatasetBase):
             class_dir = os.path.join(dir_path, classname)
             label = label_map[classname]
             
+            # Map Fingilish names to descriptive English for the prompt
+            english_classname = CLASS_MAP.get(classname, classname)
+            
             for img_name in os.listdir(class_dir):
                 if not img_name.startswith('.'):
                     impath = os.path.join(class_dir, img_name)
                     item = Datum(
                         impath=impath,
                         label=label,
-                        classname=classname
+                        classname=english_classname
                     )
                     items.append(item)
         return items
+

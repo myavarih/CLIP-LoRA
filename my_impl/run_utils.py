@@ -27,7 +27,7 @@ def get_arguments():
     # Training arguments
     parser.add_argument('--lr', default=2e-4, type=float)
     parser.add_argument('--n_iters', default=500, type=int)
-    parser.add_argument('--batch_size', default=4, type=int)
+    parser.add_argument('--batch_size', default=32, type=int)
     # LoRA arguments
     parser.add_argument('--position', type=str, default='all', choices=['bottom', 'mid', 'up', 'half-up', 'half-bottom', 'all', 'top3'], help='where to put the LoRA modules')
     parser.add_argument('--encoder', type=str, choices=['text', 'vision', 'both'], default='both')
@@ -40,6 +40,7 @@ def get_arguments():
     parser.add_argument('--filename', default='lora_weights', help='file name to save the lora weights (.pt extension will be added)')
     
     parser.add_argument('--eval_only', default=False, action='store_true', help='only evaluate the LoRA modules (save_path should not be None)')
+    parser.add_argument('--clear_vis', default=False, action='store_true', help='delete old visualizations folder before running')
     args = parser.parse_args()
 
     return args
