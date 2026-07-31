@@ -19,3 +19,18 @@ Here is a summary of the changes we've made to get the CLIP-LoRA setup running p
 
 6. **Restoring Original Batch Size**
    - We needed to restore the original batch size to match the original implementation: so we changed the default `--batch_size` argument in `run_utils.py` back to `32`.
+
+7. **Styling and Visualization Upgrades**
+   - We wanted to make the matplotlib plots more beautiful: so we adopted the FiveThirtyEight default style in `vis_utils.py`, switched to a classic sans-serif font, removed bolding from titles, adjusted color palettes, and added star markers for text features in embedding spaces.
+
+8. **Fixing the NoneType crash in `--eval_only` mode**
+   - We encountered a TypeError `NoneType object is not iterable` because `main.py` explicitly skips creating the `train_loader` to save time in eval-only mode, but `lora.py` was still trying to iterate over it: so we wrapped the train set evaluation blocks in `if train_loader is not None:` and fixed the `eval_only` logic to properly extract attention maps.
+
+9. **Fixing Attention Weight Extraction in LoRA layers**
+   - We encountered an issue where the final evaluation crashed because the attention weights were `None`: so we modified the custom `PlainMultiheadAttentionLoRA` forward method in `loralib/layers.py` to manually compute and return the Softmax attention weights when `need_weights=True` was passed.
+
+10. **Fixing Float/Half precision mismatch in pre-loading features**
+    - We encountered a `RuntimeError: mat1 and mat2 must have the same dtype` crash when trying to run `--eval_only` because the LoRA linear layers default to `Float32` but the CLIP inputs are `Float16`: so we added a `torch.amp.autocast` block inside the `pre_load_features` function in `utils.py` to handle the dtype conversion safely.
+
+11. **Optimizing Initialization Time**
+    - We noticed that the feature pre-loading step was taking a long time because it was pointlessly iterating over the validation set which was never used: so we removed the `val_features` extraction block from `lora.py` to speed up the startup sequence.

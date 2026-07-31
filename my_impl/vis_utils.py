@@ -9,12 +9,21 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import cv2
 
+# Define the global beautiful style
+def apply_beautiful_style():
+    import matplotlib.pyplot as plt
+    plt.style.use('fivethirtyeight')
+
+# Apply it when module is imported
+apply_beautiful_style()
+
 def plot_confusion_matrix(y_true, y_pred, classes, save_path, split_name=""):
     cm = confusion_matrix(y_true, y_pred)
     plt.figure(figsize=(10, 8))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
+    sns.heatmap(cm, annot=True, fmt='d', cmap='YlGnBu', cbar_kws={'shrink': 0.8}, 
+                xticklabels=classes, yticklabels=classes, linewidths=0.5, linecolor='white')
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
     title = f'{split_name} Confusion Matrix' if split_name else 'Confusion Matrix'
     plt.title(title)
     plt.tight_layout()
@@ -74,17 +83,22 @@ def plot_metrics(losses, accuracies, save_path):
     fig, ax1 = plt.subplots(figsize=(10, 5))
 
     ax1.set_xlabel('Epochs')
-    ax1.set_ylabel('Loss', color='tab:red')
-    ax1.plot(epochs, losses, color='tab:red', label='Train Loss', marker='o')
-    ax1.tick_params(axis='y', labelcolor='tab:red')
+    ax1.set_ylabel('Loss', color='C0')
+    ax1.plot(epochs, losses, color='C0', label='Train Loss', marker='o', markersize=8, alpha=0.8)
+    ax1.tick_params(axis='y', labelcolor='C0')
 
     ax2 = ax1.twinx()
-    ax2.set_ylabel('Accuracy', color='tab:blue')
-    ax2.plot(epochs, accuracies, color='tab:blue', label='Train Accuracy', marker='s')
-    ax2.tick_params(axis='y', labelcolor='tab:blue')
+    ax2.set_ylabel('Accuracy (%)', color='C1')
+    ax2.plot(epochs, accuracies, color='C1', label='Train Accuracy', marker='s', markersize=8, alpha=0.8)
+    ax2.tick_params(axis='y', labelcolor='C1')
+
+    # Adding legends for both axes
+    lines_1, labels_1 = ax1.get_legend_handles_labels()
+    lines_2, labels_2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='center right', frameon=True, fancybox=True, shadow=True)
 
     fig.tight_layout()
-    plt.title('Training Loss and Accuracy')
+    plt.title('Training Metrics Over Time', pad=15)
     plt.savefig(save_path)
     plt.close()
 
@@ -108,7 +122,8 @@ def plot_embeddings(image_features, text_features, image_labels, classes, save_p
     reduced_txt = reduced_feats[len(img_feats):]
     
     plt.figure(figsize=(12, 10))
-    palette = sns.color_palette("husl", len(classes))
+    # Use a vibrant palette
+    palette = sns.color_palette("Set2", len(classes))
     
     # Plot image features
     for i in range(len(classes)):
@@ -117,9 +132,9 @@ def plot_embeddings(image_features, text_features, image_labels, classes, save_p
         
     # Plot text features
     for i in range(len(classes)):
-        plt.scatter(reduced_txt[i, 0], reduced_txt[i, 1], color=palette[i], marker='X', edgecolor='black', s=200, label=f'Text: {classes[i]}')
+        plt.scatter(reduced_txt[i, 0], reduced_txt[i, 1], color=palette[i], marker='*', edgecolor='black', linewidth=1.5, s=400, label=f'Text: {classes[i]}', zorder=5)
         
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', markerscale=1)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', markerscale=1.2, frameon=True, shadow=True)
     title = f'Embedding Space Visualization ({method.upper()})'
     if split_name:
         title = f'[{split_name}] {title}'

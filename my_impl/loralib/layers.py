@@ -508,13 +508,32 @@ class PlainMultiheadAttentionLoRA(nn.Module):
         k = k.view(bsz, self.num_heads, src_len, self.head_dim)
         v = v.view(bsz, self.num_heads, src_len, self.head_dim)
 
-        attn_output = self.scaled_dot_product_attention(q, k, v, attn_mask, dropout_p, is_causal)
+        if need_weights:
+            q_scaled = q / math.sqrt(self.head_dim)
+            attn_weights = torch.matmul(q_scaled, k.transpose(-2, -1))
+            if attn_mask is not None:
+                if attn_mask.dtype == torch.bool:
+                    attn_weights.masked_fill_(~attn_mask, float("-inf"))
+                else:
+                    attn_weights += attn_mask
+            attn_weights = F.softmax(attn_weights, dim=-1)
+            if dropout_p > 0.0:
+                attn_weights_drop = F.dropout(attn_weights, p=dropout_p)
+            else:
+                attn_weights_drop = attn_weights
+            attn_output = torch.matmul(attn_weights_drop, v)
+            if average_attn_weights:
+                attn_weights = attn_weights.sum(dim=1) / self.num_heads
+        else:
+            attn_output = self.scaled_dot_product_attention(q, k, v, attn_mask, dropout_p, is_causal)
+            attn_weights = None
+
         attn_output = attn_output.permute(2, 0, 1, 3).contiguous().view(bsz * tgt_len, embed_dim)
         attn_output = self.proj(attn_output)
         attn_output = attn_output.view(tgt_len, bsz, attn_output.size(1))
         if self.batch_first and is_batched:
-            return attn_output.transpose(1, 0), None
-        return attn_output, None  
+            return attn_output.transpose(1, 0), attn_weights
+        return attn_output, attn_weights  
 
     def train(self, mode: bool = True):
         super().train(mode)

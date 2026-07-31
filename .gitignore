@@ -1,3 +1,6 @@
 *.zip
 FewShotData/
 __pycache__/
+my_impl/checkpoints/
+my_impl/visualizations/
+my_impl/test_vis.py

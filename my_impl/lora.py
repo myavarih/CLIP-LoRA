@@ -76,15 +76,13 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
     VALIDATION = False
     
     # Textual features
-    print("\nGetting textual features as CLIP's classifier.")
+    Logger.step("Getting textual features as CLIP's classifier.")
     textual_features = clip_classifier(dataset.classnames, dataset.template, clip_model)
 
-    # Pre-load val features
-    print("\nLoading visual features and labels from val set.")
-    val_features, val_labels = pre_load_features(clip_model, val_loader)
+    # (Val features are not needed since VALIDATION is False and they aren't plotted)
 
     # Pre-load test features
-    print("\nLoading visual features and labels from test set.")
+    Logger.step("Loading visual features and labels from test set.")
     test_features, test_labels = pre_load_features(clip_model, test_loader)
     
     test_features = test_features.cuda()
@@ -93,35 +91,40 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
     # Zero-shot CLIP
     clip_logits = logit_scale * test_features @ textual_features
     zs_acc = cls_acc(clip_logits, test_labels)
-    print("\n**** Zero-shot CLIP's test accuracy: {:.2f}. ****\n".format(zs_acc))
+    Logger.success("Zero-shot CLIP's test accuracy: {:.2f}%".format(zs_acc))
     
-    print("Generating Zero-shot visualizations...")
+    Logger.info("Generating Zero-shot visualizations...")
     os.makedirs('visualizations', exist_ok=True)
     
     # --- Zero-shot Train ---
-    zs_acc_train, zs_preds_train, zs_targets_train, zs_images_train, zs_text_features_train, zs_attn_maps_train = evaluate_lora(args, clip_model, train_loader, dataset, extract_attention=True)
-    
-    plot_confusion_matrix(zs_targets_train.numpy(), zs_preds_train.numpy(), dataset.classnames, 'visualizations/zs_train_confusion_matrix.png', split_name="Train")
-    plot_predictions(zs_images_train, zs_targets_train.numpy(), zs_preds_train.numpy(), dataset.classnames, 'visualizations/zs_train_predictions.png', split_name="Train", num_images=100)
-    
-    if len(zs_attn_maps_train) > 0 and len(zs_images_train) > 0:
-        os.makedirs('visualizations/zs_train_attention', exist_ok=True)
-        for idx in range(min(len(zs_images_train), 100)):
-            visualize_attention(zs_images_train[idx], zs_attn_maps_train[idx], f'visualizations/zs_train_attention/img_{idx}.png', split_name="Train")
-            
-    train_features, train_labels = pre_load_features(clip_model, train_loader)
-    plot_embeddings(train_features.cpu(), textual_features.t().cpu(), train_labels.cpu(), dataset.classnames, 'visualizations/zs_train_tsne.png', method='tsne', split_name="Train")
-    plot_embeddings(train_features.cpu(), textual_features.t().cpu(), train_labels.cpu(), dataset.classnames, 'visualizations/zs_train_pca.png', method='pca', split_name="Train")
+    if train_loader is not None:
+        zs_acc_train, zs_preds_train, zs_targets_train, zs_images_train, zs_text_features_train, zs_attn_maps_train = evaluate_lora(args, clip_model, train_loader, dataset, extract_attention=True)
+        
+        train_indices = np.random.choice(len(zs_images_train), min(20, len(zs_images_train)), replace=False)
+        
+        plot_confusion_matrix(zs_targets_train.numpy(), zs_preds_train.numpy(), dataset.classnames, 'visualizations/zs_train_confusion_matrix.png', split_name="Train")
+        plot_predictions(zs_images_train[train_indices], zs_targets_train.numpy()[train_indices], zs_preds_train.numpy()[train_indices], dataset.classnames, 'visualizations/zs_train_predictions.png', split_name="Train")
+        
+        if len(zs_attn_maps_train) > 0 and len(zs_images_train) > 0:
+            os.makedirs('visualizations/zs_train_attention', exist_ok=True)
+            for idx in train_indices:
+                visualize_attention(zs_images_train[idx], zs_attn_maps_train[idx], f'visualizations/zs_train_attention/img_{idx}.png', split_name="Train")
+                
+        train_features, train_labels = pre_load_features(clip_model, train_loader)
+        plot_embeddings(train_features.cpu(), textual_features.t().cpu(), train_labels.cpu(), dataset.classnames, 'visualizations/zs_train_tsne.png', method='tsne', split_name="Train")
+        plot_embeddings(train_features.cpu(), textual_features.t().cpu(), train_labels.cpu(), dataset.classnames, 'visualizations/zs_train_pca.png', method='pca', split_name="Train")
 
     # --- Zero-shot Test ---
     zs_acc_full, zs_preds, zs_targets, zs_images, zs_text_features, zs_attn_maps = evaluate_lora(args, clip_model, test_loader, dataset, extract_attention=True)
     
+    test_indices = np.random.choice(len(zs_images), min(20, len(zs_images)), replace=False)
+    
     plot_confusion_matrix(zs_targets.numpy(), zs_preds.numpy(), dataset.classnames, 'visualizations/zs_test_confusion_matrix.png', split_name="Test")
-    plot_predictions(zs_images, zs_targets.numpy(), zs_preds.numpy(), dataset.classnames, 'visualizations/zs_test_predictions.png', split_name="Test", num_images=100)
+    plot_predictions(zs_images[test_indices], zs_targets.numpy()[test_indices], zs_preds.numpy()[test_indices], dataset.classnames, 'visualizations/zs_test_predictions.png', split_name="Test")
     
     if len(zs_attn_maps) > 0 and len(zs_images) > 0:
         os.makedirs('visualizations/zs_test_attention', exist_ok=True)
-        for idx in range(min(len(zs_images), 100)):
+        for idx in test_indices:
             visualize_attention(zs_images[idx], zs_attn_maps[idx], f'visualizations/zs_test_attention/img_{idx}.png', split_name="Test")
         
     plot_embeddings(test_features.cpu(), textual_features.t().cpu(), test_labels.cpu(), dataset.classnames, 'visualizations/zs_test_tsne.png', method='tsne', split_name="Test")
@@ -138,16 +141,28 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
         load_lora(args, list_lora_layers)
         
         start_eval = time.time()
-        acc_test, test_preds, test_targets, test_images, text_features = evaluate_lora(args, clip_model, test_loader, dataset)
+        acc_test, test_preds, test_targets, test_images, text_features, attention_maps = evaluate_lora(args, clip_model, test_loader, dataset, extract_attention=True)
         eval_time = time.time() - start_eval
         
-        print("**** Test accuracy: {:.2f} (Time: {:.2f}s). ****\n".format(acc_test, eval_time))
+        Logger.success("Test accuracy: {:.2f}% (Time: {:.2f}s)".format(acc_test, eval_time))
         
         # Plot evaluation results
         os.makedirs('visualizations', exist_ok=True)
-        plot_confusion_matrix(test_targets.numpy(), test_preds.numpy(), dataset.classnames, 'visualizations/test_confusion_matrix.png')
-        plot_predictions(test_images, test_targets.numpy(), test_preds.numpy(), dataset.classnames, 'visualizations/test_predictions.png')
-        plot_embeddings(test_features, text_features, test_labels, dataset.classnames, 'visualizations/test_tsne.png', method='tsne')
+        test_indices = np.random.choice(len(test_images), min(20, len(test_images)), replace=False)
+        plot_confusion_matrix(test_targets.numpy(), test_preds.numpy(), dataset.classnames, 'visualizations/test_confusion_matrix.png', split_name="Test")
+        plot_predictions(test_images[test_indices], test_targets.numpy()[test_indices], test_preds.numpy()[test_indices], dataset.classnames, 'visualizations/test_predictions.png', split_name="Test")
+        
+        if len(attention_maps) > 0 and len(test_images) > 0:
+            os.makedirs('visualizations/test_attention', exist_ok=True)
+            for idx in test_indices:
+                visualize_attention(test_images[idx], attention_maps[idx], f'visualizations/test_attention/img_{idx}.png', split_name="Test")
+                
+        # We need test_features for embeddings, pre_load them
+        test_features, _ = pre_load_features(clip_model, test_loader)
+        plot_embeddings(test_features.cpu(), text_features.cpu(), test_labels.cpu(), dataset.classnames, 'visualizations/test_tsne.png', method='tsne', split_name="Test")
+        plot_embeddings(test_features.cpu(), text_features.cpu(), test_labels.cpu(), dataset.classnames, 'visualizations/test_pca.png', method='pca', split_name="Test")
+        
+        Logger.info("All visualizations saved in the 'visualizations/' folder.")
         return
 
     mark_only_lora_as_trainable(clip_model)
@@ -221,7 +236,8 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
             acc_train /= tot_samples
             loss_epoch /= tot_samples
             current_lr = scheduler.get_last_lr()[0]
-            print('LR: {:.6f}, Acc: {:.4f}, Loss: {:.4f}'.format(current_lr, acc_train, loss_epoch))
+            iters_left = total_iters - count_iters
+            Logger.metric('Iters Left: {}, LR: {:.6f}, Acc: {:.4f}, Loss: {:.4f}'.format(iters_left, current_lr, acc_train, loss_epoch))
             history_loss.append(loss_epoch)
             history_acc.append(acc_train)
             
@@ -229,59 +245,67 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
         if VALIDATION:
             clip_model.eval()
             acc_val = evaluate_lora(args, clip_model, val_loader, dataset)[0]
-            print("**** Val accuracy: {:.2f}. ****\n".format(acc_val))
+            Logger.success("Val accuracy: {:.2f}%".format(acc_val))
         
     
     acc_test = evaluate_lora(args, clip_model, test_loader, dataset)[0]
-    print("**** Final test accuracy: {:.2f}. ****\n".format(acc_test))
+    Logger.success("Final test accuracy: {:.2f}%".format(acc_test))
     train_time = time.time() - start_train_time
-    print(f"Training completed in {train_time:.2f} seconds.")
+    Logger.info(f"Training completed in {train_time:.2f} seconds.")
     
     if args.save_path != None:
         save_lora(args, list_lora_layers)
 
     # Final Evaluation & Visualization
-    print("\nRunning final evaluation and generating plots...")
+    Logger.step("Running final evaluation and generating plots...")
     os.makedirs('visualizations', exist_ok=True)
     
     # 1. Loss and Accuracy curve
     plot_metrics(history_loss, history_acc, 'visualizations/training_metrics.png')
     
     # 2. Final Evaluation (Train)
-    print("Evaluating on Train set...")
-    acc_train_final, train_preds, train_targets, final_train_images, final_train_text_features, attention_maps_train = evaluate_lora(args, clip_model, train_loader, dataset, extract_attention=True)
-    print("**** Final Train accuracy: {:.2f}. ****\n".format(acc_train_final))
-    
-    plot_confusion_matrix(train_targets.numpy(), train_preds.numpy(), dataset.classnames, 'visualizations/final_train_confusion_matrix.png', split_name="Train")
-    plot_predictions(final_train_images, train_targets.numpy(), train_preds.numpy(), dataset.classnames, 'visualizations/final_train_predictions.png', split_name="Train", num_images=100)
-    
-    if len(attention_maps_train) > 0 and len(final_train_images) > 0:
-        os.makedirs('visualizations/final_train_attention', exist_ok=True)
-        for idx in range(min(len(final_train_images), 100)):
-            visualize_attention(final_train_images[idx], attention_maps_train[idx], f'visualizations/final_train_attention/img_{idx}.png', split_name="Train")
-            
-    trained_train_features, _ = pre_load_features(clip_model, train_loader)
-    plot_embeddings(trained_train_features, final_train_text_features.cpu(), train_targets, dataset.classnames, 'visualizations/final_train_tsne.png', method='tsne', split_name="Train")
-    plot_embeddings(trained_train_features, final_train_text_features.cpu(), train_targets, dataset.classnames, 'visualizations/final_train_pca.png', method='pca', split_name="Train")
+    acc_train_final = 0.0
+    if train_loader is not None:
+        Logger.info("Evaluating on Train set...")
+        acc_train_final, train_preds, train_targets, final_train_images, final_train_text_features, attention_maps_train = evaluate_lora(args, clip_model, train_loader, dataset, extract_attention=True)
+        Logger.success("Final Train accuracy: {:.2f}%".format(acc_train_final))
+        
+        train_indices = np.random.choice(len(final_train_images), min(20, len(final_train_images)), replace=False)
+        
+        plot_confusion_matrix(train_targets.numpy(), train_preds.numpy(), dataset.classnames, 'visualizations/final_train_confusion_matrix.png', split_name="Train")
+        plot_predictions(final_train_images[train_indices], train_targets.numpy()[train_indices], train_preds.numpy()[train_indices], dataset.classnames, 'visualizations/final_train_predictions.png', split_name="Train")
+        
+        if len(attention_maps_train) > 0 and len(final_train_images) > 0:
+            os.makedirs('visualizations/final_train_attention', exist_ok=True)
+            for idx in train_indices:
+                visualize_attention(final_train_images[idx], attention_maps_train[idx], f'visualizations/final_train_attention/img_{idx}.png', split_name="Train")
+                
+        trained_train_features, _ = pre_load_features(clip_model, train_loader)
+        plot_embeddings(trained_train_features, final_train_text_features.cpu(), train_targets, dataset.classnames, 'visualizations/final_train_tsne.png', method='tsne', split_name="Train")
+        plot_embeddings(trained_train_features, final_train_text_features.cpu(), train_targets, dataset.classnames, 'visualizations/final_train_pca.png', method='pca', split_name="Train")
 
     # 3. Final Evaluation (Test)
-    print("Evaluating on Test set...")
+    Logger.info("Evaluating on Test set...")
     acc_test, test_preds, test_targets, test_images, final_text_features, attention_maps = evaluate_lora(args, clip_model, test_loader, dataset, extract_attention=True)
-    print("**** Final Test accuracy: {:.2f}. ****\n".format(acc_test))
+    Logger.success("Final Test accuracy: {:.2f}%".format(acc_test))
+    
+    test_indices = np.random.choice(len(test_images), min(20, len(test_images)), replace=False)
     
     plot_confusion_matrix(test_targets.numpy(), test_preds.numpy(), dataset.classnames, 'visualizations/final_test_confusion_matrix.png', split_name="Test")
-    plot_predictions(test_images, test_targets.numpy(), test_preds.numpy(), dataset.classnames, 'visualizations/final_test_predictions.png', split_name="Test", num_images=100)
+    plot_predictions(test_images[test_indices], test_targets.numpy()[test_indices], test_preds.numpy()[test_indices], dataset.classnames, 'visualizations/final_test_predictions.png', split_name="Test")
     
     if len(attention_maps) > 0 and len(test_images) > 0:
         os.makedirs('visualizations/final_test_attention', exist_ok=True)
-        for idx in range(min(len(test_images), 100)):
+        for idx in test_indices:
             visualize_attention(test_images[idx], attention_maps[idx], f'visualizations/final_test_attention/img_{idx}.png', split_name="Test")
     
     trained_test_features, _ = pre_load_features(clip_model, test_loader)
     plot_embeddings(trained_test_features, final_text_features.cpu(), test_targets, dataset.classnames, 'visualizations/final_test_tsne.png', method='tsne', split_name="Test")
     plot_embeddings(trained_test_features, final_text_features.cpu(), test_targets, dataset.classnames, 'visualizations/final_test_pca.png', method='pca', split_name="Test")
     
-    print("All visualizations saved in the 'visualizations/' folder.")
+    save_run_info(args, zs_acc, acc_train_final, acc_test, train_time)
+    
+    Logger.info("All visualizations and run summary saved in the 'visualizations/' folder.")
     return
             
     

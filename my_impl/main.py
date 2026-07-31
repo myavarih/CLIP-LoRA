@@ -18,7 +18,7 @@ def main():
         import os
         import shutil
         if os.path.exists('visualizations'):
-            print("Clearing old visualizations directory...")
+            Logger.info("Clearing old visualizations directory...")
             shutil.rmtree('visualizations')
     
     set_random_seed(args.seed)
@@ -29,7 +29,7 @@ def main():
     logit_scale = 100
 
     # Prepare dataset
-    print("Preparing dataset.")
+    Logger.step("Preparing dataset.")
         
     dataset = build_dataset(args.dataset, args.root_path, args.shots, preprocess)
     
