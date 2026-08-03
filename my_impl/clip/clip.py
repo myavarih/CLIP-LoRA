@@ -10,21 +10,10 @@ from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normal
 from tqdm import tqdm
 
 from .model import build_model
-from .simple_tokenizer import SimpleTokenizer as _Tokenizer
-
-try:
-    from torchvision.transforms import InterpolationMode
-    BICUBIC = InterpolationMode.BICUBIC
-except ImportError:
-    BICUBIC = Image.BICUBIC
-
-
-if torch.__version__.split(".") < ["1", "7", "1"]:
-    warnings.warn("PyTorch version 1.7.1 or higher is recommended")
-
+from transformers import CLIPTokenizerFast as _CLIPTokenizerFast
 
 __all__ = ["available_models", "load", "tokenize"]
-_tokenizer = _Tokenizer()
+_tokenizer = _CLIPTokenizerFast.from_pretrained("openai/clip-vit-base-patch32")
 
 _MODELS = {
     "RN50": "https://openaipublic.azureedge.net/clip/models/afeb0e10f9e5a86da6080e35cf09123aca3b358a0c3e3b6c78a7b63bc04b6762/RN50.pt",
@@ -212,18 +201,16 @@ def tokenize(texts: Union[str, List[str]], context_length: int = 77, truncate: b
     if isinstance(texts, str):
         texts = [texts]
 
-    sot_token = _tokenizer.encoder["<|startoftext|>"]
-    eot_token = _tokenizer.encoder["<|endoftext|>"]
-    all_tokens = [[sot_token] + _tokenizer.encode(text) + [eot_token] for text in texts]
-    result = torch.zeros(len(all_tokens), context_length, dtype=torch.long)
+    enc = _tokenizer(texts, padding=False, truncation=truncate, max_length=context_length if truncate else None)
+    result = torch.zeros(len(texts), context_length, dtype=torch.long)
 
-    for i, tokens in enumerate(all_tokens):
-        if len(tokens) > context_length:
+    for i, ids in enumerate(enc["input_ids"]):
+        if len(ids) > context_length:
             if truncate:
-                tokens = tokens[:context_length]
-                tokens[-1] = eot_token
+                ids = ids[:context_length]
+                ids[-1] = _tokenizer.eos_token_id
             else:
                 raise RuntimeError(f"Input {texts[i]} is too long for context length {context_length}")
-        result[i, :len(tokens)] = torch.tensor(tokens)
+        result[i, :len(ids)] = torch.tensor(ids)
 
     return result

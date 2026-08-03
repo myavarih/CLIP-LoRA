@@ -34,3 +34,6 @@ Here is a summary of the changes we've made to get the CLIP-LoRA setup running p
 
 11. **Optimizing Initialization Time**
     - We noticed that the feature pre-loading step was taking a long time because it was pointlessly iterating over the validation set which was never used: so we removed the `val_features` extraction block from `lora.py` to speed up the startup sequence.
+
+12. **Replacing Custom Tokenizer with Hugging Face Fast Rust Tokenizer**
+    - We needed to accelerate text tokenization and eliminate the legacy slow pure-Python BPE implementation: so we updated `my_impl/clip/clip.py` to use `CLIPTokenizerFast` from `transformers` (achieving a ~23x speedup with exact numerical parity), removed `my_impl/clip/simple_tokenizer.py` and the 1.3 MB `my_impl/clip/bpe_simple_vocab_16e6.txt.gz` file, and registered `tokenizers` and `transformers` in `my_impl/requirements.txt`.

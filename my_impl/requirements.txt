@@ -11,3 +11,5 @@ ftfy
 regex
 wilds==1.2.2
 tabulate
+tokenizers
+transformers
