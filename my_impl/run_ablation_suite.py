@@ -101,13 +101,14 @@ def is_experiment_completed(checkpoints_dir, output_dir, backbone, dataset, shot
     return False, None, checkpoint_file, exp_dir
 
 
-def print_summary_table(results):
-    print("\n" + "=" * 110)
-    print("                                📊 ABLATION EXPERIMENTS SUMMARY 📊")
-    print("=" * 110)
+def get_summary_table_string(results):
+    lines = []
+    lines.append("\n" + "=" * 110)
+    lines.append("                                📊 ABLATION EXPERIMENTS SUMMARY 📊")
+    lines.append("=" * 110)
     header = f"{'Config':<20} | {'Shot':<6} | {'Zero-Shot Acc':<15} | {'Final Train Acc':<16} | {'Final Test Acc':<15} | {'Train Time':<12}"
-    print(header)
-    print("-" * 110)
+    lines.append(header)
+    lines.append("-" * 110)
     for r in results:
         cfg = r['config']
         shot_str = f"{r['shots']}s"
@@ -115,8 +116,13 @@ def print_summary_table(results):
         train_acc = f"{r.get('final_train_acc', 0.0):.2f}%"
         test_acc = f"{r.get('final_test_acc', 0.0):.2f}%"
         train_time = f"{r.get('training_time_seconds', 0.0):.2f}s"
-        print(f"{cfg:<20} | {shot_str:<6} | {zs_acc:<15} | {train_acc:<16} | {test_acc:<15} | {train_time:<12}")
-    print("=" * 110 + "\n")
+        lines.append(f"{cfg:<20} | {shot_str:<6} | {zs_acc:<15} | {train_acc:<16} | {test_acc:<15} | {train_time:<12}")
+    lines.append("=" * 110 + "\n")
+    return "\n".join(lines)
+
+
+def print_summary_table(results):
+    print(get_summary_table_string(results))
 
 
 def run_experiments(args):
@@ -268,6 +274,7 @@ def run_experiments(args):
     if all_results:
         summary_json_path = os.path.join(args.output_dir, "ablation_summary.json")
         summary_csv_path = os.path.join(args.output_dir, "ablation_summary.csv")
+        summary_txt_path = os.path.join(args.output_dir, "ablation_summary.txt")
         
         with open(summary_json_path, 'w') as f:
             json.dump(all_results, f, indent=4)
@@ -275,10 +282,15 @@ def run_experiments(args):
         df = pd.DataFrame(all_results)
         df.to_csv(summary_csv_path, index=False)
         
-        print_summary_table(all_results)
+        summary_str = get_summary_table_string(all_results)
+        with open(summary_txt_path, 'w') as f:
+            f.write(summary_str)
+        
+        print(summary_str)
         print(f"📑 Consolidated results saved to:")
         print(f"   JSON: {summary_json_path}")
-        print(f"   CSV:  {summary_csv_path}\n")
+        print(f"   CSV:  {summary_csv_path}")
+        print(f"   TXT:  {summary_txt_path}\n")
     else:
         print("⚠️ No experiments were executed.")
 
