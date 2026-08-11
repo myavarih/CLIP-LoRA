@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument('--backbone', type=str, default='ViT-B/16', help='CLIP backbone')
     parser.add_argument('--lr', type=float, default=2e-4, help='Learning rate')
     parser.add_argument('--n_iters', type=int, default=500, help='Number of iterations per shot')
-    parser.add_argument('--alpha', type=int, default=1, help='LoRA alpha scaling')
+    parser.add_argument('--alpha', type=float, default=1.0, help='LoRA alpha scaling')
     parser.add_argument('--dropout_rate', type=float, default=0.25, help='LoRA dropout rate')
     parser.add_argument('--output_dir', type=str, default='ablation_experiments_output', help='Base directory to save results and visualizations')
     parser.add_argument('--checkpoints_dir', type=str, default='ablation_checkpoints', help='Base directory to save model checkpoints')

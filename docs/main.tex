@@ -1,32 +1,224 @@
 \documentclass[letterpaper,11pt,leqno]{article}
 \usepackage{paper}
 \usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{geometry}
+\geometry{margin=1in}
+
 \bibliographystyle{paper}
 
-% Enter paper title to populate PDF metadata:
-\hypersetup{pdftitle={CLIP-LoRA Implementation Details}}
-
-% Enter path to BibTeX file with references:
+\hypersetup{pdftitle={Lab Report: CLIP-LoRA Experiments}}
 \newcommand{\bib}{paper.bib}
-
-% Enter path to PDF file with figures (if needed later):
-%\newcommand{\pdf}{figures.pdf}
 
 \begin{document}
 
-% Enter title:
-\title{CLIP-LoRA Implementation Details}
-
-% Enter authors:
+\title{Lab Report: CLIP-LoRA on the Walnut Dataset}
 \author{Mohammad Yavari}
-
-% Enter date:
-\date{July 2026}
+\date{August 2026}
 
 \begin{titlepage}
 \maketitle
 \end{titlepage}
 
-% Sections will be added here as we progress...
+\section{Introduction}
+I ran a bunch of experiments to see if we can adapt CLIP for the walnut dataset using very little data. Full fine-tuning usually wrecks pre-trained models when you only have a few images. Instead, I used LoRA (Low-Rank Adaptation). It basically sneaks small trainable matrices into the attention layers without touching the original weights. It's fast and saves memory. 
+
+I wanted to figure out two things:
+1. Which parts of the attention mechanism (queries, keys, values) actually need LoRA?
+2. What does the model actually learn when we only give it 4 images per class?
+
+\section{Setup}
+I used the standard ViT-B/16 backbone for CLIP. I tested 1, 2, 4, 8, and 16 shots (images per class). 
+I messed with two main settings:
+\begin{itemize}
+    \item \textbf{Target Layers}: I tried updating just values (\texttt{p\_v}), queries and values (\texttt{p\_qv}), or all three (\texttt{baseline}: $q, v, k$).
+    \item \textbf{Rank}: I used rank $r=2$ mostly, but also tried $r=1$ (\texttt{r\_1}) to see if we could get away with even fewer parameters.
+\end{itemize}
+
+\section{The Numbers: Ablation Results}
+
+First, I looked at how the accuracy changes as we add more images (Figure \ref{fig:acc_vs_shots}). 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/acc_vs_shots.png}
+    \caption{Test accuracy going up as we add more training shots.}
+    \label{fig:acc_vs_shots}
+\end{figure}
+
+The \texttt{baseline} model ($q,v,k$ with $r=2$) wins almost everywhere. Interestingly, just updating the value matrix (\texttt{p\_v}) is terrible. It barely beats the zero-shot baseline when we only have 1 or 2 shots. My guess is that changing just the values doesn't give the model enough flexibility to shift its attention to new features. 
+
+I also checked the training curves for the 4-shot runs (Figure \ref{fig:training_curves}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/training_curves_4shots.png}
+    \caption{Training progress for the 4-shot models.}
+    \label{fig:training_curves}
+\end{figure}
+
+The \texttt{baseline} gets to a high accuracy quickly and stays there. The \texttt{r\_1} model is super jerky. It looks like rank 1 is just too small. It's probably trying to squeeze too much information into a tiny bottleneck, making the gradients bounce around.
+
+\section{Deep Dive: Before vs. After (4-Shot)}
+
+I wanted to see what was happening under the hood. So, I grabbed the embeddings and predictions before any training (Zero-Shot) and compared them to the final 4-shot model.
+
+\subsection{Clustering}
+Look at the t-SNE (Figure \ref{fig:tsne_comparison}) and PCA (Figure \ref{fig:pca_comparison}) plots. 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_tsne.png}
+        \caption{Zero-Shot (A mess)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_tsne.png}
+        \caption{Final 4-Shot (Nice clusters)}
+    \end{subfigure}
+    \caption{t-SNE shows how the model separates the classes.}
+    \label{fig:tsne_comparison}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_pca.png}
+        \caption{Zero-Shot}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_pca.png}
+        \caption{Final 4-Shot}
+    \end{subfigure}
+    \caption{PCA confirms the clusters.}
+    \label{fig:pca_comparison}
+\end{figure}
+
+Before training, CLIP is basically guessing. The embeddings for different walnut types overlap completely. It just sees "walnut". But after seeing just 4 examples of each class, it figures out how to pull them apart. The clusters become really distinct. 
+
+\subsection{Predictions and Confusion}
+The confusion matrix (Figure \ref{fig:cm_comparison}) shows exactly where it gets smarter. 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_cm.png}
+        \caption{Zero-Shot Confusion}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_cm.png}
+        \caption{Final 4-Shot Confusion}
+    \end{subfigure}
+    \caption{Fixing the mistakes.}
+    \label{fig:cm_comparison}
+\end{figure}
+
+Zero-shot gets really confused on a few specific classes. The 4-shot training clears up most of that confusion. You can see it visually in the prediction samples too (Figure \ref{fig:pred_comparison}). 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_preds.png}
+        \caption{Zero-Shot Predictions}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_preds.png}
+        \caption{Final 4-Shot Predictions}
+    \end{subfigure}
+    \caption{The model stops making silly mistakes after seeing 4 examples.}
+    \label{fig:pred_comparison}
+\end{figure}
+
+\subsection{Where is it looking?}
+This is probably the coolest part. I pulled the attention maps (Figure \ref{fig:attention_comparison}) to see what the model actually looks at. 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_attn_img0.png}
+        \caption{Zero-Shot (Img 0)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_attn_img0.png}
+        \caption{Final 4-Shot (Img 0)}
+    \end{subfigure}
+    
+    \vspace{1em}
+    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_attn_img10.png}
+        \caption{Zero-Shot (Img 10)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_attn_img10.png}
+        \caption{Final 4-Shot (Img 10)}
+    \end{subfigure}
+    \caption{Attention maps. Notice how the final model ignores the background.}
+    \label{fig:attention_comparison}
+\end{figure}
+
+In zero-shot, the attention is scattered. It looks at the edges, the background, just whatever. But after the 4-shot training, the attention map tightens up a lot. It ignores the background and focuses right on the texture of the walnut shell. This proves that updating the $q, k, v$ matrices literally changes how the model sees the image.
+
+\section{Catastrophic Forgetting \& Generalization}
+A major concern when fine-tuning on a highly specific, small dataset (like 4-shot Walnut) is catastrophic forgetting: does the model lose its broader knowledge of the world? To test this, we evaluated our final 4-shot model back on the full ImageNet validation set (1,000 classes, 50,000 images). 
+
+Remarkably, the original ViT-B/16 Zero-shot CLIP achieved \textbf{66.71\%} accuracy on ImageNet. After loading our Walnut-specific LoRA weights, the model scored \textbf{66.66\%}. This translates to an incredibly negligible drop of just \textbf{0.05\%}. This proves that LoRA successfully isolates the new knowledge within its low-rank updates without disrupting the pre-trained generalized feature space.
+
+\section{Advanced Ablations: Regularization and Modality}
+
+Following the initial experiments, I ran a second suite of ablations focusing on regularization (Dropout), scaling (Alpha), dimensionality (Rank), and modality targeting (Text vs. Vision encoder). The results are summarized in Figure \ref{fig:acc_vs_shots_2} and the training dynamics in Figure \ref{fig:training_curves_2}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/acc_vs_shots_2.png}
+    \caption{Test accuracy for advanced ablations across different shot counts.}
+    \label{fig:acc_vs_shots_2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/training_curves_4shots_2.png}
+    \caption{Training curves for the advanced 4-shot ablation models.}
+    \label{fig:training_curves_2}
+\end{figure}
+
+\subsection{Regularization and Scaling}
+Introducing a dropout rate of 0.4 (\texttt{drop\_0.4}) significantly improved the stability of the training, acting as a strong regularizer that prevents the small LoRA matrices from overfitting to the few available examples. Adjusting the alpha scaling parameter (\texttt{a\_0.75} and \texttt{a\_1.5}) showed that tuning the magnitude of the LoRA update is crucial; a higher alpha can lead to faster but sometimes unstable convergence.
+
+\subsection{Modality: Text vs. Vision}
+Interestingly, updating only the vision encoder (\texttt{e\_vision}) yielded different results compared to updating only the text encoder (\texttt{e\_text}). The baseline model updates both encoders, which seems to strike the best balance, but targeting specific modalities offers an interesting avenue for future work if computational resources are strictly limited.
+
+\subsection{Predictions and Confusion (Dropout 0.4)}
+To see how the dropout model performs in practice, I generated predictions and a confusion matrix for the \texttt{drop\_0.4} 4-shot model (Figures \ref{fig:drop04_preds} and \ref{fig:drop04_cm}).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_drop0.4_preds.png}
+        \caption{Predictions (Dropout 0.4)}
+        \label{fig:drop04_preds}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_drop0.4_cm.png}
+        \caption{Confusion Matrix (Dropout 0.4)}
+        \label{fig:drop04_cm}
+    \end{subfigure}
+    \caption{The model with dropout regularization shows robust classification with very few mistakes.}
+    \label{fig:drop04_analysis}
+\end{figure}
+
+The predictions are highly confident, and the confusion matrix shows a very clean diagonal, confirming that adding dropout prevents the model from relying on spurious features during few-shot adaptation.
+
+\section{Wrap Up}
+LoRA is definitely the way to go for this. We need to update $q, k$, and $v$ with a rank of at least 2. Trying to cut corners with rank 1 or just updating $v$ makes the training unstable or just plain bad. And it's pretty crazy that just 4 images per class is enough to completely rewire the attention maps and pull the embedding clusters apart. The second phase of experiments confirmed that adding dropout (0.4) is a great way to regularize the model and prevent overfitting on such small datasets.
 
 \end{document}

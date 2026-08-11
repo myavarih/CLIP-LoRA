@@ -3,4 +3,42 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \bibstyle{paper}
-\gdef \@abspage@last{1}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Setup}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}The Numbers: Ablation Results}{1}{section.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Test accuracy going up as we add more training shots.}}{2}{figure.caption.4}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:acc_vs_shots}{{1}{2}{Test accuracy going up as we add more training shots}{figure.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Training progress for the 4-shot models.}}{3}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:training_curves}{{2}{3}{Training progress for the 4-shot models}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Deep Dive: Before vs. After (4-Shot)}{3}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Clustering}{3}{subsection.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces t-SNE shows how the model separates the classes.}}{4}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:tsne_comparison}{{3}{4}{t-SNE shows how the model separates the classes}{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces PCA confirms the clusters.}}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:pca_comparison}{{4}{4}{PCA confirms the clusters}{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Predictions and Confusion}{4}{subsection.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Fixing the mistakes.}}{5}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:cm_comparison}{{5}{5}{Fixing the mistakes}{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces The model stops making silly mistakes after seeing 4 examples.}}{5}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:pred_comparison}{{6}{5}{The model stops making silly mistakes after seeing 4 examples}{figure.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Where is it looking?}{5}{subsection.13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Attention maps. Notice how the final model ignores the background.}}{6}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:attention_comparison}{{7}{6}{Attention maps. Notice how the final model ignores the background}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Catastrophic Forgetting \& Generalization}{6}{section.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Advanced Ablations: Regularization and Modality}{6}{section.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Test accuracy for advanced ablations across different shot counts.}}{7}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:acc_vs_shots_2}{{8}{7}{Test accuracy for advanced ablations across different shot counts}{figure.caption.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Training curves for the advanced 4-shot ablation models.}}{7}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:training_curves_2}{{9}{7}{Training curves for the advanced 4-shot ablation models}{figure.caption.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Regularization and Scaling}{7}{subsection.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Modality: Text vs. Vision}{8}{subsection.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Predictions and Confusion (Dropout 0.4)}{8}{subsection.21}\protected@file@percent }
+\newlabel{fig:drop04_preds}{{10A}{8}{Predictions (Dropout 0.4)}{figure.caption.22}{}}
+\newlabel{sub@fig:drop04_preds}{{A}{8}{Predictions (Dropout 0.4)}{figure.caption.22}{}}
+\newlabel{fig:drop04_cm}{{10B}{8}{Confusion Matrix (Dropout 0.4)}{figure.caption.22}{}}
+\newlabel{sub@fig:drop04_cm}{{B}{8}{Confusion Matrix (Dropout 0.4)}{figure.caption.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces The model with dropout regularization shows robust classification with very few mistakes.}}{8}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:drop04_analysis}{{10}{8}{The model with dropout regularization shows robust classification with very few mistakes}{figure.caption.22}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Wrap Up}{8}{section.23}\protected@file@percent }
+\gdef \@abspage@last{10}

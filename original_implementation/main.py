@@ -18,6 +18,7 @@ def main():
     
     # CLIP
     clip_model, preprocess = clip.load(args.backbone)
+    clip_model = clip_model.float()
     clip_model.eval()
     logit_scale = 100
 

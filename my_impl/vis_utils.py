@@ -30,53 +30,59 @@ def plot_confusion_matrix(y_true, y_pred, classes, save_path, split_name=""):
     plt.savefig(save_path)
     plt.close()
 
-def plot_predictions(images, y_true, y_pred, classes, save_path, num_images=None, split_name=""):
+def plot_predictions(images, y_true, y_pred, classes, save_path, probabilities=None, num_images=None, split_name=""):
     if num_images is None:
         num_images = len(images)
     num_images = min(num_images, len(images))
+    if num_images == 0:
+        return
     
-    batch_size = 64
-    num_batches = (num_images + batch_size - 1) // batch_size
+    # Clean grid layout: 5 columns with ample room to prevent text overlap
+    cols = 5 if num_images >= 5 else max(1, num_images)
+    rows = (num_images + cols - 1) // cols
     
-    for b in range(num_batches):
-        start_idx = b * batch_size
-        end_idx = min((b + 1) * batch_size, num_images)
-        batch_count = end_idx - start_idx
+    fig, axes = plt.subplots(rows, cols, figsize=(3.8 * cols, 4.2 * rows))
+    if rows == 1 and cols == 1:
+        axes = np.array([axes])
+    else:
+        axes = np.array(axes).flatten()
+    
+    for i in range(num_images):
+        img = images[i].float().cpu().numpy().transpose(1, 2, 0)
+        mean = np.array([0.48145466, 0.4578275, 0.40821073], dtype=np.float32)
+        std = np.array([0.26862954, 0.26130258, 0.27577711], dtype=np.float32)
+        img = std * img + mean
+        img = np.clip(img, 0, 1)
         
-        cols = 8
-        rows = (batch_count + cols - 1) // cols
-        fig, axes = plt.subplots(rows, cols, figsize=(3 * cols, 3 * rows))
-        axes = axes.flatten() if batch_count > 1 else [axes]
+        true_idx = int(y_true[i])
+        pred_idx = int(y_pred[i])
+        true_label = classes[true_idx]
+        pred_label = classes[pred_idx]
+        is_correct = (true_idx == pred_idx)
+        color = '#1b7a2b' if is_correct else '#c0292b'
         
-        for i in range(batch_count):
-            global_idx = start_idx + i
-            # Denormalize image for visualization
-            img = images[global_idx].cpu().numpy().transpose(1, 2, 0)
-            mean = np.array([0.48145466, 0.4578275, 0.40821073])
-            std = np.array([0.26862954, 0.26130258, 0.27577711])
-            img = std * img + mean
-            img = np.clip(img, 0, 1)
-            
-            true_label = classes[y_true[global_idx]]
-            pred_label = classes[y_pred[global_idx]]
-            color = 'green' if true_label == pred_label else 'red'
-            
-            axes[i].imshow(img)
-            axes[i].axis('off')
-            prefix = f"[{split_name}] " if split_name else ""
-            axes[i].set_title(f"{prefix}True: {true_label}\nPred: {pred_label}", color=color)
-            
-        for i in range(batch_count, len(axes)):
-            axes[i].axis('off')
-            
-        plt.tight_layout()
-        if num_batches > 1:
-            base, ext = os.path.splitext(save_path)
-            batch_save_path = f"{base}_part{b+1}{ext}"
+        axes[i].imshow(img)
+        axes[i].axis('off')
+        
+        if probabilities is not None and len(probabilities) > i:
+            probs = probabilities[i]
+            pred_conf = float(probs[pred_idx]) * 100
+            if is_correct:
+                title_text = f"True: {true_label}\nPred: {pred_label} ({pred_conf:.1f}%)"
+            else:
+                true_conf = float(probs[true_idx]) * 100
+                title_text = f"True: {true_label} ({true_conf:.1f}%)\nPred: {pred_label} ({pred_conf:.1f}%)"
         else:
-            batch_save_path = save_path
-        plt.savefig(batch_save_path)
-        plt.close()
+            title_text = f"True: {true_label}\nPred: {pred_label}"
+            
+        axes[i].set_title(title_text, color=color, fontsize=10, fontweight='semibold', pad=8)
+        
+    for i in range(num_images, len(axes)):
+        axes[i].axis('off')
+        
+    plt.tight_layout(pad=2.0)
+    plt.savefig(save_path, bbox_inches='tight', dpi=150)
+    plt.close()
 
 def plot_metrics(losses, accuracies, save_path):
     epochs = range(1, len(losses) + 1)
@@ -135,28 +141,42 @@ def plot_embeddings(image_features, text_features, image_labels, classes, save_p
         plt.scatter(reduced_txt[i, 0], reduced_txt[i, 1], color=palette[i], marker='*', edgecolor='black', linewidth=1.5, s=400, label=f'Text: {classes[i]}', zorder=5)
         
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', markerscale=1.2, frameon=True, shadow=True)
-    title = f'Embedding Space Visualization ({method.upper()})'
-    if split_name:
-        title = f'[{split_name}] {title}'
+    title = f'{split_name} Embedding Space Visualization ({method.upper()})' if split_name else f'Embedding Space Visualization ({method.upper()})'
     plt.title(title)
     plt.tight_layout()
     plt.savefig(save_path)
     plt.close()
 
-def visualize_attention(image, attention_map, save_path, split_name=""):
+def visualize_attention(image, attention_map, save_path, split_name="", class_name=""):
     # image: 3x224x224 tensor
-    # attention_map: HxW (e.g., 7x7) tensor
-    img = image.cpu().numpy().transpose(1, 2, 0)
-    mean = np.array([0.48145466, 0.4578275, 0.40821073])
-    std = np.array([0.26862954, 0.26130258, 0.27577711])
+    # attention_map: HxW (e.g., 14x14 or 224x224) tensor or numpy array
+    if torch.is_tensor(image):
+        img = image.float().cpu().numpy().transpose(1, 2, 0)
+    else:
+        img = np.array(image, dtype=np.float32)
+        if img.shape[0] == 3:
+            img = img.transpose(1, 2, 0)
+            
+    mean = np.array([0.48145466, 0.4578275, 0.40821073], dtype=np.float32)
+    std = np.array([0.26862954, 0.26130258, 0.27577711], dtype=np.float32)
     img = std * img + mean
     img = np.clip(img, 0, 1)
     
-    attn = attention_map.cpu().numpy()
-    # Resize attention map to image size
-    attn = cv2.resize(attn, (img.shape[1], img.shape[0]))
-    # Normalize attention to 0-1
-    attn = (attn - attn.min()) / (attn.max() - attn.min() + 1e-8)
+    if torch.is_tensor(attention_map):
+        attn = attention_map.float().cpu().numpy()
+    else:
+        attn = np.array(attention_map, dtype=np.float32)
+        
+    # Resize attention/CAM map to image size if needed
+    if attn.shape != (img.shape[0], img.shape[1]):
+        attn = cv2.resize(attn, (img.shape[1], img.shape[0]))
+        
+    # Normalize CAM to 0-1
+    denom = attn.max() - attn.min()
+    if denom > 1e-8:
+        attn = (attn - attn.min()) / denom
+    else:
+        attn = np.zeros_like(attn)
     
     # Create heatmap
     heatmap = cv2.applyColorMap(np.uint8(255 * attn), cv2.COLORMAP_JET)
@@ -167,20 +187,27 @@ def visualize_attention(image, attention_map, save_path, split_name=""):
     cam = np.clip(cam, 0, 1)
     
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    prefix = f"[{split_name}] " if split_name else ""
     
     axes[0].imshow(img)
-    axes[0].set_title(f'{prefix}Original Image')
+    axes[0].set_title('Original Image', fontsize=12)
     axes[0].axis('off')
     
     axes[1].imshow(attn, cmap='jet')
-    axes[1].set_title(f'{prefix}Attention Map')
+    axes[1].set_title('EigenCAM Map', fontsize=12)
     axes[1].axis('off')
     
     axes[2].imshow(cam)
-    axes[2].set_title(f'{prefix}Overlay')
+    axes[2].set_title('EigenCAM Overlay', fontsize=12)
     axes[2].axis('off')
     
+    title_parts = []
+    if split_name:
+        title_parts.append(f"[{split_name}]")
+    if class_name:
+        title_parts.append(f"Predicted Class: {class_name}")
+    if title_parts:
+        plt.suptitle(" ".join(title_parts), fontsize=14, y=1.02)
+        
     plt.tight_layout()
-    plt.savefig(save_path)
+    plt.savefig(save_path, bbox_inches='tight')
     plt.close()

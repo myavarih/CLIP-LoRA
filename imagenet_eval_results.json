@@ -1,0 +1,7 @@
+{
+  "dataset": "ImageNet (Zero-shot Evaluation)",
+  "model": "ViT-B/16 (Walnut 4-shot Seed 2 LoRA Checkpoint)",
+  "baseline_zeroshot_accuracy": 66.71,
+  "lora_test_accuracy": 66.66,
+  "catastrophic_forgetting_drop": 0.05
+}
