@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.8)  13 AUG 2026 16:59
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.8)  13 AUG 2026 17:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1370,11 +1370,41 @@ File: uzeur.fd 2005/01/11 v4.0 (WaS)
 (/usr/share/texmf-dist/tex/latex/microtype/mt-eur.cfg
 File: mt-eur.cfg 2006/07/31 v1.1 microtype config. file: AMS Euler Roman (RS)
 )
+LaTeX Font Info:    Trying to load font information for T1+SourceCodePro-TLF on
+ input line 35.
+
+(/usr/share/texmf-dist/tex/latex/sourcecodepro/T1SourceCodePro-TLF.fd
+File: T1SourceCodePro-TLF.fd 2018/02/18 (autoinst) Font definitions for T1/Sour
+ceCodePro-TLF.
+)
+LaTeX Font Info:    Font shape `T1/SourceCodePro-TLF/m/n' will be
+(Font)              scaled to size 10.0pt on input line 35.
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `SourceCodePro-TLF' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/6'
+
+(microtype)             (new value: 6.0pt) on input line 35.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 35.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 35.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 35.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 35.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
+(Font)              scaled to size 6.0pt on input line 35.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
+(Font)              scaled to size 6.0pt on input line 35.
+
 
 [1
 
 {/home/emmwhy/.texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/share
-/texmf-dist/fonts/enc/dvips/sourceserifpro/a_rlbtkr.enc}]
+/texmf-dist/fonts/enc/dvips/sourceserifpro/a_rlbtkr.enc}{/usr/share/texmf-dist/
+fonts/enc/dvips/sourcecodepro/a_lutrty.enc}]
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
 (Font)              scaled to size 14.4pt on input line 37.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
@@ -1438,21 +1468,6 @@ LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
 (Font)              scaled to size 12.0pt on input line 41.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
 (Font)              scaled to size 10.0pt on input line 69.
-Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/6'
-
-(microtype)             (new value: 6.0pt) on input line 69.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/6'
-(microtype)             (new value: 6.0pt) on input line 69.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/6'
-(microtype)             (new value: 6.0pt) on input line 69.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/6'
-(microtype)             (new value: 6.0pt) on input line 69.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/6'
-(microtype)             (new value: 6.0pt) on input line 69.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
-(Font)              scaled to size 6.0pt on input line 69.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
-(Font)              scaled to size 6.0pt on input line 69.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
 (Font)              scaled to size 8.0pt on input line 69.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
@@ -1483,7 +1498,7 @@ LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/sc' will be
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/SourceSerifPro-LF/m/sc/10.95'.
 (microtype)             Ignoring protrusion settings for this character.
-<figures/clip_classification_overview.png, id=181, 1027.84pt x 454.69875pt>
+<figures/clip_classification_overview.png, id=183, 1027.84pt x 454.69875pt>
 File: figures/clip_classification_overview.png Graphic file (type png)
 <use figures/clip_classification_overview.png>
 Package pdftex.def Info: figures/clip_classification_overview.png  used on inpu
@@ -1497,12 +1512,12 @@ s/enc/dvips/mnsymbol/MnSymbolC.enc}{/usr/share/texmf-dist/fonts/enc/dvips/mnsym
 bol/MnSymbolD.enc}{/usr/share/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolE.enc
 }{/usr/share/texmf-dist/fonts/enc/dvips/sourceserifpro/a_lseshj.enc} <./figures
 /clip_classification_overview.png>]
-<figures/4shot_zs_cm.png, id=212, 722.7pt x 578.16pt>
+<figures/4shot_zs_cm.png, id=214, 722.7pt x 578.16pt>
 File: figures/4shot_zs_cm.png Graphic file (type png)
 <use figures/4shot_zs_cm.png>
 Package pdftex.def Info: figures/4shot_zs_cm.png  used on input line 275.
 (pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
-<figures/4shot_baseline_cm.png, id=213, 722.7pt x 578.16pt>
+<figures/4shot_baseline_cm.png, id=215, 722.7pt x 578.16pt>
 File: figures/4shot_baseline_cm.png Graphic file (type png)
 <use figures/4shot_baseline_cm.png>
 Package pdftex.def Info: figures/4shot_baseline_cm.png  used on input line 280.
@@ -1511,12 +1526,12 @@ Package pdftex.def Info: figures/4shot_baseline_cm.png  used on input line 280.
 
 
 [3]
-<figures/4shot_zs_preds.png, id=221, 1331.2134pt x 1168.8468pt>
+<figures/4shot_zs_preds.png, id=223, 1331.2134pt x 1168.8468pt>
 File: figures/4shot_zs_preds.png Graphic file (type png)
 <use figures/4shot_zs_preds.png>
 Package pdftex.def Info: figures/4shot_zs_preds.png  used on input line 294.
 (pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
-<figures/4shot_baseline_preds.png, id=222, 1331.2134pt x 1168.8468pt>
+<figures/4shot_baseline_preds.png, id=224, 1331.2134pt x 1168.8468pt>
 File: figures/4shot_baseline_preds.png Graphic file (type png)
 <use figures/4shot_baseline_preds.png>
 Package pdftex.def Info: figures/4shot_baseline_preds.png  used on input line 2
@@ -1534,12 +1549,12 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `SourceSerifPro-LF' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-<figures/4shot_zs_tsne.png, id=223, 867.24pt x 722.7pt>
+<figures/4shot_zs_tsne.png, id=225, 867.24pt x 722.7pt>
 File: figures/4shot_zs_tsne.png Graphic file (type png)
 <use figures/4shot_zs_tsne.png>
 Package pdftex.def Info: figures/4shot_zs_tsne.png  used on input line 318.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
-<figures/4shot_baseline_tsne.png, id=224, 867.24pt x 722.7pt>
+<figures/4shot_baseline_tsne.png, id=226, 867.24pt x 722.7pt>
 File: figures/4shot_baseline_tsne.png Graphic file (type png)
 <use figures/4shot_baseline_tsne.png>
 Package pdftex.def Info: figures/4shot_baseline_tsne.png  used on input line 32
@@ -1550,12 +1565,12 @@ Package pdftex.def Info: figures/4shot_baseline_tsne.png  used on input line 32
 [4{/usr/share/texmf-dist/fonts/enc/dvips/sourceserifpro/a_nqu667.enc} <./figure
 s/4shot_zs_cm.png> <./figures/4shot_baseline_cm.png> <./figures/4shot_zs_preds.
 png> <./figures/4shot_baseline_preds.png>]
-<figures/4shot_zs_pca.png, id=236, 867.24pt x 722.7pt>
+<figures/4shot_zs_pca.png, id=238, 867.24pt x 722.7pt>
 File: figures/4shot_zs_pca.png Graphic file (type png)
 <use figures/4shot_zs_pca.png>
 Package pdftex.def Info: figures/4shot_zs_pca.png  used on input line 333.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
-<figures/4shot_baseline_pca.png, id=237, 867.24pt x 722.7pt>
+<figures/4shot_baseline_pca.png, id=239, 867.24pt x 722.7pt>
 File: figures/4shot_baseline_pca.png Graphic file (type png)
 <use figures/4shot_baseline_pca.png>
 Package pdftex.def Info: figures/4shot_baseline_pca.png  used on input line 338
@@ -1565,72 +1580,60 @@ Package pdftex.def Info: figures/4shot_baseline_pca.png  used on input line 338
 
 [5 <./figures/4shot_zs_tsne.png> <./figures/4shot_baseline_tsne.png> <./figures
 /4shot_zs_pca.png> <./figures/4shot_baseline_pca.png>]
-<figures/4shot_zs_attn_img0.png, id=248, 1020.4524pt x 367.8543pt>
+<figures/4shot_zs_attn_img0.png, id=250, 1020.4524pt x 367.8543pt>
 File: figures/4shot_zs_attn_img0.png Graphic file (type png)
 <use figures/4shot_zs_attn_img0.png>
 Package pdftex.def Info: figures/4shot_zs_attn_img0.png  used on input line 359
 .
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/4shot_baseline_attn_img0.png, id=249, 1020.4524pt x 367.8543pt>
+<figures/4shot_baseline_attn_img0.png, id=251, 1020.4524pt x 367.8543pt>
 File: figures/4shot_baseline_attn_img0.png Graphic file (type png)
 <use figures/4shot_baseline_attn_img0.png>
 Package pdftex.def Info: figures/4shot_baseline_attn_img0.png  used on input li
 ne 364.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-LaTeX Font Info:    Trying to load font information for T1+SourceCodePro-TLF on
- input line 405.
-
-(/usr/share/texmf-dist/tex/latex/sourcecodepro/T1SourceCodePro-TLF.fd
-File: T1SourceCodePro-TLF.fd 2018/02/18 (autoinst) Font definitions for T1/Sour
-ceCodePro-TLF.
-)
 LaTeX Font Info:    Font shape `T1/SourceCodePro-TLF/m/n' will be
 (Font)              scaled to size 10.95pt on input line 405.
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `SourceCodePro-TLF' (encoding: T1).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
 
 
-[6{/usr/share/texmf-dist/fonts/enc/dvips/sourcecodepro/a_lutrty.enc} <./figures
-/4shot_zs_attn_img0.png> <./figures/4shot_baseline_attn_img0.png>]
-<figures/zs_standalone_preds.png, id=263, 1331.2134pt x 1168.8468pt>
+[6 <./figures/4shot_zs_attn_img0.png> <./figures/4shot_baseline_attn_img0.png>]
+<figures/zs_standalone_preds.png, id=264, 1331.2134pt x 1168.8468pt>
 File: figures/zs_standalone_preds.png Graphic file (type png)
 <use figures/zs_standalone_preds.png>
 Package pdftex.def Info: figures/zs_standalone_preds.png  used on input line 41
 2.
 (pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
-<figures/zs_standalone_cm.png, id=264, 722.7pt x 578.16pt>
+<figures/zs_standalone_cm.png, id=265, 722.7pt x 578.16pt>
 File: figures/zs_standalone_cm.png Graphic file (type png)
 <use figures/zs_standalone_cm.png>
 Package pdftex.def Info: figures/zs_standalone_cm.png  used on input line 417.
 (pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
-<figures/zs_attn_0.png, id=265, 1020.4524pt x 367.8543pt>
+<figures/zs_attn_0.png, id=266, 1020.4524pt x 367.8543pt>
 File: figures/zs_attn_0.png Graphic file (type png)
 <use figures/zs_attn_0.png>
 Package pdftex.def Info: figures/zs_attn_0.png  used on input line 427.
 (pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
-<figures/zs_attn_1.png, id=266, 1020.4524pt x 367.8543pt>
+<figures/zs_attn_1.png, id=267, 1020.4524pt x 367.8543pt>
 File: figures/zs_attn_1.png Graphic file (type png)
 <use figures/zs_attn_1.png>
 Package pdftex.def Info: figures/zs_attn_1.png  used on input line 432.
 (pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
-<figures/zs_attn_2.png, id=267, 1020.4524pt x 367.8543pt>
+<figures/zs_attn_2.png, id=268, 1020.4524pt x 367.8543pt>
 File: figures/zs_attn_2.png Graphic file (type png)
 <use figures/zs_attn_2.png>
 Package pdftex.def Info: figures/zs_attn_2.png  used on input line 437.
 (pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
-<figures/zs_attn_3.png, id=268, 1020.4524pt x 367.8543pt>
+<figures/zs_attn_3.png, id=269, 1020.4524pt x 367.8543pt>
 File: figures/zs_attn_3.png Graphic file (type png)
 <use figures/zs_attn_3.png>
 Package pdftex.def Info: figures/zs_attn_3.png  used on input line 442.
 (pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
-<figures/zs_attn_4.png, id=269, 1020.4524pt x 367.8543pt>
+<figures/zs_attn_4.png, id=270, 1020.4524pt x 367.8543pt>
 File: figures/zs_attn_4.png Graphic file (type png)
 <use figures/zs_attn_4.png>
 Package pdftex.def Info: figures/zs_attn_4.png  used on input line 447.
 (pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
-<figures/zs_attn_5.png, id=270, 1020.4524pt x 367.8543pt>
+<figures/zs_attn_5.png, id=271, 1020.4524pt x 367.8543pt>
 File: figures/zs_attn_5.png Graphic file (type png)
 <use figures/zs_attn_5.png>
 Package pdftex.def Info: figures/zs_attn_5.png  used on input line 452.
@@ -1650,7 +1653,7 @@ res/zs_attn_0.png> <./figures/zs_attn_1.png> <./figures/zs_attn_2.png> <./figur
 es/zs_attn_3.png> <./figures/zs_attn_4.png> <./figures/zs_attn_5.png>]
 
 [8]
-<figures/acc_vs_shots_all.png, id=294, 1011.78pt x 578.16pt>
+<figures/acc_vs_shots_all.png, id=295, 1011.78pt x 578.16pt>
 File: figures/acc_vs_shots_all.png Graphic file (type png)
 <use figures/acc_vs_shots_all.png>
 Package pdftex.def Info: figures/acc_vs_shots_all.png  used on input line 527.
@@ -1658,13 +1661,13 @@ Package pdftex.def Info: figures/acc_vs_shots_all.png  used on input line 527.
 
 
 [9]
-<figures/cross_seed_variance.png, id=299, 722.7pt x 433.62pt>
+<figures/cross_seed_variance.png, id=300, 722.7pt x 433.62pt>
 File: figures/cross_seed_variance.png Graphic file (type png)
 <use figures/cross_seed_variance.png>
 Package pdftex.def Info: figures/cross_seed_variance.png  used on input line 53
 8.
 (pdftex.def)             Requested size: 375.80544pt x 225.48369pt.
-<figures/training_curves_4shots.png, id=301, 1011.78pt x 578.16pt>
+<figures/training_curves_4shots.png, id=302, 1011.78pt x 578.16pt>
 File: figures/training_curves_4shots.png Graphic file (type png)
 <use figures/training_curves_4shots.png>
 Package pdftex.def Info: figures/training_curves_4shots.png  used on input line
@@ -1673,7 +1676,7 @@ Package pdftex.def Info: figures/training_curves_4shots.png  used on input line
 
 
 [10 <./figures/acc_vs_shots_all.png> <./figures/cross_seed_variance.png>]
-<figures/training_time_vs_shots.png, id=310, 722.7pt x 433.62pt>
+<figures/training_time_vs_shots.png, id=311, 722.7pt x 433.62pt>
 File: figures/training_time_vs_shots.png Graphic file (type png)
 <use figures/training_time_vs_shots.png>
 Package pdftex.def Info: figures/training_time_vs_shots.png  used on input line
@@ -1682,7 +1685,7 @@ Package pdftex.def Info: figures/training_time_vs_shots.png  used on input line
 
 
 [11 <./figures/training_curves_4shots.png>]
-<figures/overfitting_gap.png, id=319, 794.97pt x 433.62pt>
+<figures/overfitting_gap.png, id=320, 794.97pt x 433.62pt>
 File: figures/overfitting_gap.png Graphic file (type png)
 <use figures/overfitting_gap.png>
 Package pdftex.def Info: figures/overfitting_gap.png  used on input line 576.
@@ -1729,62 +1732,62 @@ File: figures/4shot_baseline_preds.png Graphic file (type png)
 Package pdftex.def Info: figures/4shot_baseline_preds.png  used on input line 6
 47.
 (pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
-<figures/attn_zs_0.png, id=341, 1020.4524pt x 367.8543pt>
+<figures/attn_zs_0.png, id=342, 1020.4524pt x 367.8543pt>
 File: figures/attn_zs_0.png Graphic file (type png)
 <use figures/attn_zs_0.png>
 Package pdftex.def Info: figures/attn_zs_0.png  used on input line 661.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_4shot_0.png, id=342, 1020.4524pt x 367.8543pt>
+<figures/attn_4shot_0.png, id=343, 1020.4524pt x 367.8543pt>
 File: figures/attn_4shot_0.png Graphic file (type png)
 <use figures/attn_4shot_0.png>
 Package pdftex.def Info: figures/attn_4shot_0.png  used on input line 666.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_zs_1.png, id=343, 1020.4524pt x 367.8543pt>
+<figures/attn_zs_1.png, id=344, 1020.4524pt x 367.8543pt>
 File: figures/attn_zs_1.png Graphic file (type png)
 <use figures/attn_zs_1.png>
 Package pdftex.def Info: figures/attn_zs_1.png  used on input line 671.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_4shot_1.png, id=344, 1020.4524pt x 367.8543pt>
+<figures/attn_4shot_1.png, id=345, 1020.4524pt x 367.8543pt>
 File: figures/attn_4shot_1.png Graphic file (type png)
 <use figures/attn_4shot_1.png>
 Package pdftex.def Info: figures/attn_4shot_1.png  used on input line 676.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_zs_2.png, id=345, 1020.4524pt x 367.8543pt>
+<figures/attn_zs_2.png, id=346, 1020.4524pt x 367.8543pt>
 File: figures/attn_zs_2.png Graphic file (type png)
 <use figures/attn_zs_2.png>
 Package pdftex.def Info: figures/attn_zs_2.png  used on input line 681.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_4shot_2.png, id=346, 1020.4524pt x 367.8543pt>
+<figures/attn_4shot_2.png, id=347, 1020.4524pt x 367.8543pt>
 File: figures/attn_4shot_2.png Graphic file (type png)
 <use figures/attn_4shot_2.png>
 Package pdftex.def Info: figures/attn_4shot_2.png  used on input line 686.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_zs_3.png, id=347, 1020.4524pt x 367.8543pt>
+<figures/attn_zs_3.png, id=348, 1020.4524pt x 367.8543pt>
 File: figures/attn_zs_3.png Graphic file (type png)
 <use figures/attn_zs_3.png>
 Package pdftex.def Info: figures/attn_zs_3.png  used on input line 691.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_4shot_3.png, id=348, 1020.4524pt x 367.8543pt>
+<figures/attn_4shot_3.png, id=349, 1020.4524pt x 367.8543pt>
 File: figures/attn_4shot_3.png Graphic file (type png)
 <use figures/attn_4shot_3.png>
 Package pdftex.def Info: figures/attn_4shot_3.png  used on input line 696.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_zs_4.png, id=349, 1020.4524pt x 367.8543pt>
+<figures/attn_zs_4.png, id=350, 1020.4524pt x 367.8543pt>
 File: figures/attn_zs_4.png Graphic file (type png)
 <use figures/attn_zs_4.png>
 Package pdftex.def Info: figures/attn_zs_4.png  used on input line 701.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_4shot_4.png, id=350, 1020.4524pt x 367.8543pt>
+<figures/attn_4shot_4.png, id=351, 1020.4524pt x 367.8543pt>
 File: figures/attn_4shot_4.png Graphic file (type png)
 <use figures/attn_4shot_4.png>
 Package pdftex.def Info: figures/attn_4shot_4.png  used on input line 706.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_zs_5.png, id=351, 1020.4524pt x 367.8543pt>
+<figures/attn_zs_5.png, id=352, 1020.4524pt x 367.8543pt>
 File: figures/attn_zs_5.png Graphic file (type png)
 <use figures/attn_zs_5.png>
 Package pdftex.def Info: figures/attn_zs_5.png  used on input line 711.
 (pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
-<figures/attn_4shot_5.png, id=352, 1020.4524pt x 367.8543pt>
+<figures/attn_4shot_5.png, id=353, 1020.4524pt x 367.8543pt>
 File: figures/attn_4shot_5.png Graphic file (type png)
 <use figures/attn_4shot_5.png>
 Package pdftex.def Info: figures/attn_4shot_5.png  used on input line 716.
@@ -1801,13 +1804,13 @@ Overfull \vbox (14.83574pt too high) has occurred while \output is active []
 hot_2.png> <./figures/attn_zs_3.png> <./figures/attn_4shot_3.png> <./figures/at
 tn_zs_4.png> <./figures/attn_4shot_4.png> <./figures/attn_zs_5.png> <./figures/
 attn_4shot_5.png>]
-<figures/alpha_sweep_4shot.png, id=377, 650.43pt x 433.62pt>
+<figures/alpha_sweep_4shot.png, id=378, 650.43pt x 433.62pt>
 File: figures/alpha_sweep_4shot.png Graphic file (type png)
 <use figures/alpha_sweep_4shot.png>
 Package pdftex.def Info: figures/alpha_sweep_4shot.png  used on input line 733.
 
 (pdftex.def)             Requested size: 352.31625pt x 234.87912pt.
-<figures/alpha15_ablation_grid.png, id=378, 867.24pt x 505.89pt>
+<figures/alpha15_ablation_grid.png, id=379, 867.24pt x 505.89pt>
 File: figures/alpha15_ablation_grid.png Graphic file (type png)
 <use figures/alpha15_ablation_grid.png>
 Package pdftex.def Info: figures/alpha15_ablation_grid.png  used on input line 
@@ -1816,7 +1819,7 @@ Package pdftex.def Info: figures/alpha15_ablation_grid.png  used on input line
 
 
 [16 <./figures/alpha_sweep_4shot.png>]
-<figures/rank_comparison_4shot.png, id=391, 578.16pt x 397.485pt>
+<figures/rank_comparison_4shot.png, id=392, 578.16pt x 397.485pt>
 File: figures/rank_comparison_4shot.png Graphic file (type png)
 <use figures/rank_comparison_4shot.png>
 Package pdftex.def Info: figures/rank_comparison_4shot.png  used on input line 
@@ -1825,31 +1828,31 @@ Package pdftex.def Info: figures/rank_comparison_4shot.png  used on input line
 
 
 [17 <./figures/alpha15_ablation_grid.png>]
-<figures/comp_r_1_final_test_tsne.png, id=399, 867.24pt x 722.7pt>
+<figures/comp_r_1_final_test_tsne.png, id=400, 867.24pt x 722.7pt>
 File: figures/comp_r_1_final_test_tsne.png Graphic file (type png)
 <use figures/comp_r_1_final_test_tsne.png>
 Package pdftex.def Info: figures/comp_r_1_final_test_tsne.png  used on input li
 ne 782.
 (pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
-<figures/comp_baseline_final_test_tsne.png, id=400, 867.24pt x 722.7pt>
+<figures/comp_baseline_final_test_tsne.png, id=401, 867.24pt x 722.7pt>
 File: figures/comp_baseline_final_test_tsne.png Graphic file (type png)
 <use figures/comp_baseline_final_test_tsne.png>
 Package pdftex.def Info: figures/comp_baseline_final_test_tsne.png  used on inp
 ut line 787.
 (pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
-<figures/comp_r_3_final_test_tsne.png, id=401, 867.24pt x 722.7pt>
+<figures/comp_r_3_final_test_tsne.png, id=402, 867.24pt x 722.7pt>
 File: figures/comp_r_3_final_test_tsne.png Graphic file (type png)
 <use figures/comp_r_3_final_test_tsne.png>
 Package pdftex.def Info: figures/comp_r_3_final_test_tsne.png  used on input li
 ne 792.
 (pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
-<figures/comp_r_1_final_test_confusion_matrix.png, id=402, 722.7pt x 578.16pt>
+<figures/comp_r_1_final_test_confusion_matrix.png, id=403, 722.7pt x 578.16pt>
 File: figures/comp_r_1_final_test_confusion_matrix.png Graphic file (type png)
 <use figures/comp_r_1_final_test_confusion_matrix.png>
 Package pdftex.def Info: figures/comp_r_1_final_test_confusion_matrix.png  used
  on input line 802.
 (pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
-<figures/comp_baseline_final_test_confusion_matrix.png, id=403, 722.7pt x 578.1
+<figures/comp_baseline_final_test_confusion_matrix.png, id=404, 722.7pt x 578.1
 6pt>
 File: figures/comp_baseline_final_test_confusion_matrix.png Graphic file (type 
 png)
@@ -1857,13 +1860,13 @@ png)
 Package pdftex.def Info: figures/comp_baseline_final_test_confusion_matrix.png 
  used on input line 807.
 (pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
-<figures/comp_r_3_final_test_confusion_matrix.png, id=404, 722.7pt x 578.16pt>
+<figures/comp_r_3_final_test_confusion_matrix.png, id=405, 722.7pt x 578.16pt>
 File: figures/comp_r_3_final_test_confusion_matrix.png Graphic file (type png)
 <use figures/comp_r_3_final_test_confusion_matrix.png>
 Package pdftex.def Info: figures/comp_r_3_final_test_confusion_matrix.png  used
  on input line 812.
 (pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
-<figures/modality_comparison_4shot.png, id=407, 578.16pt x 397.485pt>
+<figures/modality_comparison_4shot.png, id=408, 578.16pt x 397.485pt>
 File: figures/modality_comparison_4shot.png Graphic file (type png)
 <use figures/modality_comparison_4shot.png>
 Package pdftex.def Info: figures/modality_comparison_4shot.png  used on input l
@@ -1876,13 +1879,13 @@ ng> <./figures/comp_baseline_final_test_tsne.png> <./figures/comp_r_3_final_tes
 t_tsne.png> <./figures/comp_r_1_final_test_confusion_matrix.png> <./figures/com
 p_baseline_final_test_confusion_matrix.png> <./figures/comp_r_3_final_test_conf
 usion_matrix.png>]
-<figures/comp_e_text_final_test_tsne.png, id=421, 867.24pt x 722.7pt>
+<figures/comp_e_text_final_test_tsne.png, id=422, 867.24pt x 722.7pt>
 File: figures/comp_e_text_final_test_tsne.png Graphic file (type png)
 <use figures/comp_e_text_final_test_tsne.png>
 Package pdftex.def Info: figures/comp_e_text_final_test_tsne.png  used on input
  line 833.
 (pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
-<figures/comp_e_vision_final_test_tsne.png, id=422, 867.24pt x 722.7pt>
+<figures/comp_e_vision_final_test_tsne.png, id=423, 867.24pt x 722.7pt>
 File: figures/comp_e_vision_final_test_tsne.png Graphic file (type png)
 <use figures/comp_e_vision_final_test_tsne.png>
 Package pdftex.def Info: figures/comp_e_vision_final_test_tsne.png  used on inp
@@ -1893,7 +1896,7 @@ File: figures/comp_baseline_final_test_tsne.png Graphic file (type png)
 Package pdftex.def Info: figures/comp_baseline_final_test_tsne.png  used on inp
 ut line 843.
 (pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
-<figures/comp_e_text_final_test_confusion_matrix.png, id=423, 722.7pt x 578.16p
+<figures/comp_e_text_final_test_confusion_matrix.png, id=424, 722.7pt x 578.16p
 t>
 File: figures/comp_e_text_final_test_confusion_matrix.png Graphic file (type pn
 g)
@@ -1901,7 +1904,7 @@ g)
 Package pdftex.def Info: figures/comp_e_text_final_test_confusion_matrix.png  u
 sed on input line 853.
 (pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
-<figures/comp_e_vision_final_test_confusion_matrix.png, id=424, 722.7pt x 578.1
+<figures/comp_e_vision_final_test_confusion_matrix.png, id=425, 722.7pt x 578.1
 6pt>
 File: figures/comp_e_vision_final_test_confusion_matrix.png Graphic file (type 
 png)
@@ -1919,18 +1922,18 @@ Package pdftex.def Info: figures/comp_baseline_final_test_confusion_matrix.png
 
 [19 <./figures/modality_comparison_4shot.png> <./figures/comp_e_text_final_test
 _tsne.png> <./figures/comp_e_vision_final_test_tsne.png>]
-<figures/shot_progression.png, id=436, 722.7pt x 397.485pt>
+<figures/shot_progression.png, id=437, 722.7pt x 397.485pt>
 File: figures/shot_progression.png Graphic file (type png)
 <use figures/shot_progression.png>
 Package pdftex.def Info: figures/shot_progression.png  used on input line 878.
 (pdftex.def)             Requested size: 399.29463pt x 219.6121pt.
-<figures/32shot_baseline_tsne.png, id=439, 867.24pt x 722.7pt>
+<figures/32shot_baseline_tsne.png, id=440, 867.24pt x 722.7pt>
 File: figures/32shot_baseline_tsne.png Graphic file (type png)
 <use figures/32shot_baseline_tsne.png>
 Package pdftex.def Info: figures/32shot_baseline_tsne.png  used on input line 8
 90.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
-<figures/32shot_baseline_cm.png, id=440, 722.7pt x 578.16pt>
+<figures/32shot_baseline_cm.png, id=441, 722.7pt x 578.16pt>
 File: figures/32shot_baseline_cm.png Graphic file (type png)
 <use figures/32shot_baseline_cm.png>
 Package pdftex.def Info: figures/32shot_baseline_cm.png  used on input line 895
@@ -1940,49 +1943,49 @@ Package pdftex.def Info: figures/32shot_baseline_cm.png  used on input line 895
 
 [20 <./figures/comp_e_text_final_test_confusion_matrix.png> <./figures/comp_e_v
 ision_final_test_confusion_matrix.png> <./figures/shot_progression.png>]
-<figures/32shot_baseline_pca.png, id=451, 867.24pt x 722.7pt>
+<figures/32shot_baseline_pca.png, id=452, 867.24pt x 722.7pt>
 File: figures/32shot_baseline_pca.png Graphic file (type png)
 <use figures/32shot_baseline_pca.png>
 Package pdftex.def Info: figures/32shot_baseline_pca.png  used on input line 90
 5.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
-<figures/32shot_baseline_preds.png, id=452, 1331.2134pt x 1168.8468pt>
+<figures/32shot_baseline_preds.png, id=453, 1331.2134pt x 1168.8468pt>
 File: figures/32shot_baseline_preds.png Graphic file (type png)
 <use figures/32shot_baseline_preds.png>
 Package pdftex.def Info: figures/32shot_baseline_preds.png  used on input line 
 910.
 (pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
-<figures/attn_prog_0shot.png, id=454, 1020.4524pt x 367.8543pt>
+<figures/attn_prog_0shot.png, id=455, 1020.4524pt x 367.8543pt>
 File: figures/attn_prog_0shot.png Graphic file (type png)
 <use figures/attn_prog_0shot.png>
 Package pdftex.def Info: figures/attn_prog_0shot.png  used on input line 924.
 (pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
-<figures/attn_prog_1shot.png, id=455, 1020.4524pt x 367.8543pt>
+<figures/attn_prog_1shot.png, id=456, 1020.4524pt x 367.8543pt>
 File: figures/attn_prog_1shot.png Graphic file (type png)
 <use figures/attn_prog_1shot.png>
 Package pdftex.def Info: figures/attn_prog_1shot.png  used on input line 929.
 (pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
-<figures/attn_prog_2shot.png, id=456, 1020.4524pt x 367.8543pt>
+<figures/attn_prog_2shot.png, id=457, 1020.4524pt x 367.8543pt>
 File: figures/attn_prog_2shot.png Graphic file (type png)
 <use figures/attn_prog_2shot.png>
 Package pdftex.def Info: figures/attn_prog_2shot.png  used on input line 934.
 (pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
-<figures/attn_prog_4shot.png, id=457, 1020.4524pt x 367.8543pt>
+<figures/attn_prog_4shot.png, id=458, 1020.4524pt x 367.8543pt>
 File: figures/attn_prog_4shot.png Graphic file (type png)
 <use figures/attn_prog_4shot.png>
 Package pdftex.def Info: figures/attn_prog_4shot.png  used on input line 939.
 (pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
-<figures/attn_prog_8shot.png, id=458, 1020.4524pt x 367.8543pt>
+<figures/attn_prog_8shot.png, id=459, 1020.4524pt x 367.8543pt>
 File: figures/attn_prog_8shot.png Graphic file (type png)
 <use figures/attn_prog_8shot.png>
 Package pdftex.def Info: figures/attn_prog_8shot.png  used on input line 944.
 (pdftex.def)             Requested size: 145.6229pt x 52.49274pt.
-<figures/attn_prog_16shot.png, id=459, 1020.4524pt x 367.8543pt>
+<figures/attn_prog_16shot.png, id=460, 1020.4524pt x 367.8543pt>
 File: figures/attn_prog_16shot.png Graphic file (type png)
 <use figures/attn_prog_16shot.png>
 Package pdftex.def Info: figures/attn_prog_16shot.png  used on input line 949.
 (pdftex.def)             Requested size: 145.6229pt x 52.49274pt.
-<figures/attn_prog_32shot.png, id=460, 1020.4524pt x 367.8543pt>
+<figures/attn_prog_32shot.png, id=461, 1020.4524pt x 367.8543pt>
 File: figures/attn_prog_32shot.png Graphic file (type png)
 <use figures/attn_prog_32shot.png>
 Package pdftex.def Info: figures/attn_prog_32shot.png  used on input line 954.
@@ -2000,19 +2003,15 @@ attn_prog_2shot.png> <./figures/attn_prog_4shot.png> <./figures/attn_prog_8shot
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 9AC493E8C2F0A4D8ADE188AB4E3F93B8;4870.
  ) 
 Here is how much of TeX's memory you used:
- 34285 strings out of 475159
- 636095 string characters out of 5766697
- 1038291 words of memory out of 5000000
- 56352 multiletter control sequences out of 15000+600000
- 1260817 words of font info for 300 fonts, out of 8000000 for 9000
+ 34288 strings out of 475159
+ 636192 string characters out of 5766697
+ 1038579 words of memory out of 5000000
+ 56354 multiletter control sequences out of 15000+600000
+ 1261431 words of font info for 302 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  89i,12n,131p,1001b,980s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol10.pfb></usr/share
@@ -2025,10 +2024,10 @@ ifpro/SourceSerifPro-It.pfb></usr/share/texmf-dist/fonts/type1/adobe/sourceseri
 fpro/SourceSerifPro-Regular.pfb></usr/share/texmf-dist/fonts/type1/public/amsfo
 nts/euler/eurm10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/euler/e
 urm7.pfb>
-Output written on main.pdf (23 pages, 65436994 bytes).
+Output written on main.pdf (23 pages, 65438476 bytes).
 PDF statistics:
- 574 PDF objects out of 1000 (max. 8388607)
- 368 compressed objects within 4 object streams
+ 575 PDF objects out of 1000 (max. 8388607)
+ 369 compressed objects within 4 object streams
  88 named destinations out of 1000 (max. 500000)
- 99499 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 100011 words of extra memory for PDF output out of 106986 (max. 10000000)
 
