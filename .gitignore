@@ -9,8 +9,13 @@ scratch/
 ablation_checkpoints/
 ablation_experiments_output/
 visualizations/
+docs/figures/
 *.pt
 *.pth
+*.png
+*.jpg
+*.jpeg
+*.gif
 *.aux
 *.log
 *.out
