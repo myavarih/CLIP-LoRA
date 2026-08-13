@@ -1,0 +1,9 @@
+{
+    "dataset": "imagenet",
+    "split": "val",
+    "model": "32-shot baseline (seed 1)",
+    "test_acc": 64.78,
+    "eval_time_seconds": 176.53,
+    "zero_shot_imagenet_acc": 66.71,
+    "accuracy_drop": 1.93
+}

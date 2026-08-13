@@ -4,3 +4,14 @@ __pycache__/
 my_impl/checkpoints/
 my_impl/visualizations/
 my_impl/test_vis.py
+explanations.md
+scratch/
+ablation_checkpoints/
+ablation_experiments_output/
+*.pt
+*.pth
+docs/figures/
+*.png
+*.jpg
+
+

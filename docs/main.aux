@@ -3,42 +3,106 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \bibstyle{paper}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Setup}{1}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}The Numbers: Ablation Results}{1}{section.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Test accuracy going up as we add more training shots.}}{2}{figure.caption.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}How Does Adaptation Work}{2}{section.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces This figure shows an overview of how learnable parameters are injected in a layer.}}{2}{figure.caption.2}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:acc_vs_shots}{{1}{2}{Test accuracy going up as we add more training shots}{figure.caption.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Training progress for the 4-shot models.}}{3}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:training_curves}{{2}{3}{Training progress for the 4-shot models}{figure.caption.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Deep Dive: Before vs. After (4-Shot)}{3}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Clustering}{3}{subsection.7}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces t-SNE shows how the model separates the classes.}}{4}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:tsne_comparison}{{3}{4}{t-SNE shows how the model separates the classes}{figure.caption.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces PCA confirms the clusters.}}{4}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:pca_comparison}{{4}{4}{PCA confirms the clusters}{figure.caption.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Predictions and Confusion}{4}{subsection.10}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Fixing the mistakes.}}{5}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:cm_comparison}{{5}{5}{Fixing the mistakes}{figure.caption.11}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces The model stops making silly mistakes after seeing 4 examples.}}{5}{figure.caption.12}\protected@file@percent }
-\newlabel{fig:pred_comparison}{{6}{5}{The model stops making silly mistakes after seeing 4 examples}{figure.caption.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Where is it looking?}{5}{subsection.13}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Attention maps. Notice how the final model ignores the background.}}{6}{figure.caption.14}\protected@file@percent }
-\newlabel{fig:attention_comparison}{{7}{6}{Attention maps. Notice how the final model ignores the background}{figure.caption.14}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Catastrophic Forgetting \& Generalization}{6}{section.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Advanced Ablations: Regularization and Modality}{6}{section.16}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Test accuracy for advanced ablations across different shot counts.}}{7}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:acc_vs_shots_2}{{8}{7}{Test accuracy for advanced ablations across different shot counts}{figure.caption.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Training curves for the advanced 4-shot ablation models.}}{7}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:training_curves_2}{{9}{7}{Training curves for the advanced 4-shot ablation models}{figure.caption.18}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Regularization and Scaling}{7}{subsection.19}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Modality: Text vs. Vision}{8}{subsection.20}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Predictions and Confusion (Dropout 0.4)}{8}{subsection.21}\protected@file@percent }
-\newlabel{fig:drop04_preds}{{10A}{8}{Predictions (Dropout 0.4)}{figure.caption.22}{}}
-\newlabel{sub@fig:drop04_preds}{{A}{8}{Predictions (Dropout 0.4)}{figure.caption.22}{}}
-\newlabel{fig:drop04_cm}{{10B}{8}{Confusion Matrix (Dropout 0.4)}{figure.caption.22}{}}
-\newlabel{sub@fig:drop04_cm}{{B}{8}{Confusion Matrix (Dropout 0.4)}{figure.caption.22}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces The model with dropout regularization shows robust classification with very few mistakes.}}{8}{figure.caption.22}\protected@file@percent }
-\newlabel{fig:drop04_analysis}{{10}{8}{The model with dropout regularization shows robust classification with very few mistakes}{figure.caption.22}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Wrap Up}{8}{section.23}\protected@file@percent }
-\gdef \@abspage@last{10}
+\newlabel{fig:lora_diagram}{{1}{2}{This figure shows an overview of how learnable parameters are injected in a layer}{figure.caption.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces How CLIP classifies.}}{2}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:clip_classification}{{2}{2}{How CLIP classifies}{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Internal architecture of CLIP's vision and text encoders (ViT-B/16). Both encoders have 12 transformer blocks. LoRA parameters are injected into the Q, K, and V projections inside the multi-head self-attention of each block.}}{3}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:encoder_architecture}{{3}{3}{Internal architecture of CLIP's vision and text encoders (ViT-B/16). Both encoders have 12 transformer blocks. LoRA parameters are injected into the Q, K, and V projections inside the multi-head self-attention of each block}{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Visualizations (Added)}{3}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Confusion Matrices}{3}{subsection.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Confusion matrices on the test set before and after LoRA adaptation.}}{4}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:vis_cm}{{4}{4}{Confusion matrices on the test set before and after LoRA adaptation}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Sample Predictions}{4}{subsection.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Sample test predictions with confidence scores.}}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:vis_preds}{{5}{4}{Sample test predictions with confidence scores}{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}t-SNE and PCA}{4}{subsection.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces t-SNE visualizations of test embeddings before and after LoRA.}}{5}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:vis_tsne}{{6}{5}{t-SNE visualizations of test embeddings before and after LoRA}{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces PCA visualizations of test embeddings before and after LoRA.}}{5}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:vis_pca}{{7}{5}{PCA visualizations of test embeddings before and after LoRA}{figure.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Attention Visualizations via EigenCAM}{5}{subsection.13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces EigenCAM attention maps on a test image before and after LoRA adaptation.}}{6}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:vis_attn}{{8}{6}{EigenCAM attention maps on a test image before and after LoRA adaptation}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Hyperparameter Explanation}{6}{section.15}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Fixed baseline hyperparameters across experiments.}}{6}{table.caption.16}\protected@file@percent }
+\newlabel{tab:hyperparams}{{1}{6}{Fixed baseline hyperparameters across experiments}{table.caption.16}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Zero-Shot Baseline Analysis}{6}{section.17}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Zero-shot test predictions and confusion matrix.}}{7}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:zs_preds_cm}{{9}{7}{Zero-shot test predictions and confusion matrix}{figure.caption.18}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Zero-shot EigenCAM attention maps across 6 test samples.}}{7}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:zs_attention_maps}{{10}{7}{Zero-shot EigenCAM attention maps across 6 test samples}{figure.caption.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces PCA and t-SNE projections of zero-shot test embeddings.}}{8}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:zs_pca_tsne}{{11}{8}{PCA and t-SNE projections of zero-shot test embeddings}{figure.caption.20}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}The Numbers: Complete Ablation Results}{8}{section.21}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Comprehensive test accuracy (\%) across all experiments. \colorbox {bestgreen}{Green} = best per column, \colorbox {worstred}{Red} = worst. Missing values (--) = not evaluated.}}{9}{table.caption.22}\protected@file@percent }
+\newlabel{tab:all_results_full}{{2}{9}{Comprehensive test accuracy (\%) across all experiments. \colorbox {bestgreen}{Green} = best per column, \colorbox {worstred}{Red} = worst. Missing values (--) = not evaluated}{table.caption.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Test accuracy vs. shots across all configurations.}}{10}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:acc_vs_shots_all}{{12}{10}{Test accuracy vs. shots across all configurations}{figure.caption.23}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Cross-Seed Variance}{10}{subsection.24}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Baseline accuracy across seeds (mean $\pm $ std).}}{10}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:cross_seed}{{13}{10}{Baseline accuracy across seeds (mean $\pm $ std)}{figure.caption.25}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Training Dynamics}{11}{section.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Training Curves (4-Shot)}{11}{subsection.27}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Complete 4-shot training progress across all 12 configurations evaluated over 2,000 iterations.}}{11}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:training_curves}{{14}{11}{Complete 4-shot training progress across all 12 configurations evaluated over 2,000 iterations}{figure.caption.28}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Convergence Speed \& Training Time}{11}{subsection.29}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Training time scaling across shot counts.}}{12}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:training_time}{{15}{12}{Training time scaling across shot counts}{figure.caption.30}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Overfitting Analysis}{12}{subsection.31}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Train--test accuracy gap across shot counts.}}{12}{figure.caption.32}\protected@file@percent }
+\newlabel{fig:overfitting}{{16}{12}{Train--test accuracy gap across shot counts}{figure.caption.32}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Deep Dive: Before vs. After (4-Shot)}{12}{section.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Clustering}{12}{subsection.34}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces t-SNE comparison of test embeddings before and after 4-shot LoRA.}}{13}{figure.caption.35}\protected@file@percent }
+\newlabel{fig:tsne_comparison}{{17}{13}{t-SNE comparison of test embeddings before and after 4-shot LoRA}{figure.caption.35}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces PCA comparison of test embeddings before and after 4-shot LoRA.}}{13}{figure.caption.36}\protected@file@percent }
+\newlabel{fig:pca_comparison}{{18}{13}{PCA comparison of test embeddings before and after 4-shot LoRA}{figure.caption.36}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Predictions and Confusion}{13}{subsection.37}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Confusion matrix before and after 4-shot LoRA adaptation.}}{14}{figure.caption.38}\protected@file@percent }
+\newlabel{fig:cm_comparison}{{19}{14}{Confusion matrix before and after 4-shot LoRA adaptation}{figure.caption.38}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Sample predictions before and after 4-shot LoRA adaptation.}}{14}{figure.caption.39}\protected@file@percent }
+\newlabel{fig:pred_comparison}{{20}{14}{Sample predictions before and after 4-shot LoRA adaptation}{figure.caption.39}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Attention Map Shift}{14}{subsection.40}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces EigenCAM attention comparison showing focus shift to visual features across 6 samples (Zero-Shot vs. 4-Shot Baseline).}}{15}{figure.caption.41}\protected@file@percent }
+\newlabel{fig:attention_comparison}{{21}{15}{EigenCAM attention comparison showing focus shift to visual features across 6 samples (Zero-Shot vs. 4-Shot Baseline)}{figure.caption.41}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Advanced Ablations}{16}{section.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Alpha Scaling Sweep}{16}{subsection.43}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces Alpha scaling comparison at 4-shot.}}{16}{figure.caption.44}\protected@file@percent }
+\newlabel{fig:alpha_sweep}{{22}{16}{Alpha scaling comparison at 4-shot}{figure.caption.44}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces Alpha scaling performance summary.}}{16}{figure.caption.45}\protected@file@percent }
+\newlabel{fig:alpha_diagram}{{23}{16}{Alpha scaling performance summary}{figure.caption.45}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces $\alpha =1.5$ ablation grid across target layer configurations (Seed 3).}}{17}{figure.caption.46}\protected@file@percent }
+\newlabel{fig:alpha15_grid}{{24}{17}{$\alpha =1.5$ ablation grid across target layer configurations (Seed 3)}{figure.caption.46}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.1.1}Alpha 2.0 Analysis}{17}{subsubsection.47}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Rank Analysis}{17}{subsection.48}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces LoRA rank comparison at 4-shot.}}{18}{figure.caption.49}\protected@file@percent }
+\newlabel{fig:rank_comparison}{{25}{18}{LoRA rank comparison at 4-shot}{figure.caption.49}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces t-SNE comparison across LoRA ranks.}}{18}{figure.caption.50}\protected@file@percent }
+\newlabel{fig:rank_tsne}{{26}{18}{t-SNE comparison across LoRA ranks}{figure.caption.50}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces Confusion matrices across LoRA ranks.}}{18}{figure.caption.51}\protected@file@percent }
+\newlabel{fig:rank_cm}{{27}{18}{Confusion matrices across LoRA ranks}{figure.caption.51}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Modality Targeting: Text vs. Vision}{19}{subsection.52}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {28}{\ignorespaces Encoder modality targeting comparison at 4-shot.}}{19}{figure.caption.53}\protected@file@percent }
+\newlabel{fig:modality}{{28}{19}{Encoder modality targeting comparison at 4-shot}{figure.caption.53}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {29}{\ignorespaces Feature space comparison by encoder targeting.}}{19}{figure.caption.54}\protected@file@percent }
+\newlabel{fig:modality_tsne}{{29}{19}{Feature space comparison by encoder targeting}{figure.caption.54}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {30}{\ignorespaces Confusion matrices by encoder targeting.}}{20}{figure.caption.55}\protected@file@percent }
+\newlabel{fig:modality_cm}{{30}{20}{Confusion matrices by encoder targeting}{figure.caption.55}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Scaling: From 1-Shot to 32-Shot}{20}{section.56}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {31}{\ignorespaces Baseline accuracy scaling from 1-shot to 32-shot.}}{20}{figure.caption.57}\protected@file@percent }
+\newlabel{fig:shot_progression}{{31}{20}{Baseline accuracy scaling from 1-shot to 32-shot}{figure.caption.57}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}32-Shot Evaluation}{20}{subsection.58}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {32}{\ignorespaces 32-shot baseline t-SNE and confusion matrix.}}{21}{figure.caption.59}\protected@file@percent }
+\newlabel{fig:32shot_analysis}{{32}{21}{32-shot baseline t-SNE and confusion matrix}{figure.caption.59}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {33}{\ignorespaces PCA and sample predictions at 32-shot.}}{21}{figure.caption.60}\protected@file@percent }
+\newlabel{fig:32shot_pca_preds}{{33}{21}{PCA and sample predictions at 32-shot}{figure.caption.60}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Attention Evolution across Shots}{21}{subsection.61}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {34}{\ignorespaces Attention map progression across shot counts (Zero-Shot to 32-Shot).}}{22}{figure.caption.62}\protected@file@percent }
+\newlabel{fig:attention_evolution}{{34}{22}{Attention map progression across shot counts (Zero-Shot to 32-Shot)}{figure.caption.62}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Catastrophic Forgetting \& Generalization}{22}{section.63}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {35}{\ignorespaces ImageNet validation accuracy across zero-shot, 4-shot, and 32-shot models.}}{22}{figure.caption.64}\protected@file@percent }
+\newlabel{fig:forgetting}{{35}{22}{ImageNet validation accuracy across zero-shot, 4-shot, and 32-shot models}{figure.caption.64}{}}
+\gdef \@abspage@last{23}

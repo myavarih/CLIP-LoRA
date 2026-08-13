@@ -9,8 +9,20 @@
 
 \bibliographystyle{paper}
 
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usetikzlibrary{positioning, fit, arrows.meta, shapes.geometric, calc, backgrounds, shadows, decorations.pathreplacing}
 \hypersetup{pdftitle={Lab Report: CLIP-LoRA Experiments}}
 \newcommand{\bib}{paper.bib}
+
+% Custom colors for tables
+\definecolor{bestgreen}{HTML}{C8E6C9}
+\definecolor{worstred}{HTML}{FFCDD2}
+\definecolor{midyellow}{HTML}{FFF9C4}
+\definecolor{sectionblue}{HTML}{E3F2FD}
 
 \begin{document}
 
@@ -22,64 +34,571 @@
 \maketitle
 \end{titlepage}
 
-\section{Introduction}
-I ran a bunch of experiments to see if we can adapt CLIP for the walnut dataset using very little data. Full fine-tuning usually wrecks pre-trained models when you only have a few images. Instead, I used LoRA (Low-Rank Adaptation). It basically sneaks small trainable matrices into the attention layers without touching the original weights. It's fast and saves memory. 
+\tableofcontents
+\newpage
 
-I wanted to figure out two things:
-1. Which parts of the attention mechanism (queries, keys, values) actually need LoRA?
-2. What does the model actually learn when we only give it 4 images per class?
+% ============================================================================
+\section{How Does Adaptation Work}
+% ============================================================================
 
-\section{Setup}
-I used the standard ViT-B/16 backbone for CLIP. I tested 1, 2, 4, 8, and 16 shots (images per class). 
-I messed with two main settings:
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        % --- Color Palette ---
+        frozen blue/.style={top color=blue!8, bottom color=blue!18, draw=blue!50},
+        trainable orange/.style={top color=orange!12, bottom color=orange!28, draw=orange!60},
+        % --- Node Styles ---
+        basenode/.style={rectangle, rounded corners=6pt, minimum height=1cm, align=center,
+                         font=\small, inner sep=6pt, line width=0.6pt},
+        frozen/.style={basenode, frozen blue, minimum width=4cm,
+                       drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, fill=blue!10, opacity=0.35}},
+        trainable/.style={basenode, trainable orange, minimum width=3.2cm,
+                          drop shadow={shadow xshift=0.6pt, shadow yshift=-0.6pt, fill=orange!10, opacity=0.35}},
+        io/.style={font=\small\bfseries, inner sep=4pt},
+        sumnode/.style={circle, draw=gray!70, fill=gray!8, inner sep=3pt, font=\normalsize\bfseries,
+                        line width=0.7pt},
+        % --- Arrow Styles ---
+        main arrow/.style={-{Stealth[length=5pt, width=4pt]}, line width=0.7pt, color=gray!70},
+        frozen arrow/.style={main arrow, color=blue!40},
+        lora arrow/.style={main arrow, color=orange!55},
+        % --- Annotation ---
+        annot/.style={font=\scriptsize\itshape, text=gray!70},
+    ]
+
+    % --- Input (bottom center) ---
+    \node[io] (input) at (0, 0) {Input $\mathbf{x}$};
+
+    % --- Split point ---
+    \coordinate (split) at (0, 1.0);
+
+    % --- Frozen path (left) ---
+    \node[frozen] (pretrained) at (-3.2, 3.5)
+        {\textbf{Pre-trained Weight $W$}\\[2pt] {\scriptsize\color{blue!60} frozen --- not updated}};
+
+    % --- LoRA path (right) ---
+    \node[trainable] (loraA) at (3.2, 2.5)
+        {\textbf{LoRA Down} ($A$)\\[2pt] {\scriptsize $d \;\to\; r$}};
+    \node[trainable] (loraB) at (3.2, 4.5)
+        {\textbf{LoRA Up} ($B$)\\[2pt] {\scriptsize $r \;\to\; d$}};
+
+    % --- Sum node (centered above both paths) ---
+    \node[sumnode] (plus) at (0, 6.2) {$+$};
+
+    % --- Output ---
+    \node[io] (output) at (0, 7.4) {Output $\;\mathbf{h} = \mathbf{x}W + \mathbf{x}AB$};
+
+    % --- Scaling annotation (right of LoRA Up) ---
+    \node[annot, anchor=west] at ([xshift=8pt]loraB.east) {$\times\;\dfrac{\alpha}{\sqrt{r}}$};
+
+    % --- Bottleneck annotation (right of LoRA Down) ---
+    \node[annot, anchor=west] at ([xshift=8pt]loraA.east) {$r \ll d$};
+
+    % --- Arrows ---
+    % Input to split
+    \draw[main arrow] (input) -- (split);
+    % Frozen path
+    \draw[frozen arrow] (split) -| (pretrained);
+    \draw[frozen arrow] (pretrained.north) -- ++(0, 1.2) -| (plus);
+    % LoRA path
+    \draw[lora arrow] (split) -| (loraA);
+    \draw[lora arrow] (loraA) -- (loraB);
+    \draw[lora arrow] (loraB.north) -- ++(0, 0.5) -| (plus);
+    % Output
+    \draw[main arrow] (plus) -- (output);
+
+    % --- Brace for LoRA path (left side of LoRA nodes) ---
+    \draw[decorate, decoration={brace, amplitude=5pt}, gray!50, line width=0.5pt]
+        ([xshift=-10pt]loraA.south west) -- ([xshift=-10pt]loraB.north west)
+        node[midway, left=8pt, annot, align=right] {trainable\\[-1pt]parameters};
+
+    % --- Legend (bottom-left) ---
+    \begin{scope}[shift={(-4.5, -0.6)}]
+        \node[rectangle, rounded corners=3pt, frozen blue, minimum width=0.7cm, minimum height=0.3cm, line width=0.5pt] at (0,0) {};
+        \node[font=\scriptsize, anchor=west] at (0.5, 0) {Frozen};
+        \node[rectangle, rounded corners=3pt, trainable orange, minimum width=0.7cm, minimum height=0.3cm, line width=0.5pt] at (2.2, 0) {};
+        \node[font=\scriptsize, anchor=west] at (2.7, 0) {Trainable (LoRA)};
+    \end{scope}
+
+    \end{tikzpicture}
+    \caption{This figure shows an overview of how learnable parameters are injected in a layer.}
+    \label{fig:lora_diagram}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/clip_classification_overview.png}
+    \caption{How CLIP classifies.}
+    \label{fig:clip_classification}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        % Colors
+        frozen blue/.style={top color=blue!6, bottom color=blue!15, draw=blue!40},
+        lora orange/.style={top color=orange!10, bottom color=orange!25, draw=orange!50},
+        attn purple/.style={top color=violet!6, bottom color=violet!14, draw=violet!35},
+        mlp green/.style={top color=green!5, bottom color=green!14, draw=green!35},
+        embed gray/.style={top color=gray!6, bottom color=gray!14, draw=gray!30},
+        norm teal/.style={top color=teal!5, bottom color=teal!12, draw=teal!30},
+        % Nodes
+        block/.style={rectangle, rounded corners=4pt, minimum width=5.4cm, minimum height=0.55cm,
+                      align=center, font=\scriptsize, inner sep=3pt, line width=0.5pt},
+        smallblock/.style={rectangle, rounded corners=3pt, minimum width=1.4cm, minimum height=0.45cm,
+                           align=center, font=\tiny, inner sep=2pt, line width=0.4pt},
+        titlebox/.style={font=\small\bfseries, align=center},
+        annot/.style={font=\tiny\itshape, text=gray!65},
+        brace label/.style={font=\tiny, text=gray!60, align=center},
+    ]
+
+    % ========== VISION ENCODER (left) ==========
+    \node[titlebox] at (-3.5, 8.8) {Vision Encoder (ViT-B/16)};
+
+    % Patch Embedding
+    \node[block, embed gray] (v_embed) at (-3.5, 8.1) {Patch Embedding + Position Encoding};
+
+    % Transformer Blocks
+    \foreach \i/\y in {0/7.3, 1/6.6, 2/5.9} {
+        \node[block, frozen blue] (v_block_\i) at (-3.5, \y) {Transformer Block \i};
+    }
+    \node[annot] at (-3.5, 5.35) {$\vdots$};
+    \node[block, frozen blue] (v_block_11) at (-3.5, 4.8) {Transformer Block 11};
+
+    % Layer Norm
+    \node[block, norm teal] (v_ln) at (-3.5, 4.1) {Layer Norm + Projection};
+
+    % Output
+    \node[font=\scriptsize\bfseries] (v_out) at (-3.5, 3.5) {Image Features $\mathbf{I}$};
+
+    % Arrows
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (v_embed) -- (v_block_0);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (v_block_0) -- (v_block_1);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (v_block_1) -- (v_block_2);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (v_block_11) -- (v_ln);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (v_ln) -- (v_out);
+
+    % ========== TEXT ENCODER (right) ==========
+    \node[titlebox] at (3.5, 8.8) {Text Encoder};
+
+    % Token Embedding
+    \node[block, embed gray] (t_embed) at (3.5, 8.1) {Token Embedding + Position Encoding};
+
+    % Transformer Blocks
+    \foreach \i/\y in {0/7.3, 1/6.6, 2/5.9} {
+        \node[block, frozen blue] (t_block_\i) at (3.5, \y) {Transformer Block \i};
+    }
+    \node[annot] at (3.5, 5.35) {$\vdots$};
+    \node[block, frozen blue] (t_block_11) at (3.5, 4.8) {Transformer Block 11};
+
+    % Layer Norm
+    \node[block, norm teal] (t_ln) at (3.5, 4.1) {Layer Norm + Projection};
+
+    % Output
+    \node[font=\scriptsize\bfseries] (t_out) at (3.5, 3.5) {Text Features $\mathbf{T}$};
+
+    % Arrows
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (t_embed) -- (t_block_0);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (t_block_0) -- (t_block_1);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (t_block_1) -- (t_block_2);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (t_block_11) -- (t_ln);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.5pt] (t_ln) -- (t_out);
+
+    % ========== EXPANDED BLOCK DETAIL (center bottom) ==========
+    \node[titlebox] at (0, 2.5) {Inside Each Transformer Block};
+
+    % Dashed box
+    \draw[dashed, rounded corners=6pt, gray!40, line width=0.5pt]
+        (-4.2, -0.1) rectangle (4.2, 2.1);
+
+    % Layer Norm 1
+    \node[block, norm teal, minimum width=7.8cm] (ln1) at (0, 1.75) {Layer Norm};
+
+    % Multi-Head Attention
+    \node[block, attn purple, minimum width=7.8cm] (mha) at (0, 1.15) {Multi-Head Self-Attention};
+
+    % Q, K, V projections inside attention
+    \node[smallblock, lora orange] (qproj) at (-2.4, 0.55) {\textbf{Q} proj + LoRA};
+    \node[smallblock, lora orange] (kproj) at (0, 0.55) {\textbf{K} proj + LoRA};
+    \node[smallblock, lora orange] (vproj) at (2.4, 0.55) {\textbf{V} proj + LoRA};
+
+    % Residual + LN2 + MLP
+    \node[block, norm teal, minimum width=7.8cm] (ln2) at (0, -0.6) {Layer Norm};
+    \node[block, mlp green, minimum width=7.8cm] (mlp) at (0, -1.2) {MLP (Feed-Forward)};
+
+    % Arrows inside block
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.4pt] (ln1) -- (mha);
+    \draw[-{Stealth[length=3pt]}, orange!50, line width=0.4pt] (mha) -- (qproj);
+    \draw[-{Stealth[length=3pt]}, orange!50, line width=0.4pt] (mha) -- (kproj);
+    \draw[-{Stealth[length=3pt]}, orange!50, line width=0.4pt] (mha) -- (vproj);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.4pt] (0, 0.25) -- (ln2);
+    \draw[-{Stealth[length=3pt]}, gray!50, line width=0.4pt] (ln2) -- (mlp);
+
+    % LoRA injection label
+    \node[font=\tiny\bfseries, text=orange!70, anchor=west] at (3.6, 0.55) {$\leftarrow$ LoRA injected here};
+
+    % Connecting lines from encoder blocks to detail
+    \draw[-{Stealth[length=3pt]}, gray!30, dashed, line width=0.4pt]
+        (v_block_11.south) -- ++(0, -0.3) -| (-2.5, 2.1);
+    \draw[-{Stealth[length=3pt]}, gray!30, dashed, line width=0.4pt]
+        (t_block_11.south) -- ++(0, -0.3) -| (2.5, 2.1);
+
+    % ========== LEGEND ==========
+    \begin{scope}[shift={(-4.2, -2.0)}]
+        \node[rectangle, rounded corners=2pt, frozen blue, minimum width=0.6cm, minimum height=0.25cm, line width=0.4pt] at (0,0) {};
+        \node[font=\tiny, anchor=west] at (0.4, 0) {Frozen};
+        \node[rectangle, rounded corners=2pt, lora orange, minimum width=0.6cm, minimum height=0.25cm, line width=0.4pt] at (2.0, 0) {};
+        \node[font=\tiny, anchor=west] at (2.4, 0) {LoRA Injected};
+        \node[rectangle, rounded corners=2pt, mlp green, minimum width=0.6cm, minimum height=0.25cm, line width=0.4pt] at (4.6, 0) {};
+        \node[font=\tiny, anchor=west] at (5.0, 0) {MLP (frozen)};
+        \node[rectangle, rounded corners=2pt, norm teal, minimum width=0.6cm, minimum height=0.25cm, line width=0.4pt] at (6.8, 0) {};
+        \node[font=\tiny, anchor=west] at (7.2, 0) {Layer Norm};
+    \end{scope}
+
+    \end{tikzpicture}
+    \caption{Internal architecture of CLIP's vision and text encoders (ViT-B/16). Both encoders have 12 transformer blocks. LoRA parameters are injected into the Q, K, and V projections inside the multi-head self-attention of each block.}
+    \label{fig:encoder_architecture}
+\end{figure}
+
+% ============================================================================
+\section{Visualizations (Added)}
+% ============================================================================
+
+To better understand model behavior beyond overall accuracy metrics, confusion matrices, sample predictions, t-SNE, PCA, and EigenCAM attention visualizations were added across both train and test sets.
+
+\subsection{Confusion Matrices}
+
+Confusion matrices display class-level misclassifications. Diagonal values show correct predictions, while off-diagonal values show where classes get confused.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_cm.png}
+        \caption{Zero-shot (before LoRA)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_cm.png}
+        \caption{After LoRA fine-tuning (4-shot)}
+    \end{subfigure}
+    \caption{Confusion matrices on the test set before and after LoRA adaptation.}
+    \label{fig:vis_cm}
+\end{figure}
+
+\subsection{Sample Predictions}
+
+Sample predictions show test images with predicted class labels and confidence scores.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_preds.png}
+        \caption{Zero-shot predictions}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_preds.png}
+        \caption{After LoRA fine-tuning (4-shot)}
+    \end{subfigure}
+    \caption{Sample test predictions with confidence scores.}
+    \label{fig:vis_preds}
+\end{figure}
+
+\subsection{t-SNE and PCA}
+
+PCA and t-SNE are used to project high-dimensional embeddings into 2D:
 \begin{itemize}
-    \item \textbf{Target Layers}: I tried updating just values (\texttt{p\_v}), queries and values (\texttt{p\_qv}), or all three (\texttt{baseline}: $q, v, k$).
-    \item \textbf{Rank}: I used rank $r=2$ mostly, but also tried $r=1$ (\texttt{r\_1}) to see if we could get away with even fewer parameters.
+    \item \textbf{PCA} preserves global variance across features.
+    \item \textbf{t-SNE} preserves local neighbor distances to reveal distinct class clusters.
 \end{itemize}
-
-\section{The Numbers: Ablation Results}
-
-First, I looked at how the accuracy changes as we add more images (Figure \ref{fig:acc_vs_shots}). 
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/acc_vs_shots.png}
-    \caption{Test accuracy going up as we add more training shots.}
-    \label{fig:acc_vs_shots}
-\end{figure}
-
-The \texttt{baseline} model ($q,v,k$ with $r=2$) wins almost everywhere. Interestingly, just updating the value matrix (\texttt{p\_v}) is terrible. It barely beats the zero-shot baseline when we only have 1 or 2 shots. My guess is that changing just the values doesn't give the model enough flexibility to shift its attention to new features. 
-
-I also checked the training curves for the 4-shot runs (Figure \ref{fig:training_curves}).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/training_curves_4shots.png}
-    \caption{Training progress for the 4-shot models.}
-    \label{fig:training_curves}
-\end{figure}
-
-The \texttt{baseline} gets to a high accuracy quickly and stays there. The \texttt{r\_1} model is super jerky. It looks like rank 1 is just too small. It's probably trying to squeeze too much information into a tiny bottleneck, making the gradients bounce around.
-
-\section{Deep Dive: Before vs. After (4-Shot)}
-
-I wanted to see what was happening under the hood. So, I grabbed the embeddings and predictions before any training (Zero-Shot) and compared them to the final 4-shot model.
-
-\subsection{Clustering}
-Look at the t-SNE (Figure \ref{fig:tsne_comparison}) and PCA (Figure \ref{fig:pca_comparison}) plots. 
+Separated clusters show clear features; overlapping clusters indicate class ambiguity.
 
 \begin{figure}[H]
     \centering
     \begin{subfigure}{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/4shot_zs_tsne.png}
-        \caption{Zero-Shot (A mess)}
+        \caption{Zero-shot t-SNE}
     \end{subfigure}
     \hfill
     \begin{subfigure}{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/4shot_baseline_tsne.png}
-        \caption{Final 4-Shot (Nice clusters)}
+        \caption{After LoRA t-SNE (4-shot)}
     \end{subfigure}
-    \caption{t-SNE shows how the model separates the classes.}
+    \caption{t-SNE visualizations of test embeddings before and after LoRA.}
+    \label{fig:vis_tsne}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_pca.png}
+        \caption{Zero-shot PCA}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_pca.png}
+        \caption{After LoRA PCA (4-shot)}
+    \end{subfigure}
+    \caption{PCA visualizations of test embeddings before and after LoRA.}
+    \label{fig:vis_pca}
+\end{figure}
+
+\subsection{Attention Visualizations via EigenCAM}
+
+Standard Grad-CAM struggles here for three main reasons:
+\begin{itemize}
+    \item \textbf{No classification head:} CLIP uses cosine similarity between image and text features rather than softmax logits.
+    \item \textbf{Frozen weights:} Backpropagating through frozen layers yields weak attributions since only LoRA layers update.
+    \item \textbf{Mixed precision (FP16):} Half-precision gradients often generate noisy heatmaps.
+\end{itemize}
+
+EigenCAM avoids this by being gradient-free. It computes the \textbf{first principal component} of activations at the target layer—compressing 768 feature channels into a 2D heatmap of the primary visual patterns. This reveals whether the model focuses on the walnut itself or background clutter.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_attn_img0.png}
+        \caption{Zero-shot attention}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_attn_img0.png}
+        \caption{After LoRA attention (4-shot)}
+    \end{subfigure}
+    \caption{EigenCAM attention maps on a test image before and after LoRA adaptation.}
+    \label{fig:vis_attn}
+\end{figure}
+
+
+\section{Hyperparameter Explanation}
+% ============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Fixed baseline hyperparameters across experiments.}
+\label{tab:hyperparams}
+\begin{tabular}{lll}
+\toprule
+\textbf{Hyperparameter} & \textbf{Default Value} & \textbf{Purpose} \\
+\midrule
+Backbone & ViT-B/16 & Pre-trained feature extractor \\
+Learning rate & $2 \times 10^{-4}$ & Gradient step size \\
+Batch size & 32 & Samples per iteration \\
+Iterations & 500 (per shot) & Total optimization steps \\
+LoRA rank ($r$) & 2 & Low-rank inner dimension \\
+LoRA scaling ($\alpha$) & 1.0 & Adapter output multiplier \\
+Dropout rate & 0.25 & Regularization rate \\
+Target parameters & $q, k, v$ & Attention projection targets \\
+Target encoder & Both & Encoder modality targeting \\
+Layer position & All layers & Layer depth targeting \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+% ============================================================================
+\section{Zero-Shot Baseline Analysis}
+% ============================================================================
+
+Initial zero-shot testing yielded an accuracy near 19\%. Modifying the prompt templates and translating class names into descriptive English improved accuracy to 22.26\%. For example:
+\begin{center}
+\texttt{a photo of a brown momtaz walnut} $\quad\longrightarrow\quad$ \texttt{a photo of a premium brown walnut, a type of walnut.}
+\end{center}
+Despite this improvement, zero-shot accuracy remains very low and close to random guessing. CLIP's pre-training did not include fine-grained walnut cultivars, so its default embeddings cannot distinguish between these varieties without fine-tuning.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_standalone_preds.png}
+        \caption{Zero-Shot Sample Predictions}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_standalone_cm.png}
+        \caption{Zero-Shot Confusion Matrix}
+    \end{subfigure}
+    \caption{Zero-shot test predictions and confusion matrix.}
+    \label{fig:zs_preds_cm}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_attn_0.png}
+        \caption{Sample 1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_attn_1.png}
+        \caption{Sample 2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_attn_2.png}
+        \caption{Sample 3}
+    \end{subfigure}
+    \vskip \baselineskip
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_attn_3.png}
+        \caption{Sample 4}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_attn_4.png}
+        \caption{Sample 5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/zs_attn_5.png}
+        \caption{Sample 6}
+    \end{subfigure}
+    \caption{Zero-shot EigenCAM attention maps across 6 test samples.}
+    \label{fig:zs_attention_maps}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_pca.png}
+        \caption{Zero-Shot PCA}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_tsne.png}
+        \caption{Zero-Shot t-SNE}
+    \end{subfigure}
+    \caption{PCA and t-SNE projections of zero-shot test embeddings.}
+    \label{fig:zs_pca_tsne}
+\end{figure}
+
+% ============================================================================
+\section{The Numbers: Complete Ablation Results}
+% ============================================================================
+
+Table~\ref{tab:all_results_full} summarizes test accuracy across all configurations and shot counts. Figure~\ref{fig:acc_vs_shots_all} compares overall accuracy progression. Testing all combinations was not feasible, so a representative subset was selected.
+
+\begin{table}[H]
+\centering
+\caption{Comprehensive test accuracy (\%) across all experiments. \colorbox{bestgreen}{Green} = best per column, \colorbox{worstred}{Red} = worst. Missing values (--) = not evaluated.}
+\label{tab:all_results_full}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrrrr}
+\toprule
+\multirow{2}{*}{\textbf{Configuration}} & \multirow{2}{*}{\textbf{Seed}} & \multicolumn{6}{c}{\textbf{Number of Shots}} & \multirow{2}{*}{\textbf{Train Acc (4s)}} & \multirow{2}{*}{\textbf{Time (4s)}} \\
+\cmidrule(lr){3-8}
+ & & \textbf{1} & \textbf{2} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{32} & & \\
+\midrule
+\multicolumn{10}{l}{\cellcolor{sectionblue}\textbf{Target Layer Ablations ($r=2$, $\alpha=1.0$, $d=0.25$)}} \\
+\midrule
+\texttt{baseline} ($q,k,v$) & 1 & 39.74 & 43.82 & 46.39 & 49.65 & 56.18 & \cellcolor{bestgreen}62.82 & 100.0 & 30m \\
+\texttt{baseline} ($q,k,v$) & 2 & 38.93 & 43.82 & 47.67 & 50.70 & \cellcolor{bestgreen}59.32 & -- & 100.0 & 29m \\
+\texttt{baseline} ($q,k,v$) ablation run & 2 & 38.46 & 44.06 & 48.02 & 50.35 & 59.56 & -- & 100.0 & 29m \\
+\texttt{p\_qv} ($q,v$) & 2 & 36.60 & 41.26 & 44.87 & \cellcolor{bestgreen}52.80 & 58.51 & -- & 100.0 & -- \\
+\texttt{p\_v} ($v$ only) & 2 & \cellcolor{bestgreen}40.68 & \cellcolor{worstred}40.21 & 46.97 & 50.00 & 58.16 & -- & 100.0 & -- \\
+\texttt{r\_1} ($q,k,v$, $r=1$) & 2 & 38.23 & 43.12 & 47.55 & 49.42 & -- & -- & 100.0 & -- \\
+\midrule
+\multicolumn{10}{l}{\cellcolor{sectionblue}\textbf{Alpha 1.5 Sweep ($r=2$, $\alpha=1.5$, $d=0.25$, Seed 3)}} \\
+\midrule
+\texttt{baseline\_$\alpha$1.5} ($q,k,v$) & 3 & 39.39 & 42.31 & \cellcolor{bestgreen}49.65 & 51.63 & 58.28 & -- & 100.0 & 27m \\
+\texttt{p\_qv\_$\alpha$1.5} ($q,v$) & 3 & 39.63 & 42.66 & 48.14 & 50.70 & \cellcolor{bestgreen}58.62 & -- & 100.0 & 29m \\
+\texttt{p\_v\_$\alpha$1.5} ($v$ only) & 3 & 38.69 & 41.49 & 47.32 & 50.93 & 58.51 & -- & 100.0 & 29m \\
+\texttt{r\_1\_$\alpha$1.5} ($r=1$) & 3 & 38.11 & 42.77 & 48.02 & 50.47 & -- & -- & 100.0 & 32m \\
+\midrule
+\multicolumn{10}{l}{\cellcolor{sectionblue}\textbf{High Alpha \& Dropout Experiments}} \\
+\midrule
+\texttt{$\alpha$=2.0, $d$=0.4} ($q,k,v$) & 1 & 39.98 & 41.61 & 44.29 & \cellcolor{bestgreen}53.61 & -- & -- & 100.0 & 15m \\
+\texttt{$\alpha$=1.5, $d$=0.4} ($q,k,v$) & 1 & \cellcolor{bestgreen}40.56 & \cellcolor{bestgreen}43.01 & 44.17 & 52.68 & -- & -- & 95.83 & 15m \\
+\midrule
+\multicolumn{10}{l}{\cellcolor{sectionblue}\textbf{4-Shot Only Ablations ($\alpha=1.0$, $d=0.25$, Seed 2)}} \\
+\midrule
+\texttt{a\_0.75} ($\alpha=0.75$) & 2 & -- & -- & 47.32 & -- & -- & -- & 100.0 & -- \\
+\texttt{a\_1.5} ($\alpha=1.5$) & 2 & -- & -- & \cellcolor{bestgreen}50.00 & -- & -- & -- & 100.0 & -- \\
+\texttt{drop\_0.4} (Dropout 0.4) & 2 & -- & -- & 48.37 & -- & -- & -- & 100.0 & -- \\
+\texttt{e\_text} (Text Encoder) & 2 & -- & -- & \cellcolor{worstred}40.56 & -- & -- & -- & 100.0 & -- \\
+\texttt{e\_vision} (Vision Encoder) & 2 & -- & -- & 45.34 & -- & -- & -- & 100.0 & -- \\
+\texttt{r\_3} (Rank 3) & 2 & -- & -- & 48.60 & -- & -- & -- & 100.0 & -- \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/acc_vs_shots_all.png}
+    \caption{Test accuracy vs. shots across all configurations.}
+    \label{fig:acc_vs_shots_all}
+\end{figure}
+
+\subsection{Cross-Seed Variance}
+
+Evaluating the baseline across random seeds shows low standard deviation ($\approx \pm 1\text{--}2\%$).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/cross_seed_variance.png}
+    \caption{Baseline accuracy across seeds (mean $\pm$ std).}
+    \label{fig:cross_seed}
+\end{figure}
+
+% ============================================================================
+\section{Training Dynamics}
+% ============================================================================
+
+\subsection{Training Curves (4-Shot)}
+
+Figure~\ref{fig:training_curves} tracks test accuracy over 2,000 iterations for all 4-shot models.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/training_curves_4shots.png}
+    \caption{Complete 4-shot training progress across all 12 configurations evaluated over 2,000 iterations.}
+    \label{fig:training_curves}
+\end{figure}
+
+\subsection{Convergence Speed \& Training Time}
+
+Training time increases almost linearly with shot count (Figure~\ref{fig:training_time}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/training_time_vs_shots.png}
+    \caption{Training time scaling across shot counts.}
+    \label{fig:training_time}
+\end{figure}
+
+\subsection{Overfitting Analysis}
+
+Extreme overfitting is visible in all shots (because it is very easy for the huge model to memorize a few train images), but more shots reduce the gap as expected (Figure~\ref{fig:overfitting}).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/overfitting_gap.png}
+    \end{subfigure}
+    \caption{Train--test accuracy gap across shot counts.}
+    \label{fig:overfitting}
+\end{figure}
+
+% ============================================================================
+\section{Deep Dive: Before vs. After (4-Shot)}
+% ============================================================================
+
+\subsection{Clustering}
+
+Hints of clustering are visible (Figure~\ref{fig:tsne_comparison} \& Figure~\ref{fig:pca_comparison}).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_zs_tsne.png}
+        \caption{Zero-Shot}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/4shot_baseline_tsne.png}
+        \caption{4-Shot Baseline}
+    \end{subfigure}
+    \caption{t-SNE comparison of test embeddings before and after 4-shot LoRA.}
     \label{fig:tsne_comparison}
 \end{figure}
 
@@ -92,16 +611,15 @@ Look at the t-SNE (Figure \ref{fig:tsne_comparison}) and PCA (Figure \ref{fig:pc
     \hfill
     \begin{subfigure}{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/4shot_baseline_pca.png}
-        \caption{Final 4-Shot}
+        \caption{4-Shot Baseline}
     \end{subfigure}
-    \caption{PCA confirms the clusters.}
+    \caption{PCA comparison of test embeddings before and after 4-shot LoRA.}
     \label{fig:pca_comparison}
 \end{figure}
 
-Before training, CLIP is basically guessing. The embeddings for different walnut types overlap completely. It just sees "walnut". But after seeing just 4 examples of each class, it figures out how to pull them apart. The clusters become really distinct. 
-
 \subsection{Predictions and Confusion}
-The confusion matrix (Figure \ref{fig:cm_comparison}) shows exactly where it gets smarter. 
+
+Visualizations illustrate model learning dynamics while highlighting where and why failure cases occur (Figure~\ref{fig:cm_comparison} \& Figure~\ref{fig:pred_comparison}).
 
 \begin{figure}[H]
     \centering
@@ -112,13 +630,11 @@ The confusion matrix (Figure \ref{fig:cm_comparison}) shows exactly where it get
     \hfill
     \begin{subfigure}{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/4shot_baseline_cm.png}
-        \caption{Final 4-Shot Confusion}
+        \caption{4-Shot Confusion}
     \end{subfigure}
-    \caption{Fixing the mistakes.}
+    \caption{Confusion matrix before and after 4-shot LoRA adaptation.}
     \label{fig:cm_comparison}
 \end{figure}
-
-Zero-shot gets really confused on a few specific classes. The 4-shot training clears up most of that confusion. You can see it visually in the prediction samples too (Figure \ref{fig:pred_comparison}). 
 
 \begin{figure}[H]
     \centering
@@ -129,96 +645,343 @@ Zero-shot gets really confused on a few specific classes. The 4-shot training cl
     \hfill
     \begin{subfigure}{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/4shot_baseline_preds.png}
-        \caption{Final 4-Shot Predictions}
+        \caption{4-Shot Predictions}
     \end{subfigure}
-    \caption{The model stops making silly mistakes after seeing 4 examples.}
+    \caption{Sample predictions before and after 4-shot LoRA adaptation.}
     \label{fig:pred_comparison}
 \end{figure}
 
-\subsection{Where is it looking?}
-This is probably the coolest part. I pulled the attention maps (Figure \ref{fig:attention_comparison}) to see what the model actually looks at. 
+\subsection{Attention Map Shift}
+
+Attention focus shows slight spatial refinement (Figure~\ref{fig:attention_comparison}).
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{figures/4shot_zs_attn_img0.png}
-        \caption{Zero-Shot (Img 0)}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_zs_0.png}
+        \caption{Zero-Shot (Sample 1)}
     \end{subfigure}
     \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{figures/4shot_baseline_attn_img0.png}
-        \caption{Final 4-Shot (Img 0)}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_4shot_0.png}
+        \caption{4-Shot (Sample 1)}
     \end{subfigure}
-    
-    \vspace{1em}
-    
-    \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{figures/4shot_zs_attn_img10.png}
-        \caption{Zero-Shot (Img 10)}
+    \vspace{0.5em}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_zs_1.png}
+        \caption{Zero-Shot (Sample 2)}
     \end{subfigure}
     \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{figures/4shot_baseline_attn_img10.png}
-        \caption{Final 4-Shot (Img 10)}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_4shot_1.png}
+        \caption{4-Shot (Sample 2)}
     \end{subfigure}
-    \caption{Attention maps. Notice how the final model ignores the background.}
+    \vspace{0.5em}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_zs_2.png}
+        \caption{Zero-Shot (Sample 3)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_4shot_2.png}
+        \caption{4-Shot (Sample 3)}
+    \end{subfigure}
+    \vspace{0.5em}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_zs_3.png}
+        \caption{Zero-Shot (Sample 4)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_4shot_3.png}
+        \caption{4-Shot (Sample 4)}
+    \end{subfigure}
+    \vspace{0.5em}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_zs_4.png}
+        \caption{Zero-Shot (Sample 5)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_4shot_4.png}
+        \caption{4-Shot (Sample 5)}
+    \end{subfigure}
+    \vspace{0.5em}
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_zs_5.png}
+        \caption{Zero-Shot (Sample 6)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_4shot_5.png}
+        \caption{4-Shot (Sample 6)}
+    \end{subfigure}
+    \caption{EigenCAM attention comparison showing focus shift to visual features across 6 samples (Zero-Shot vs. 4-Shot Baseline).}
     \label{fig:attention_comparison}
 \end{figure}
 
-In zero-shot, the attention is scattered. It looks at the edges, the background, just whatever. But after the 4-shot training, the attention map tightens up a lot. It ignores the background and focuses right on the texture of the walnut shell. This proves that updating the $q, k, v$ matrices literally changes how the model sees the image.
+% ============================================================================
+\section{Advanced Ablations}
+% ============================================================================
 
-\section{Catastrophic Forgetting \& Generalization}
-A major concern when fine-tuning on a highly specific, small dataset (like 4-shot Walnut) is catastrophic forgetting: does the model lose its broader knowledge of the world? To test this, we evaluated our final 4-shot model back on the full ImageNet validation set (1,000 classes, 50,000 images). 
+\subsection{Alpha Scaling Sweep}
 
-Remarkably, the original ViT-B/16 Zero-shot CLIP achieved \textbf{66.71\%} accuracy on ImageNet. After loading our Walnut-specific LoRA weights, the model scored \textbf{66.66\%}. This translates to an incredibly negligible drop of just \textbf{0.05\%}. This proves that LoRA successfully isolates the new knowledge within its low-rank updates without disrupting the pre-trained generalized feature space.
-
-\section{Advanced Ablations: Regularization and Modality}
-
-Following the initial experiments, I ran a second suite of ablations focusing on regularization (Dropout), scaling (Alpha), dimensionality (Rank), and modality targeting (Text vs. Vision encoder). The results are summarized in Figure \ref{fig:acc_vs_shots_2} and the training dynamics in Figure \ref{fig:training_curves_2}.
+Evaluating different scaling factors ($\alpha \in \{0.75, 1.0, 1.5, 2.0\}$) indicates that $\alpha=1.5$ achieves peak performance at 4-shot (Figure~\ref{fig:alpha_sweep} \& Figure~\ref{fig:alpha_diagram}). However, across other shot counts, no single configuration works optimally in all cases (even within the same dataset). See Figure~\ref{fig:alpha15_grid} for target layer variations under $\alpha=1.5$.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/acc_vs_shots_2.png}
-    \caption{Test accuracy for advanced ablations across different shot counts.}
-    \label{fig:acc_vs_shots_2}
+    \includegraphics[width=0.75\textwidth]{figures/alpha_sweep_4shot.png}
+    \caption{Alpha scaling comparison at 4-shot.}
+    \label{fig:alpha_sweep}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/training_curves_4shots_2.png}
-    \caption{Training curves for the advanced 4-shot ablation models.}
-    \label{fig:training_curves_2}
+    \begin{tikzpicture}[
+        box/.style={draw, rounded corners, minimum width=2.5cm, minimum height=1cm, align=center, font=\small},
+        arrow/.style={-latex, thick}
+    ]
+    \node[box, fill=yellow!10] (low) at (0,0) {$\alpha = 0.75$\\ \small 47.3\%};
+    \node[box, fill=green!15] (mid) at (4.5,0) {$\alpha = 1.0$--$1.5$\\ \small 47.7--50.0\%};
+    \node[box, fill=red!10] (high) at (9,0) {$\alpha = 2.0$\\ \small 44.3\%};
+    
+    \draw[arrow, green!60!black] (low) -- (mid) node[midway, above, font=\scriptsize] {better};
+    \draw[arrow, red!60!black] (mid) -- (high) node[midway, above, font=\scriptsize] {worse};
+    \end{tikzpicture}
+    \caption{Alpha scaling performance summary.}
+    \label{fig:alpha_diagram}
 \end{figure}
 
-\subsection{Regularization and Scaling}
-Introducing a dropout rate of 0.4 (\texttt{drop\_0.4}) significantly improved the stability of the training, acting as a strong regularizer that prevents the small LoRA matrices from overfitting to the few available examples. Adjusting the alpha scaling parameter (\texttt{a\_0.75} and \texttt{a\_1.5}) showed that tuning the magnitude of the LoRA update is crucial; a higher alpha can lead to faster but sometimes unstable convergence.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/alpha15_ablation_grid.png}
+    \caption{$\alpha=1.5$ ablation grid across target layer configurations (Seed 3).}
+    \label{fig:alpha15_grid}
+\end{figure}
 
-\subsection{Modality: Text vs. Vision}
-Interestingly, updating only the vision encoder (\texttt{e\_vision}) yielded different results compared to updating only the text encoder (\texttt{e\_text}). The baseline model updates both encoders, which seems to strike the best balance, but targeting specific modalities offers an interesting avenue for future work if computational resources are strictly limited.
+\subsubsection{Alpha 2.0 Analysis}
 
-\subsection{Predictions and Confusion (Dropout 0.4)}
-To see how the dropout model performs in practice, I generated predictions and a confusion matrix for the \texttt{drop\_0.4} 4-shot model (Figures \ref{fig:drop04_preds} and \ref{fig:drop04_cm}).
+At $\alpha=2.0$, 4-shot performance drops to 44.3\%, but recovers at 8-shot to achieve 53.6\%.
+
+As mentioned, finding a single configuration that consistently outperforms the baseline across all shot counts turned out to be a dead end. However, increasing $\alpha$ grants the model greater adaptation power ("wilder" parameter updates), though it also makes performance less predictable. Tuning seeds alongside these hyperparameters may yield slightly superior results in specific isolated cases.
+
+\subsection{Rank Analysis}
+
+Most tests were conducted with $r=2$. Although $r=1$ is less likely to yield improvements, $r=3$ may be worth investigating further as it increases adaptation power (Figure~\ref{fig:rank_comparison}--\ref{fig:rank_cm}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/rank_comparison_4shot.png}
+    \caption{LoRA rank comparison at 4-shot.}
+    \label{fig:rank_comparison}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_r_1_final_test_tsne.png}
+        \caption{Rank 1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_baseline_final_test_tsne.png}
+        \caption{Rank 2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_r_3_final_test_tsne.png}
+        \caption{Rank 3}
+    \end{subfigure}
+    \caption{t-SNE comparison across LoRA ranks.}
+    \label{fig:rank_tsne}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_r_1_final_test_confusion_matrix.png}
+        \caption{Rank 1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_baseline_final_test_confusion_matrix.png}
+        \caption{Rank 2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_r_3_final_test_confusion_matrix.png}
+        \caption{Rank 3}
+    \end{subfigure}
+    \caption{Confusion matrices across LoRA ranks.}
+    \label{fig:rank_cm}
+\end{figure}
+
+\subsection{Modality Targeting: Text vs. Vision}
+
+Adaptation power is maximized when LoRA parameters are injected into both encoders (Figure~\ref{fig:modality}--\ref{fig:modality_cm}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{figures/modality_comparison_4shot.png}
+    \caption{Encoder modality targeting comparison at 4-shot.}
+    \label{fig:modality}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_e_text_final_test_tsne.png}
+        \caption{Text Only}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_e_vision_final_test_tsne.png}
+        \caption{Vision Only}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_baseline_final_test_tsne.png}
+        \caption{Both (Baseline)}
+    \end{subfigure}
+    \caption{Feature space comparison by encoder targeting.}
+    \label{fig:modality_tsne}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_e_text_final_test_confusion_matrix.png}
+        \caption{Text Only}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_e_vision_final_test_confusion_matrix.png}
+        \caption{Vision Only}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/comp_baseline_final_test_confusion_matrix.png}
+        \caption{Both (Baseline)}
+    \end{subfigure}
+    \caption{Confusion matrices by encoder targeting.}
+    \label{fig:modality_cm}
+\end{figure}
+
+% ============================================================================
+\section{Scaling: From 1-Shot to 32-Shot}
+% ============================================================================
+
+Baseline accuracy scales consistently from 39.7\% at 1-shot to 62.82\% at 32-shot (Figure~\ref{fig:shot_progression}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/shot_progression.png}
+    \caption{Baseline accuracy scaling from 1-shot to 32-shot.}
+    \label{fig:shot_progression}
+\end{figure}
+
+\subsection{32-Shot Evaluation}
+
+At 32 shots per class, embeddings form tight clusters and confusion matrix errors decrease substantially (Figure~\ref{fig:32shot_analysis} \& Figure~\ref{fig:32shot_pca_preds}).
 
 \begin{figure}[H]
     \centering
     \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\textwidth]{figures/4shot_drop0.4_preds.png}
-        \caption{Predictions (Dropout 0.4)}
-        \label{fig:drop04_preds}
+        \includegraphics[width=\textwidth]{figures/32shot_baseline_tsne.png}
+        \caption{32-Shot t-SNE}
     \end{subfigure}
     \hfill
     \begin{subfigure}{0.48\textwidth}
-        \includegraphics[width=\textwidth]{figures/4shot_drop0.4_cm.png}
-        \caption{Confusion Matrix (Dropout 0.4)}
-        \label{fig:drop04_cm}
+        \includegraphics[width=\textwidth]{figures/32shot_baseline_cm.png}
+        \caption{32-Shot Confusion Matrix}
     \end{subfigure}
-    \caption{The model with dropout regularization shows robust classification with very few mistakes.}
-    \label{fig:drop04_analysis}
+    \caption{32-shot baseline t-SNE and confusion matrix.}
+    \label{fig:32shot_analysis}
 \end{figure}
 
-The predictions are highly confident, and the confusion matrix shows a very clean diagonal, confirming that adding dropout prevents the model from relying on spurious features during few-shot adaptation.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/32shot_baseline_pca.png}
+        \caption{32-Shot PCA}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/32shot_baseline_preds.png}
+        \caption{32-Shot Predictions}
+    \end{subfigure}
+    \caption{PCA and sample predictions at 32-shot.}
+    \label{fig:32shot_pca_preds}
+\end{figure}
 
-\section{Wrap Up}
-LoRA is definitely the way to go for this. We need to update $q, k$, and $v$ with a rank of at least 2. Trying to cut corners with rank 1 or just updating $v$ makes the training unstable or just plain bad. And it's pretty crazy that just 4 images per class is enough to completely rewire the attention maps and pull the embedding clusters apart. The second phase of experiments confirmed that adding dropout (0.4) is a great way to regularize the model and prevent overfitting on such small datasets.
+\subsection{Attention Evolution across Shots}
+
+EigenCAM maps show progressive spatial focus refinement from zero-shot all the way to 32-shot adaptation (Figure~\ref{fig:attention_evolution}).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.24\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_prog_0shot.png}
+        \caption{Zero-Shot}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.24\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_prog_1shot.png}
+        \caption{1-Shot}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.24\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_prog_2shot.png}
+        \caption{2-Shot}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.24\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_prog_4shot.png}
+        \caption{4-Shot}
+    \end{subfigure}
+    \vspace{0.5em}
+    \begin{subfigure}{0.31\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_prog_8shot.png}
+        \caption{8-Shot}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.31\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_prog_16shot.png}
+        \caption{16-Shot}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.31\textwidth}
+        \includegraphics[width=\textwidth]{figures/attn_prog_32shot.png}
+        \caption{32-Shot}
+    \end{subfigure}
+    \caption{Attention map progression across shot counts (Zero-Shot to 32-Shot).}
+    \label{fig:attention_evolution}
+\end{figure}
+
+% ============================================================================
+\section{Catastrophic Forgetting \& Generalization}
+% ============================================================================
+
+Evaluating the adapted models on ImageNet validation demonstrates minimal catastrophic forgetting:
+\begin{itemize}
+    \item \textbf{4-Shot Model:} Achieves \textbf{66.66\%} ImageNet validation accuracy (compared to 66.71\% zero-shot CLIP, a negligible $0.05\%$ drop).
+    \item \textbf{32-Shot Model:} Achieves \textbf{64.78\%} ImageNet validation accuracy (evaluation time: 176.53s, a $1.93\%$ drop).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        bar/.style={minimum height=0.7cm, text=white, font=\bfseries\small, anchor=west},
+    ]
+    \node[bar, fill=blue!60, minimum width=10cm] at (0,2) {Original Zero-Shot CLIP: \textbf{66.71\%}};
+    \node[bar, fill=orange!60, minimum width=9.99cm] at (0,1) {+ 4-Shot Walnut LoRA: \textbf{66.66\%} ($\Delta = -0.05\%$)};
+    \node[bar, fill=red!55, minimum width=9.71cm] at (0,0) {+ 32-Shot Walnut LoRA: \textbf{64.78\%} ($\Delta = -1.93\%$)};
+    \end{tikzpicture}
+    \caption{ImageNet validation accuracy across zero-shot, 4-shot, and 32-shot models.}
+    \label{fig:forgetting}
+\end{figure}
+
+The forgetting is not significant. This is promising and suggests multiple fine-grained tasks can be learned sequentially without catastrophic forgetting (as discussed in the C-CLIP paper).
 
 \end{document}
+

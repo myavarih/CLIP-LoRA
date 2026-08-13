@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.8)  11 AUG 2026 16:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.1.8)  13 AUG 2026 16:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -868,39 +868,358 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \@float@everytoks=\toks43
 \@floatcapt=\box59
 )
+(/usr/share/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/usr/share/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+\pgfutil@everybye=\toks44
+\pgfutil@tempdima=\dimen194
+\pgfutil@tempdimb=\dimen195
+)
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
+\pgfutil@abb=\box60
+)
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/pgf.revision.tex)
+Package: pgfrcs 2023-01-15 v3.1.10 (3.1.10)
+))
+Package: pgf 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(/usr/share/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+Package: pgfsys 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks45
+\pgfkeys@temptoks=\toks46
+
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.code.te
+x
+\pgfkeys@tmptoks=\toks47
+))
+\pgf@x=\dimen196
+\pgf@y=\dimen197
+\pgf@xa=\dimen198
+\pgf@ya=\dimen199
+\pgf@xb=\dimen256
+\pgf@yb=\dimen257
+\pgf@xc=\dimen258
+\pgf@yc=\dimen259
+\pgf@xd=\dimen260
+\pgf@yd=\dimen261
+\w@pgf@writea=\write3
+\r@pgf@reada=\read2
+\c@pgf@counta=\count323
+\c@pgf@countb=\count324
+\c@pgf@countc=\count325
+\c@pgf@countd=\count326
+\t@pgf@toka=\toks48
+\t@pgf@tokb=\toks49
+\t@pgf@tokc=\toks50
+\pgf@sys@id@count=\count327
+ (/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
+File: pgf.cfg 2023-01-15 v3.1.10 (3.1.10)
+)
+Driver file for pgf: pgfsys-pdftex.def
+
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+File: pgfsys-pdftex.def 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def
+File: pgfsys-common-pdf.def 2023-01-15 v3.1.10 (3.1.10)
+)))
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
+File: pgfsyssoftpath.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfsyssoftpath@smallbuffer@items=\count328
+\pgfsyssoftpath@bigbuffer@items=\count329
+)
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
+File: pgfsysprotocol.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+Package: pgfcore 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+\pgfmath@dimen=\dimen262
+\pgfmath@count=\count330
+\pgfmath@box=\box61
+\pgfmath@toks=\toks51
+\pgfmath@stack@operand=\toks52
+\pgfmath@stack@operation=\toks53
+)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code
+.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.te
+x) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics
+.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count331
+))
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
+File: pgfcorepoints.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@picminx=\dimen263
+\pgf@picmaxx=\dimen264
+\pgf@picminy=\dimen265
+\pgf@picmaxy=\dimen266
+\pgf@pathminx=\dimen267
+\pgf@pathmaxx=\dimen268
+\pgf@pathminy=\dimen269
+\pgf@pathmaxy=\dimen270
+\pgf@xx=\dimen271
+\pgf@xy=\dimen272
+\pgf@yx=\dimen273
+\pgf@yy=\dimen274
+\pgf@zx=\dimen275
+\pgf@zy=\dimen276
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
+File: pgfcorepathconstruct.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@path@lastx=\dimen277
+\pgf@path@lasty=\dimen278
+) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex
+File: pgfcorepathusage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@shorten@end@additional=\dimen279
+\pgf@shorten@start@additional=\dimen280
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex
+File: pgfcorescopes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfpic=\box62
+\pgf@hbox=\box63
+\pgf@layerbox@main=\box64
+\pgf@picture@serial@count=\count332
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex
+File: pgfcoregraphicstate.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgflinewidth=\dimen281
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.t
+ex
+File: pgfcoretransformations.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@pt@x=\dimen282
+\pgf@pt@y=\dimen283
+\pgf@pt@temp=\dimen284
+) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+File: pgfcorequick.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex
+File: pgfcoreobjects.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.te
+x
+File: pgfcorepathprocessing.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex
+File: pgfcorearrows.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfarrowsep=\dimen285
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+File: pgfcoreshade.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@max=\dimen286
+\pgf@sys@shading@range@num=\count333
+\pgf@shadingcount=\count334
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+File: pgfcoreimage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
+File: pgfcoreexternal.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfexternal@startupbox=\box65
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
+File: pgfcorelayers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
+File: pgfcoretransparency.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
+File: pgfcorepatterns.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
+File: pgfcorerdf.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)))
+(/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
+File: pgfmoduleshapes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfnodeparttextbox=\box66
+)
+(/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+File: pgfmoduleplot.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty
+Package: pgfcomp-version-0-65 2023-01-15 v3.1.10 (3.1.10)
+\pgf@nodesepstart=\dimen287
+\pgf@nodesepend=\dimen288
+)
+(/usr/share/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty
+Package: pgfcomp-version-1-18 2023-01-15 v3.1.10 (3.1.10)
+))
+(/usr/share/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/usr/share/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex))
+(/usr/share/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex
+Package: pgffor 2023-01-15 v3.1.10 (3.1.10)
+\pgffor@iter=\dimen289
+\pgffor@skip=\dimen290
+\pgffor@stack=\toks54
+\pgffor@toks=\toks55
+))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+Package: tikz 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.code.te
+x
+File: pgflibraryplothandlers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@plot@mark@count=\count335
+\pgfplotmarksize=\dimen291
+)
+\tikz@lastx=\dimen292
+\tikz@lasty=\dimen293
+\tikz@lastxsaved=\dimen294
+\tikz@lastysaved=\dimen295
+\tikz@lastmovetox=\dimen296
+\tikz@lastmovetoy=\dimen297
+\tikzleveldistance=\dimen298
+\tikzsiblingdistance=\dimen299
+\tikz@figbox=\box67
+\tikz@figbox@bg=\box68
+\tikz@tempbox=\box69
+\tikz@tempbox@bg=\box70
+\tikztreelevel=\count336
+\tikznumberofchildren=\count337
+\tikznumberofcurrentchild=\count338
+\tikz@fig@count=\count339
+ (/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
+File: pgfmodulematrix.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfmatrixcurrentrow=\count340
+\pgfmatrixcurrentcolumn=\count341
+\pgf@matrix@numberofcolumns=\count342
+)
+\tikz@expandcount=\count343
+
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+topaths.code.tex
+File: tikzlibrarytopaths.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))) (/usr/share/texmf-dist/tex/latex/colortbl/colortbl.sty
+Package: colortbl 2024/07/06 v1.0i Color table columns (DPC)
+
+(/usr/share/texmf-dist/tex/latex/tools/array.sty
+Package: array 2024/10/17 v2.6g Tabular extension package (FMi)
+\col@sep=\dimen300
+\ar@mcellbox=\box71
+\extrarowheight=\dimen301
+\NC@list=\toks56
+\extratabsurround=\skip116
+\backup@length=\skip117
+\ar@cellbox=\box72
+)
+\everycr=\toks57
+\minrowclearance=\skip118
+\rownum=\count344
+)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+positioning.code.tex
+File: tikzlibrarypositioning.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+fit.code.tex
+File: tikzlibraryfit.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.meta.code.tex
+File: pgflibraryarrows.meta.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfarrowinset=\dimen302
+\pgfarrowlength=\dimen303
+\pgfarrowwidth=\dimen304
+\pgfarrowlinewidth=\dimen305
+)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.geometric.code.tex
+File: tikzlibraryshapes.geometric.code.tex 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.geomet
+ric.code.tex
+File: pgflibraryshapes.geometric.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+calc.code.tex
+File: tikzlibrarycalc.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+backgrounds.code.tex
+File: tikzlibrarybackgrounds.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@layerbox@background=\box73
+\pgf@layerboxsaved@background=\box74
+)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shadows.code.tex
+File: tikzlibraryshadows.code.tex 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+fadings.code.tex
+File: tikzlibraryfadings.code.tex 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/pgflibraryfadings.code.tex
+File: pgflibraryfadings.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+decorations.pathreplacing.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+decorations.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmoduledecorations.code.tex
+\pgfdecoratedcompleteddistance=\dimen306
+\pgfdecoratedremainingdistance=\dimen307
+\pgfdecoratedinputsegmentcompleteddistance=\dimen308
+\pgfdecoratedinputsegmentremainingdistance=\dimen309
+\pgf@decorate@distancetomove=\dimen310
+\pgf@decorate@repeatstate=\count345
+\pgfdecorationsegmentamplitude=\dimen311
+\pgfdecorationsegmentlength=\dimen312
+)
+\tikz@lib@dec@box=\box75
+)
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/decorations/pgflibrarydecorati
+ons.pathreplacing.code.tex))
 (/usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count323
-\l__pdf_internal_box=\box60
+\l__color_backend_stack_int=\count346
+\l__pdf_internal_box=\box76
 ) (./main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for LY1/ptm/m/n on input line 15.
-LaTeX Font Info:    Trying to load font information for LY1+ptm on input line 1
-5.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for LY1/ptm/m/n on input line 27.
+LaTeX Font Info:    Trying to load font information for LY1+ptm on input line 2
+7.
 
 (/usr/share/texmf-dist/tex/latex/ly1/ly1ptm.fd
 File: ly1ptm.fd 2001/02/01 font definitions for LY1/ptm using Berry names.
 )
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -936,20 +1255,20 @@ LaTeX Font Info:    ... okay on input line 15.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 15.
-Package microtype Info: Applying patch `item' on input line 15.
-Package microtype Info: Applying patch `toc' on input line 15.
-Package microtype Info: Applying patch `eqnum' on input line 15.
-Package microtype Info: Applying patch `footnote' on input line 15.
-Package microtype Info: Applying patch `verbatim' on input line 15.
-LaTeX Info: Redefining \microtypesetup on input line 15.
+LaTeX Info: Redefining \microtypecontext on input line 27.
+Package microtype Info: Applying patch `item' on input line 27.
+Package microtype Info: Applying patch `toc' on input line 27.
+Package microtype Info: Applying patch `eqnum' on input line 27.
+Package microtype Info: Applying patch `footnote' on input line 27.
+Package microtype Info: Applying patch `verbatim' on input line 27.
+LaTeX Info: Redefining \microtypesetup on input line 27.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 15.
+LaTeX Info: Redefining \showhyphens on input line 27.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
@@ -959,17 +1278,17 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             See the microtype manual for details.
 (/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count324
-\scratchdimen=\dimen194
-\scratchbox=\box61
-\nofMPsegments=\count325
-\nofMParguments=\count326
-\everyMPshowfont=\toks44
-\MPscratchCnt=\count327
-\MPscratchDim=\dimen195
-\MPnumerator=\count328
-\makeMPintoPDFobject=\count329
-\everyMPtoPDFconversion=\toks45
+\scratchcounter=\count347
+\scratchdimen=\dimen313
+\scratchbox=\box77
+\nofMPsegments=\count348
+\nofMParguments=\count349
+\everyMPshowfont=\toks58
+\MPscratchCnt=\count350
+\MPscratchDim=\dimen314
+\MPnumerator=\count351
+\makeMPintoPDFobject=\count352
+\everyMPtoPDFconversion=\toks59
 ) (/usr/share/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
@@ -983,66 +1302,66 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring OFF on input line 15.
+Package hyperref Info: Link coloring OFF on input line 27.
  (./main.out)
 (./main.out)
-\@outlinefile=\write3
-\openout3 = `main.out'.
+\@outlinefile=\write4
+\openout4 = `main.out'.
 
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
-(Font)              scaled to size 10.95pt on input line 23.
+(Font)              scaled to size 10.95pt on input line 35.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
-(Font)              scaled to size 24.88pt on input line 23.
+(Font)              scaled to size 24.88pt on input line 35.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
-(Font)              scaled to size 12.0pt on input line 23.
+(Font)              scaled to size 12.0pt on input line 35.
  (/usr/share/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
 Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/12
 '
-(microtype)             (new value: 12.0pt) on input line 23.
+(microtype)             (new value: 12.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/10
 '
-(microtype)             (new value: 10.0pt) on input line 23.
+(microtype)             (new value: 10.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/8'
 
-(microtype)             (new value: 8.0pt) on input line 23.
+(microtype)             (new value: 8.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/12'
-(microtype)             (new value: 12.0pt) on input line 23.
+(microtype)             (new value: 12.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/10'
-(microtype)             (new value: 10.0pt) on input line 23.
+(microtype)             (new value: 10.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/8'
-(microtype)             (new value: 8.0pt) on input line 23.
+(microtype)             (new value: 8.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/12'
-(microtype)             (new value: 12.0pt) on input line 23.
+(microtype)             (new value: 12.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/10'
-(microtype)             (new value: 10.0pt) on input line 23.
+(microtype)             (new value: 10.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/8'
-(microtype)             (new value: 8.0pt) on input line 23.
+(microtype)             (new value: 8.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/12'
-(microtype)             (new value: 12.0pt) on input line 23.
+(microtype)             (new value: 12.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/10'
-(microtype)             (new value: 10.0pt) on input line 23.
+(microtype)             (new value: 10.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/8'
-(microtype)             (new value: 8.0pt) on input line 23.
+(microtype)             (new value: 8.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/12'
-(microtype)             (new value: 12.0pt) on input line 23.
+(microtype)             (new value: 12.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/10'
-(microtype)             (new value: 10.0pt) on input line 23.
+(microtype)             (new value: 10.0pt) on input line 35.
 Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/8'
-(microtype)             (new value: 8.0pt) on input line 23.
+(microtype)             (new value: 8.0pt) on input line 35.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
-(Font)              scaled to size 10.0pt on input line 23.
+(Font)              scaled to size 10.0pt on input line 35.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
-(Font)              scaled to size 8.0pt on input line 23.
+(Font)              scaled to size 8.0pt on input line 35.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
-(Font)              scaled to size 12.0pt on input line 23.
+(Font)              scaled to size 12.0pt on input line 35.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
-(Font)              scaled to size 10.0pt on input line 23.
+(Font)              scaled to size 10.0pt on input line 35.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
-(Font)              scaled to size 8.0pt on input line 23.
-LaTeX Font Info:    Trying to load font information for U+zeur on input line 23
+(Font)              scaled to size 8.0pt on input line 35.
+LaTeX Font Info:    Trying to load font information for U+zeur on input line 35
 .
 
 (/usr/share/texmf-dist/tex/latex/eulervm/uzeur.fd
@@ -1056,249 +1375,660 @@ File: mt-eur.cfg 2006/07/31 v1.1 microtype config. file: AMS Euler Roman (RS)
 
 {/home/emmwhy/.texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/share
 /texmf-dist/fonts/enc/dvips/sourceserifpro/a_rlbtkr.enc}]
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
+(Font)              scaled to size 14.4pt on input line 37.
 LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
-(Font)              scaled to size 12.0pt on input line 25.
-LaTeX Font Info:    Trying to load font information for TS1+SourceSerifPro-LF o
-n input line 36.
+(Font)              scaled to size 14.4pt on input line 37.
+ (./main.toc
+Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/10
+.95'
+(microtype)             (new value: 10.95pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/9'
 
-(/usr/share/texmf-dist/tex/latex/sourceserifpro/TS1SourceSerifPro-LF.fd
+(microtype)             (new value: 9.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/7'
+
+(microtype)             (new value: 7.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/10.9
+5'
+(microtype)             (new value: 10.95pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/9'
+(microtype)             (new value: 9.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/7'
+(microtype)             (new value: 7.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/10.9
+5'
+(microtype)             (new value: 10.95pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/9'
+(microtype)             (new value: 9.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/7'
+(microtype)             (new value: 7.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/10.9
+5'
+(microtype)             (new value: 10.95pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/9'
+(microtype)             (new value: 9.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/7'
+(microtype)             (new value: 7.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/10.9
+5'
+(microtype)             (new value: 10.95pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/9'
+(microtype)             (new value: 9.0pt) on input line 1.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/7'
+(microtype)             (new value: 7.0pt) on input line 1.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
+(Font)              scaled to size 9.0pt on input line 1.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
+(Font)              scaled to size 7.0pt on input line 1.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
+(Font)              scaled to size 10.95pt on input line 1.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
+(Font)              scaled to size 9.0pt on input line 1.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
+(Font)              scaled to size 7.0pt on input line 1.
+)
+\tf@toc=\write5
+\openout5 = `main.toc'.
+
+
+
+[1]
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
+(Font)              scaled to size 12.0pt on input line 41.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
+(Font)              scaled to size 10.0pt on input line 69.
+Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/6'
+
+(microtype)             (new value: 6.0pt) on input line 69.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 69.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 69.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 69.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/6'
+(microtype)             (new value: 6.0pt) on input line 69.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
+(Font)              scaled to size 6.0pt on input line 69.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
+(Font)              scaled to size 6.0pt on input line 69.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
+(Font)              scaled to size 8.0pt on input line 69.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
+(Font)              scaled to size 6.0pt on input line 69.
+Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/5'
+
+(microtype)             (new value: 5.0pt) on input line 80.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/5'
+(microtype)             (new value: 5.0pt) on input line 80.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/5'
+(microtype)             (new value: 5.0pt) on input line 80.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/5'
+(microtype)             (new value: 5.0pt) on input line 80.
+Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/5'
+(microtype)             (new value: 5.0pt) on input line 80.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
+(Font)              scaled to size 5.0pt on input line 80.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
+(Font)              scaled to size 5.0pt on input line 80.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
+(Font)              scaled to size 5.0pt on input line 80.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
+(Font)              scaled to size 9.0pt on input line 85.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/b/n' will be
+(Font)              scaled to size 7.0pt on input line 85.
+LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/sc' will be
+(Font)              scaled to size 10.95pt on input line 123.
+Package microtype Info: Character `029' is missing
+(microtype)             in font `T1/SourceSerifPro-LF/m/sc/10.95'.
+(microtype)             Ignoring protrusion settings for this character.
+<figures/clip_classification_overview.png, id=181, 1027.84pt x 454.69875pt>
+File: figures/clip_classification_overview.png Graphic file (type png)
+<use figures/clip_classification_overview.png>
+Package pdftex.def Info: figures/clip_classification_overview.png  used on inpu
+t line 129.
+(pdftex.def)             Requested size: 469.75502pt x 207.81102pt.
+
+
+[2{/usr/share/texmf-dist/fonts/enc/dvips/sourceserifpro/a_5mjl2d.enc}{/usr/shar
+e/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolA.enc}{/usr/share/texmf-dist/font
+s/enc/dvips/mnsymbol/MnSymbolC.enc}{/usr/share/texmf-dist/fonts/enc/dvips/mnsym
+bol/MnSymbolD.enc}{/usr/share/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolE.enc
+}{/usr/share/texmf-dist/fonts/enc/dvips/sourceserifpro/a_lseshj.enc} <./figures
+/clip_classification_overview.png>]
+<figures/4shot_zs_cm.png, id=212, 722.7pt x 578.16pt>
+File: figures/4shot_zs_cm.png Graphic file (type png)
+<use figures/4shot_zs_cm.png>
+Package pdftex.def Info: figures/4shot_zs_cm.png  used on input line 275.
+(pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
+<figures/4shot_baseline_cm.png, id=213, 722.7pt x 578.16pt>
+File: figures/4shot_baseline_cm.png Graphic file (type png)
+<use figures/4shot_baseline_cm.png>
+Package pdftex.def Info: figures/4shot_baseline_cm.png  used on input line 280.
+
+(pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
+
+
+[3]
+<figures/4shot_zs_preds.png, id=221, 1331.2134pt x 1168.8468pt>
+File: figures/4shot_zs_preds.png Graphic file (type png)
+<use figures/4shot_zs_preds.png>
+Package pdftex.def Info: figures/4shot_zs_preds.png  used on input line 294.
+(pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
+<figures/4shot_baseline_preds.png, id=222, 1331.2134pt x 1168.8468pt>
+File: figures/4shot_baseline_preds.png Graphic file (type png)
+<use figures/4shot_baseline_preds.png>
+Package pdftex.def Info: figures/4shot_baseline_preds.png  used on input line 2
+99.
+(pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
+LaTeX Font Info:    Trying to load font information for TS1+SourceSerifPro-LF o
+n input line 310.
+ (/usr/share/texmf-dist/tex/latex/sourceserifpro/TS1SourceSerifPro-LF.fd
 File: TS1SourceSerifPro-LF.fd 2018/09/05 (autoinst) Font definitions for TS1/So
 urceSerifPro-LF.
 )
 LaTeX Font Info:    Font shape `TS1/SourceSerifPro-LF/m/n' will be
-(Font)              scaled to size 10.95pt on input line 36.
+(Font)              scaled to size 10.95pt on input line 310.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `SourceSerifPro-LF' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
+<figures/4shot_zs_tsne.png, id=223, 867.24pt x 722.7pt>
+File: figures/4shot_zs_tsne.png Graphic file (type png)
+<use figures/4shot_zs_tsne.png>
+Package pdftex.def Info: figures/4shot_zs_tsne.png  used on input line 318.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+<figures/4shot_baseline_tsne.png, id=224, 867.24pt x 722.7pt>
+File: figures/4shot_baseline_tsne.png Graphic file (type png)
+<use figures/4shot_baseline_tsne.png>
+Package pdftex.def Info: figures/4shot_baseline_tsne.png  used on input line 32
+3.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+
+
+[4{/usr/share/texmf-dist/fonts/enc/dvips/sourceserifpro/a_nqu667.enc} <./figure
+s/4shot_zs_cm.png> <./figures/4shot_baseline_cm.png> <./figures/4shot_zs_preds.
+png> <./figures/4shot_baseline_preds.png>]
+<figures/4shot_zs_pca.png, id=236, 867.24pt x 722.7pt>
+File: figures/4shot_zs_pca.png Graphic file (type png)
+<use figures/4shot_zs_pca.png>
+Package pdftex.def Info: figures/4shot_zs_pca.png  used on input line 333.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+<figures/4shot_baseline_pca.png, id=237, 867.24pt x 722.7pt>
+File: figures/4shot_baseline_pca.png Graphic file (type png)
+<use figures/4shot_baseline_pca.png>
+Package pdftex.def Info: figures/4shot_baseline_pca.png  used on input line 338
+.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+
+
+[5 <./figures/4shot_zs_tsne.png> <./figures/4shot_baseline_tsne.png> <./figures
+/4shot_zs_pca.png> <./figures/4shot_baseline_pca.png>]
+<figures/4shot_zs_attn_img0.png, id=248, 1020.4524pt x 367.8543pt>
+File: figures/4shot_zs_attn_img0.png Graphic file (type png)
+<use figures/4shot_zs_attn_img0.png>
+Package pdftex.def Info: figures/4shot_zs_attn_img0.png  used on input line 359
+.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/4shot_baseline_attn_img0.png, id=249, 1020.4524pt x 367.8543pt>
+File: figures/4shot_baseline_attn_img0.png Graphic file (type png)
+<use figures/4shot_baseline_attn_img0.png>
+Package pdftex.def Info: figures/4shot_baseline_attn_img0.png  used on input li
+ne 364.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
 LaTeX Font Info:    Trying to load font information for T1+SourceCodePro-TLF on
- input line 36.
+ input line 405.
 
 (/usr/share/texmf-dist/tex/latex/sourcecodepro/T1SourceCodePro-TLF.fd
 File: T1SourceCodePro-TLF.fd 2018/02/18 (autoinst) Font definitions for T1/Sour
 ceCodePro-TLF.
 )
 LaTeX Font Info:    Font shape `T1/SourceCodePro-TLF/m/n' will be
-(Font)              scaled to size 10.95pt on input line 36.
+(Font)              scaled to size 10.95pt on input line 405.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `SourceCodePro-TLF' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/10
-.95'
-(microtype)             (new value: 10.95pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/9'
-
-(microtype)             (new value: 9.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `OMX/MnSymbolE/m/n/7'
-
-(microtype)             (new value: 7.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/10.9
-5'
-(microtype)             (new value: 10.95pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/9'
-(microtype)             (new value: 9.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolA/m/n/7'
-(microtype)             (new value: 7.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/10.9
-5'
-(microtype)             (new value: 10.95pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/9'
-(microtype)             (new value: 9.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolB/m/n/7'
-(microtype)             (new value: 7.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/10.9
-5'
-(microtype)             (new value: 10.95pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/9'
-(microtype)             (new value: 9.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolC/m/n/7'
-(microtype)             (new value: 7.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/10.9
-5'
-(microtype)             (new value: 10.95pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/9'
-(microtype)             (new value: 9.0pt) on input line 36.
-Package microtype Info: Fixing zero \fontdimen 6 for font `U/MnSymbolD/m/n/7'
-(microtype)             (new value: 7.0pt) on input line 36.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
-(Font)              scaled to size 9.0pt on input line 36.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/n' will be
-(Font)              scaled to size 7.0pt on input line 36.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
-(Font)              scaled to size 10.95pt on input line 36.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
-(Font)              scaled to size 9.0pt on input line 36.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/it' will be
-(Font)              scaled to size 7.0pt on input line 36.
-<figures/acc_vs_shots.png, id=64, 578.16pt x 433.62pt>
-File: figures/acc_vs_shots.png Graphic file (type png)
-<use figures/acc_vs_shots.png>
-Package pdftex.def Info: figures/acc_vs_shots.png  used on input line 46.
-(pdftex.def)             Requested size: 375.80544pt x 281.84966pt.
-LaTeX Font Info:    Font shape `T1/SourceSerifPro-LF/m/sc' will be
-(Font)              scaled to size 10.95pt on input line 47.
-Package microtype Info: Character `029' is missing
-(microtype)             in font `T1/SourceSerifPro-LF/m/sc/10.95'.
-(microtype)             Ignoring protrusion settings for this character.
 
 
-[1{/usr/share/texmf-dist/fonts/enc/dvips/sourceserifpro/a_nqu667.enc}{/usr/shar
-e/texmf-dist/fonts/enc/dvips/sourcecodepro/a_lutrty.enc}{/usr/share/texmf-dist/
-fonts/enc/dvips/sourceserifpro/a_5mjl2d.enc}{/usr/share/texmf-dist/fonts/enc/dv
-ips/mnsymbol/MnSymbolD.enc}]
-<figures/training_curves_4shots.png, id=76, 722.7pt x 433.62pt>
+[6{/usr/share/texmf-dist/fonts/enc/dvips/sourcecodepro/a_lutrty.enc} <./figures
+/4shot_zs_attn_img0.png> <./figures/4shot_baseline_attn_img0.png>]
+<figures/zs_standalone_preds.png, id=263, 1331.2134pt x 1168.8468pt>
+File: figures/zs_standalone_preds.png Graphic file (type png)
+<use figures/zs_standalone_preds.png>
+Package pdftex.def Info: figures/zs_standalone_preds.png  used on input line 41
+2.
+(pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
+<figures/zs_standalone_cm.png, id=264, 722.7pt x 578.16pt>
+File: figures/zs_standalone_cm.png Graphic file (type png)
+<use figures/zs_standalone_cm.png>
+Package pdftex.def Info: figures/zs_standalone_cm.png  used on input line 417.
+(pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
+<figures/zs_attn_0.png, id=265, 1020.4524pt x 367.8543pt>
+File: figures/zs_attn_0.png Graphic file (type png)
+<use figures/zs_attn_0.png>
+Package pdftex.def Info: figures/zs_attn_0.png  used on input line 427.
+(pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
+<figures/zs_attn_1.png, id=266, 1020.4524pt x 367.8543pt>
+File: figures/zs_attn_1.png Graphic file (type png)
+<use figures/zs_attn_1.png>
+Package pdftex.def Info: figures/zs_attn_1.png  used on input line 432.
+(pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
+<figures/zs_attn_2.png, id=267, 1020.4524pt x 367.8543pt>
+File: figures/zs_attn_2.png Graphic file (type png)
+<use figures/zs_attn_2.png>
+Package pdftex.def Info: figures/zs_attn_2.png  used on input line 437.
+(pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
+<figures/zs_attn_3.png, id=268, 1020.4524pt x 367.8543pt>
+File: figures/zs_attn_3.png Graphic file (type png)
+<use figures/zs_attn_3.png>
+Package pdftex.def Info: figures/zs_attn_3.png  used on input line 442.
+(pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
+<figures/zs_attn_4.png, id=269, 1020.4524pt x 367.8543pt>
+File: figures/zs_attn_4.png Graphic file (type png)
+<use figures/zs_attn_4.png>
+Package pdftex.def Info: figures/zs_attn_4.png  used on input line 447.
+(pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
+<figures/zs_attn_5.png, id=270, 1020.4524pt x 367.8543pt>
+File: figures/zs_attn_5.png Graphic file (type png)
+<use figures/zs_attn_5.png>
+Package pdftex.def Info: figures/zs_attn_5.png  used on input line 452.
+(pdftex.def)             Requested size: 150.32504pt x 54.18787pt.
+File: figures/4shot_zs_pca.png Graphic file (type png)
+<use figures/4shot_zs_pca.png>
+Package pdftex.def Info: figures/4shot_zs_pca.png  used on input line 462.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+File: figures/4shot_zs_tsne.png Graphic file (type png)
+<use figures/4shot_zs_tsne.png>
+Package pdftex.def Info: figures/4shot_zs_tsne.png  used on input line 467.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+
+
+[7 <./figures/zs_standalone_preds.png> <./figures/zs_standalone_cm.png> <./figu
+res/zs_attn_0.png> <./figures/zs_attn_1.png> <./figures/zs_attn_2.png> <./figur
+es/zs_attn_3.png> <./figures/zs_attn_4.png> <./figures/zs_attn_5.png>]
+
+[8]
+<figures/acc_vs_shots_all.png, id=294, 1011.78pt x 578.16pt>
+File: figures/acc_vs_shots_all.png Graphic file (type png)
+<use figures/acc_vs_shots_all.png>
+Package pdftex.def Info: figures/acc_vs_shots_all.png  used on input line 527.
+(pdftex.def)             Requested size: 469.75502pt x 268.4358pt.
+
+
+[9]
+<figures/cross_seed_variance.png, id=299, 722.7pt x 433.62pt>
+File: figures/cross_seed_variance.png Graphic file (type png)
+<use figures/cross_seed_variance.png>
+Package pdftex.def Info: figures/cross_seed_variance.png  used on input line 53
+8.
+(pdftex.def)             Requested size: 375.80544pt x 225.48369pt.
+<figures/training_curves_4shots.png, id=301, 1011.78pt x 578.16pt>
 File: figures/training_curves_4shots.png Graphic file (type png)
 <use figures/training_curves_4shots.png>
 Package pdftex.def Info: figures/training_curves_4shots.png  used on input line
- 57.
+ 553.
+(pdftex.def)             Requested size: 469.75502pt x 268.4358pt.
+
+
+[10 <./figures/acc_vs_shots_all.png> <./figures/cross_seed_variance.png>]
+<figures/training_time_vs_shots.png, id=310, 722.7pt x 433.62pt>
+File: figures/training_time_vs_shots.png Graphic file (type png)
+<use figures/training_time_vs_shots.png>
+Package pdftex.def Info: figures/training_time_vs_shots.png  used on input line
+ 564.
 (pdftex.def)             Requested size: 375.80544pt x 225.48369pt.
 
 
-[2{/usr/share/texmf-dist/fonts/enc/dvips/sourceserifpro/a_lseshj.enc} <./figure
-s/acc_vs_shots.png>]
-<figures/4shot_zs_tsne.png, id=86, 867.24pt x 722.7pt>
+[11 <./figures/training_curves_4shots.png>]
+<figures/overfitting_gap.png, id=319, 794.97pt x 433.62pt>
+File: figures/overfitting_gap.png Graphic file (type png)
+<use figures/overfitting_gap.png>
+Package pdftex.def Info: figures/overfitting_gap.png  used on input line 576.
+(pdftex.def)             Requested size: 225.4804pt x 122.98749pt.
 File: figures/4shot_zs_tsne.png Graphic file (type png)
 <use figures/4shot_zs_tsne.png>
-Package pdftex.def Info: figures/4shot_zs_tsne.png  used on input line 74.
+Package pdftex.def Info: figures/4shot_zs_tsne.png  used on input line 593.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
-<figures/4shot_baseline_tsne.png, id=87, 867.24pt x 722.7pt>
 File: figures/4shot_baseline_tsne.png Graphic file (type png)
 <use figures/4shot_baseline_tsne.png>
-Package pdftex.def Info: figures/4shot_baseline_tsne.png  used on input line 79
-.
+Package pdftex.def Info: figures/4shot_baseline_tsne.png  used on input line 59
+8.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
 
 
-[3 <./figures/training_curves_4shots.png>]
-<figures/4shot_zs_pca.png, id=95, 867.24pt x 722.7pt>
+[12 <./figures/training_time_vs_shots.png> <./figures/overfitting_gap.png>]
 File: figures/4shot_zs_pca.png Graphic file (type png)
 <use figures/4shot_zs_pca.png>
-Package pdftex.def Info: figures/4shot_zs_pca.png  used on input line 89.
+Package pdftex.def Info: figures/4shot_zs_pca.png  used on input line 608.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
-<figures/4shot_baseline_pca.png, id=96, 867.24pt x 722.7pt>
 File: figures/4shot_baseline_pca.png Graphic file (type png)
 <use figures/4shot_baseline_pca.png>
-Package pdftex.def Info: figures/4shot_baseline_pca.png  used on input line 94.
-
+Package pdftex.def Info: figures/4shot_baseline_pca.png  used on input line 613
+.
 (pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
-<figures/4shot_zs_cm.png, id=98, 722.7pt x 578.16pt>
 File: figures/4shot_zs_cm.png Graphic file (type png)
 <use figures/4shot_zs_cm.png>
-Package pdftex.def Info: figures/4shot_zs_cm.png  used on input line 109.
+Package pdftex.def Info: figures/4shot_zs_cm.png  used on input line 627.
 (pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
-<figures/4shot_baseline_cm.png, id=99, 722.7pt x 578.16pt>
 File: figures/4shot_baseline_cm.png Graphic file (type png)
 <use figures/4shot_baseline_cm.png>
-Package pdftex.def Info: figures/4shot_baseline_cm.png  used on input line 114.
+Package pdftex.def Info: figures/4shot_baseline_cm.png  used on input line 632.
 
 (pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
 
 
-[4 <./figures/4shot_zs_tsne.png> <./figures/4shot_baseline_tsne.png> <./figures
-/4shot_zs_pca.png> <./figures/4shot_baseline_pca.png>]
-<figures/4shot_zs_preds.png, id=110, 1331.2134pt x 1168.8468pt>
+[13]
 File: figures/4shot_zs_preds.png Graphic file (type png)
 <use figures/4shot_zs_preds.png>
-Package pdftex.def Info: figures/4shot_zs_preds.png  used on input line 126.
+Package pdftex.def Info: figures/4shot_zs_preds.png  used on input line 642.
 (pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
-<figures/4shot_baseline_preds.png, id=111, 1331.2134pt x 1168.8468pt>
 File: figures/4shot_baseline_preds.png Graphic file (type png)
 <use figures/4shot_baseline_preds.png>
-Package pdftex.def Info: figures/4shot_baseline_preds.png  used on input line 1
-31.
+Package pdftex.def Info: figures/4shot_baseline_preds.png  used on input line 6
+47.
 (pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
-<figures/4shot_zs_attn_img0.png, id=113, 1020.4524pt x 367.8543pt>
-File: figures/4shot_zs_attn_img0.png Graphic file (type png)
-<use figures/4shot_zs_attn_img0.png>
-Package pdftex.def Info: figures/4shot_zs_attn_img0.png  used on input line 144
+<figures/attn_zs_0.png, id=341, 1020.4524pt x 367.8543pt>
+File: figures/attn_zs_0.png Graphic file (type png)
+<use figures/attn_zs_0.png>
+Package pdftex.def Info: figures/attn_zs_0.png  used on input line 661.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_4shot_0.png, id=342, 1020.4524pt x 367.8543pt>
+File: figures/attn_4shot_0.png Graphic file (type png)
+<use figures/attn_4shot_0.png>
+Package pdftex.def Info: figures/attn_4shot_0.png  used on input line 666.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_zs_1.png, id=343, 1020.4524pt x 367.8543pt>
+File: figures/attn_zs_1.png Graphic file (type png)
+<use figures/attn_zs_1.png>
+Package pdftex.def Info: figures/attn_zs_1.png  used on input line 671.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_4shot_1.png, id=344, 1020.4524pt x 367.8543pt>
+File: figures/attn_4shot_1.png Graphic file (type png)
+<use figures/attn_4shot_1.png>
+Package pdftex.def Info: figures/attn_4shot_1.png  used on input line 676.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_zs_2.png, id=345, 1020.4524pt x 367.8543pt>
+File: figures/attn_zs_2.png Graphic file (type png)
+<use figures/attn_zs_2.png>
+Package pdftex.def Info: figures/attn_zs_2.png  used on input line 681.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_4shot_2.png, id=346, 1020.4524pt x 367.8543pt>
+File: figures/attn_4shot_2.png Graphic file (type png)
+<use figures/attn_4shot_2.png>
+Package pdftex.def Info: figures/attn_4shot_2.png  used on input line 686.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_zs_3.png, id=347, 1020.4524pt x 367.8543pt>
+File: figures/attn_zs_3.png Graphic file (type png)
+<use figures/attn_zs_3.png>
+Package pdftex.def Info: figures/attn_zs_3.png  used on input line 691.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_4shot_3.png, id=348, 1020.4524pt x 367.8543pt>
+File: figures/attn_4shot_3.png Graphic file (type png)
+<use figures/attn_4shot_3.png>
+Package pdftex.def Info: figures/attn_4shot_3.png  used on input line 696.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_zs_4.png, id=349, 1020.4524pt x 367.8543pt>
+File: figures/attn_zs_4.png Graphic file (type png)
+<use figures/attn_zs_4.png>
+Package pdftex.def Info: figures/attn_zs_4.png  used on input line 701.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_4shot_4.png, id=350, 1020.4524pt x 367.8543pt>
+File: figures/attn_4shot_4.png Graphic file (type png)
+<use figures/attn_4shot_4.png>
+Package pdftex.def Info: figures/attn_4shot_4.png  used on input line 706.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_zs_5.png, id=351, 1020.4524pt x 367.8543pt>
+File: figures/attn_zs_5.png Graphic file (type png)
+<use figures/attn_zs_5.png>
+Package pdftex.def Info: figures/attn_zs_5.png  used on input line 711.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+<figures/attn_4shot_5.png, id=352, 1020.4524pt x 367.8543pt>
+File: figures/attn_4shot_5.png Graphic file (type png)
+<use figures/attn_4shot_5.png>
+Package pdftex.def Info: figures/attn_4shot_5.png  used on input line 716.
+(pdftex.def)             Requested size: 225.4804pt x 81.2818pt.
+
+
+[14]
+Overfull \vbox (14.83574pt too high) has occurred while \output is active []
+
+
+
+[15 <./figures/attn_zs_0.png> <./figures/attn_4shot_0.png> <./figures/attn_zs_1
+.png> <./figures/attn_4shot_1.png> <./figures/attn_zs_2.png> <./figures/attn_4s
+hot_2.png> <./figures/attn_zs_3.png> <./figures/attn_4shot_3.png> <./figures/at
+tn_zs_4.png> <./figures/attn_4shot_4.png> <./figures/attn_zs_5.png> <./figures/
+attn_4shot_5.png>]
+<figures/alpha_sweep_4shot.png, id=377, 650.43pt x 433.62pt>
+File: figures/alpha_sweep_4shot.png Graphic file (type png)
+<use figures/alpha_sweep_4shot.png>
+Package pdftex.def Info: figures/alpha_sweep_4shot.png  used on input line 733.
+
+(pdftex.def)             Requested size: 352.31625pt x 234.87912pt.
+<figures/alpha15_ablation_grid.png, id=378, 867.24pt x 505.89pt>
+File: figures/alpha15_ablation_grid.png Graphic file (type png)
+<use figures/alpha15_ablation_grid.png>
+Package pdftex.def Info: figures/alpha15_ablation_grid.png  used on input line 
+757.
+(pdftex.def)             Requested size: 399.29463pt x 232.92064pt.
+
+
+[16 <./figures/alpha_sweep_4shot.png>]
+<figures/rank_comparison_4shot.png, id=391, 578.16pt x 397.485pt>
+File: figures/rank_comparison_4shot.png Graphic file (type png)
+<use figures/rank_comparison_4shot.png>
+Package pdftex.def Info: figures/rank_comparison_4shot.png  used on input line 
+774.
+(pdftex.def)             Requested size: 328.82707pt x 226.0654pt.
+
+
+[17 <./figures/alpha15_ablation_grid.png>]
+<figures/comp_r_1_final_test_tsne.png, id=399, 867.24pt x 722.7pt>
+File: figures/comp_r_1_final_test_tsne.png Graphic file (type png)
+<use figures/comp_r_1_final_test_tsne.png>
+Package pdftex.def Info: figures/comp_r_1_final_test_tsne.png  used on input li
+ne 782.
+(pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
+<figures/comp_baseline_final_test_tsne.png, id=400, 867.24pt x 722.7pt>
+File: figures/comp_baseline_final_test_tsne.png Graphic file (type png)
+<use figures/comp_baseline_final_test_tsne.png>
+Package pdftex.def Info: figures/comp_baseline_final_test_tsne.png  used on inp
+ut line 787.
+(pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
+<figures/comp_r_3_final_test_tsne.png, id=401, 867.24pt x 722.7pt>
+File: figures/comp_r_3_final_test_tsne.png Graphic file (type png)
+<use figures/comp_r_3_final_test_tsne.png>
+Package pdftex.def Info: figures/comp_r_3_final_test_tsne.png  used on input li
+ne 792.
+(pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
+<figures/comp_r_1_final_test_confusion_matrix.png, id=402, 722.7pt x 578.16pt>
+File: figures/comp_r_1_final_test_confusion_matrix.png Graphic file (type png)
+<use figures/comp_r_1_final_test_confusion_matrix.png>
+Package pdftex.def Info: figures/comp_r_1_final_test_confusion_matrix.png  used
+ on input line 802.
+(pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
+<figures/comp_baseline_final_test_confusion_matrix.png, id=403, 722.7pt x 578.1
+6pt>
+File: figures/comp_baseline_final_test_confusion_matrix.png Graphic file (type 
+png)
+<use figures/comp_baseline_final_test_confusion_matrix.png>
+Package pdftex.def Info: figures/comp_baseline_final_test_confusion_matrix.png 
+ used on input line 807.
+(pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
+<figures/comp_r_3_final_test_confusion_matrix.png, id=404, 722.7pt x 578.16pt>
+File: figures/comp_r_3_final_test_confusion_matrix.png Graphic file (type png)
+<use figures/comp_r_3_final_test_confusion_matrix.png>
+Package pdftex.def Info: figures/comp_r_3_final_test_confusion_matrix.png  used
+ on input line 812.
+(pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
+<figures/modality_comparison_4shot.png, id=407, 578.16pt x 397.485pt>
+File: figures/modality_comparison_4shot.png Graphic file (type png)
+<use figures/modality_comparison_4shot.png>
+Package pdftex.def Info: figures/modality_comparison_4shot.png  used on input l
+ine 825.
+(pdftex.def)             Requested size: 305.33789pt x 209.92003pt.
+
+
+[18 <./figures/rank_comparison_4shot.png> <./figures/comp_r_1_final_test_tsne.p
+ng> <./figures/comp_baseline_final_test_tsne.png> <./figures/comp_r_3_final_tes
+t_tsne.png> <./figures/comp_r_1_final_test_confusion_matrix.png> <./figures/com
+p_baseline_final_test_confusion_matrix.png> <./figures/comp_r_3_final_test_conf
+usion_matrix.png>]
+<figures/comp_e_text_final_test_tsne.png, id=421, 867.24pt x 722.7pt>
+File: figures/comp_e_text_final_test_tsne.png Graphic file (type png)
+<use figures/comp_e_text_final_test_tsne.png>
+Package pdftex.def Info: figures/comp_e_text_final_test_tsne.png  used on input
+ line 833.
+(pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
+<figures/comp_e_vision_final_test_tsne.png, id=422, 867.24pt x 722.7pt>
+File: figures/comp_e_vision_final_test_tsne.png Graphic file (type png)
+<use figures/comp_e_vision_final_test_tsne.png>
+Package pdftex.def Info: figures/comp_e_vision_final_test_tsne.png  used on inp
+ut line 838.
+(pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
+File: figures/comp_baseline_final_test_tsne.png Graphic file (type png)
+<use figures/comp_baseline_final_test_tsne.png>
+Package pdftex.def Info: figures/comp_baseline_final_test_tsne.png  used on inp
+ut line 843.
+(pdftex.def)             Requested size: 150.32504pt x 125.26137pt.
+<figures/comp_e_text_final_test_confusion_matrix.png, id=423, 722.7pt x 578.16p
+t>
+File: figures/comp_e_text_final_test_confusion_matrix.png Graphic file (type pn
+g)
+<use figures/comp_e_text_final_test_confusion_matrix.png>
+Package pdftex.def Info: figures/comp_e_text_final_test_confusion_matrix.png  u
+sed on input line 853.
+(pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
+<figures/comp_e_vision_final_test_confusion_matrix.png, id=424, 722.7pt x 578.1
+6pt>
+File: figures/comp_e_vision_final_test_confusion_matrix.png Graphic file (type 
+png)
+<use figures/comp_e_vision_final_test_confusion_matrix.png>
+Package pdftex.def Info: figures/comp_e_vision_final_test_confusion_matrix.png 
+ used on input line 858.
+(pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
+File: figures/comp_baseline_final_test_confusion_matrix.png Graphic file (type 
+png)
+<use figures/comp_baseline_final_test_confusion_matrix.png>
+Package pdftex.def Info: figures/comp_baseline_final_test_confusion_matrix.png 
+ used on input line 863.
+(pdftex.def)             Requested size: 150.32504pt x 120.26149pt.
+
+
+[19 <./figures/modality_comparison_4shot.png> <./figures/comp_e_text_final_test
+_tsne.png> <./figures/comp_e_vision_final_test_tsne.png>]
+<figures/shot_progression.png, id=436, 722.7pt x 397.485pt>
+File: figures/shot_progression.png Graphic file (type png)
+<use figures/shot_progression.png>
+Package pdftex.def Info: figures/shot_progression.png  used on input line 878.
+(pdftex.def)             Requested size: 399.29463pt x 219.6121pt.
+<figures/32shot_baseline_tsne.png, id=439, 867.24pt x 722.7pt>
+File: figures/32shot_baseline_tsne.png Graphic file (type png)
+<use figures/32shot_baseline_tsne.png>
+Package pdftex.def Info: figures/32shot_baseline_tsne.png  used on input line 8
+90.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+<figures/32shot_baseline_cm.png, id=440, 722.7pt x 578.16pt>
+File: figures/32shot_baseline_cm.png Graphic file (type png)
+<use figures/32shot_baseline_cm.png>
+Package pdftex.def Info: figures/32shot_baseline_cm.png  used on input line 895
 .
-(pdftex.def)             Requested size: 211.38832pt x 76.20204pt.
-<figures/4shot_baseline_attn_img0.png, id=114, 1020.4524pt x 367.8543pt>
-File: figures/4shot_baseline_attn_img0.png Graphic file (type png)
-<use figures/4shot_baseline_attn_img0.png>
-Package pdftex.def Info: figures/4shot_baseline_attn_img0.png  used on input li
-ne 149.
-(pdftex.def)             Requested size: 211.38832pt x 76.20204pt.
-<figures/4shot_zs_attn_img10.png, id=115, 1020.4524pt x 367.8543pt>
-File: figures/4shot_zs_attn_img10.png Graphic file (type png)
-<use figures/4shot_zs_attn_img10.png>
-Package pdftex.def Info: figures/4shot_zs_attn_img10.png  used on input line 15
-6.
-(pdftex.def)             Requested size: 211.38832pt x 76.20204pt.
-<figures/4shot_baseline_attn_img10.png, id=116, 1020.4524pt x 367.8543pt>
-File: figures/4shot_baseline_attn_img10.png Graphic file (type png)
-<use figures/4shot_baseline_attn_img10.png>
-Package pdftex.def Info: figures/4shot_baseline_attn_img10.png  used on input l
-ine 161.
-(pdftex.def)             Requested size: 211.38832pt x 76.20204pt.
-
-
-[5 <./figures/4shot_zs_cm.png> <./figures/4shot_baseline_cm.png> <./figures/4sh
-ot_zs_preds.png> <./figures/4shot_baseline_preds.png>]
-<figures/acc_vs_shots_2.png, id=129, 578.16pt x 433.62pt>
-File: figures/acc_vs_shots_2.png Graphic file (type png)
-<use figures/acc_vs_shots_2.png>
-Package pdftex.def Info: figures/acc_vs_shots_2.png  used on input line 181.
-(pdftex.def)             Requested size: 375.80544pt x 281.84966pt.
-
-
-[6 <./figures/4shot_zs_attn_img0.png> <./figures/4shot_baseline_attn_img0.png> 
-<./figures/4shot_zs_attn_img10.png> <./figures/4shot_baseline_attn_img10.png>]
-<figures/training_curves_4shots_2.png, id=141, 722.7pt x 433.62pt>
-File: figures/training_curves_4shots_2.png Graphic file (type png)
-<use figures/training_curves_4shots_2.png>
-Package pdftex.def Info: figures/training_curves_4shots_2.png  used on input li
-ne 188.
-(pdftex.def)             Requested size: 375.80544pt x 225.48369pt.
-
-
-[7 <./figures/acc_vs_shots_2.png> <./figures/training_curves_4shots_2.png>]
-<figures/4shot_drop0.4_preds.png, id=150, 1331.2134pt x 1168.8468pt>
-File: figures/4shot_drop0.4_preds.png Graphic file (type png)
-<use figures/4shot_drop0.4_preds.png>
-Package pdftex.def Info: figures/4shot_drop0.4_preds.png  used on input line 20
-5.
-(pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
-<figures/4shot_drop0.4_cm.png, id=151, 722.7pt x 578.16pt>
-File: figures/4shot_drop0.4_cm.png Graphic file (type png)
-<use figures/4shot_drop0.4_cm.png>
-Package pdftex.def Info: figures/4shot_drop0.4_cm.png  used on input line 211.
 (pdftex.def)             Requested size: 225.4804pt x 180.38342pt.
 
 
-[8 <./figures/4shot_drop0.4_preds.png> <./figures/4shot_drop0.4_cm.png>]
+[20 <./figures/comp_e_text_final_test_confusion_matrix.png> <./figures/comp_e_v
+ision_final_test_confusion_matrix.png> <./figures/shot_progression.png>]
+<figures/32shot_baseline_pca.png, id=451, 867.24pt x 722.7pt>
+File: figures/32shot_baseline_pca.png Graphic file (type png)
+<use figures/32shot_baseline_pca.png>
+Package pdftex.def Info: figures/32shot_baseline_pca.png  used on input line 90
+5.
+(pdftex.def)             Requested size: 225.4804pt x 187.89757pt.
+<figures/32shot_baseline_preds.png, id=452, 1331.2134pt x 1168.8468pt>
+File: figures/32shot_baseline_preds.png Graphic file (type png)
+<use figures/32shot_baseline_preds.png>
+Package pdftex.def Info: figures/32shot_baseline_preds.png  used on input line 
+910.
+(pdftex.def)             Requested size: 225.4804pt x 197.97008pt.
+<figures/attn_prog_0shot.png, id=454, 1020.4524pt x 367.8543pt>
+File: figures/attn_prog_0shot.png Graphic file (type png)
+<use figures/attn_prog_0shot.png>
+Package pdftex.def Info: figures/attn_prog_0shot.png  used on input line 924.
+(pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
+<figures/attn_prog_1shot.png, id=455, 1020.4524pt x 367.8543pt>
+File: figures/attn_prog_1shot.png Graphic file (type png)
+<use figures/attn_prog_1shot.png>
+Package pdftex.def Info: figures/attn_prog_1shot.png  used on input line 929.
+(pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
+<figures/attn_prog_2shot.png, id=456, 1020.4524pt x 367.8543pt>
+File: figures/attn_prog_2shot.png Graphic file (type png)
+<use figures/attn_prog_2shot.png>
+Package pdftex.def Info: figures/attn_prog_2shot.png  used on input line 934.
+(pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
+<figures/attn_prog_4shot.png, id=457, 1020.4524pt x 367.8543pt>
+File: figures/attn_prog_4shot.png Graphic file (type png)
+<use figures/attn_prog_4shot.png>
+Package pdftex.def Info: figures/attn_prog_4shot.png  used on input line 939.
+(pdftex.def)             Requested size: 112.74377pt x 40.63809pt.
+<figures/attn_prog_8shot.png, id=458, 1020.4524pt x 367.8543pt>
+File: figures/attn_prog_8shot.png Graphic file (type png)
+<use figures/attn_prog_8shot.png>
+Package pdftex.def Info: figures/attn_prog_8shot.png  used on input line 944.
+(pdftex.def)             Requested size: 145.6229pt x 52.49274pt.
+<figures/attn_prog_16shot.png, id=459, 1020.4524pt x 367.8543pt>
+File: figures/attn_prog_16shot.png Graphic file (type png)
+<use figures/attn_prog_16shot.png>
+Package pdftex.def Info: figures/attn_prog_16shot.png  used on input line 949.
+(pdftex.def)             Requested size: 145.6229pt x 52.49274pt.
+<figures/attn_prog_32shot.png, id=460, 1020.4524pt x 367.8543pt>
+File: figures/attn_prog_32shot.png Graphic file (type png)
+<use figures/attn_prog_32shot.png>
+Package pdftex.def Info: figures/attn_prog_32shot.png  used on input line 954.
+(pdftex.def)             Requested size: 145.6229pt x 52.49274pt.
 
-Package caption Warning: Unused \captionsetup[table] on input line 205.
-See the caption package documentation for explanation.
 
+[21 <./figures/32shot_baseline_tsne.png> <./figures/32shot_baseline_cm.png> <./
+figures/32shot_baseline_pca.png> <./figures/32shot_baseline_preds.png>]
 
-
-[9] (./main.aux)
+[22 <./figures/attn_prog_0shot.png> <./figures/attn_prog_1shot.png> <./figures/
+attn_prog_2shot.png> <./figures/attn_prog_4shot.png> <./figures/attn_prog_8shot
+.png> <./figures/attn_prog_16shot.png> <./figures/attn_prog_32shot.png>]
+(./main.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: D8D2C6C5B2C287F708596BC0272BD3BB;2356.
+(rerunfilecheck)             Checksum: 9AC493E8C2F0A4D8ADE188AB4E3F93B8;4870.
  ) 
 Here is how much of TeX's memory you used:
- 21509 strings out of 475159
- 343623 string characters out of 5766697
- 754073 words of memory out of 5000000
- 44011 multiletter control sequences out of 15000+600000
- 938531 words of font info for 209 fonts, out of 8000000 for 9000
+ 34285 strings out of 475159
+ 636095 string characters out of 5766697
+ 1038291 words of memory out of 5000000
+ 56352 multiletter control sequences out of 15000+600000
+ 1260817 words of font info for 300 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 89i,11n,131p,1001b,626s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,12n,131p,1001b,980s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol10.pfb></usr/share
-/texmf-dist/fonts/type1/adobe/sourcecodepro/SourceCodePro-Regular.pfb></usr/sha
-re/texmf-dist/fonts/type1/adobe/sourceserifpro/SourceSerifPro-Bold.pfb></usr/sh
-are/texmf-dist/fonts/type1/adobe/sourceserifpro/SourceSerifPro-It.pfb></usr/sha
-re/texmf-dist/fonts/type1/adobe/sourceserifpro/SourceSerifPro-Regular.pfb>
-Output written on main.pdf (10 pages, 33521214 bytes).
+/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol6.pfb></usr/share/texmf-dist/fo
+nts/type1/public/mnsymbol/MnSymbol8.pfb></usr/share/texmf-dist/fonts/type1/publ
+ic/mnsymbol/MnSymbol9.pfb></usr/share/texmf-dist/fonts/type1/adobe/sourcecodepr
+o/SourceCodePro-Regular.pfb></usr/share/texmf-dist/fonts/type1/adobe/sourceseri
+fpro/SourceSerifPro-Bold.pfb></usr/share/texmf-dist/fonts/type1/adobe/sourceser
+ifpro/SourceSerifPro-It.pfb></usr/share/texmf-dist/fonts/type1/adobe/sourceseri
+fpro/SourceSerifPro-Regular.pfb></usr/share/texmf-dist/fonts/type1/public/amsfo
+nts/euler/eurm10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/euler/e
+urm7.pfb>
+Output written on main.pdf (23 pages, 65436994 bytes).
 PDF statistics:
- 206 PDF objects out of 1000 (max. 8388607)
- 144 compressed objects within 2 object streams
- 34 named destinations out of 1000 (max. 500000)
- 57027 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 574 PDF objects out of 1000 (max. 8388607)
+ 368 compressed objects within 4 object streams
+ 88 named destinations out of 1000 (max. 500000)
+ 99499 words of extra memory for PDF output out of 106986 (max. 10000000)
 
