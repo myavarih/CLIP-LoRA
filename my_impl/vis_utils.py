@@ -61,7 +61,7 @@ def plot_predictions(images, y_true, y_pred, classes, save_path, probabilities=N
         is_correct = (true_idx == pred_idx)
         color = '#1b7a2b' if is_correct else '#c0292b'
         
-        axes[i].imshow(img)
+        axes[i].imshow(img, aspect='equal')
         axes[i].axis('off')
         
         if probabilities is not None and len(probabilities) > i:
@@ -90,12 +90,12 @@ def plot_metrics(losses, accuracies, save_path):
 
     ax1.set_xlabel('Epochs')
     ax1.set_ylabel('Loss', color='C0')
-    ax1.plot(epochs, losses, color='C0', label='Train Loss', marker='o', markersize=8, alpha=0.8)
+    ax1.plot(epochs, losses, color='C0', label='Train Loss', linewidth=2.5, alpha=0.9)
     ax1.tick_params(axis='y', labelcolor='C0')
 
     ax2 = ax1.twinx()
     ax2.set_ylabel('Accuracy (%)', color='C1')
-    ax2.plot(epochs, accuracies, color='C1', label='Train Accuracy', marker='s', markersize=8, alpha=0.8)
+    ax2.plot(epochs, accuracies, color='C1', label='Train Accuracy', linewidth=2.5, alpha=0.9)
     ax2.tick_params(axis='y', labelcolor='C1')
 
     # Adding legends for both axes
@@ -188,15 +188,15 @@ def visualize_attention(image, attention_map, save_path, split_name="", class_na
     
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     
-    axes[0].imshow(img)
-    axes[0].set_title('Original Image', fontsize=12)
+    axes[0].imshow(img, aspect='equal')
+    axes[0].set_title('Model Input (Full Image)', fontsize=12)
     axes[0].axis('off')
     
-    axes[1].imshow(attn, cmap='jet')
+    axes[1].imshow(attn, cmap='jet', aspect='equal')
     axes[1].set_title('EigenCAM Map', fontsize=12)
     axes[1].axis('off')
     
-    axes[2].imshow(cam)
+    axes[2].imshow(cam, aspect='equal')
     axes[2].set_title('EigenCAM Overlay', fontsize=12)
     axes[2].axis('off')
     

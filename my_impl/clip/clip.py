@@ -18,7 +18,7 @@ try:
 except ImportError:
     BICUBIC = Image.BICUBIC
 
-__all__ = ["available_models", "load", "tokenize"]
+__all__ = ["available_models", "load", "tokenize", "SquarePad", "AddGaussianNoise", "AddSaltAndPepperNoise"]
 _tokenizer = _CLIPTokenizerFast.from_pretrained("openai/clip-vit-base-patch32")
 
 _MODELS = {
@@ -68,14 +68,101 @@ def _convert_image_to_rgb(image):
     return image.convert("RGB")
 
 
-def _transform(n_px):
-    return Compose([
-        Resize(n_px, interpolation=BICUBIC),
-        CenterCrop(n_px),
-        _convert_image_to_rgb,
-        ToTensor(),
-        Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
-    ])
+class SquarePad(object):
+    """
+    Pads an image to a square shape (max(W, H) x max(W, H))
+    preserving original aspect ratio and eliminating any cropping.
+    """
+    def __init__(self, fill=0, padding_mode='constant'):
+        self.fill = fill
+        self.padding_mode = padding_mode
+
+    def __call__(self, image):
+        import torchvision.transforms.functional as F
+        if isinstance(image, torch.Tensor):
+            h, w = image.shape[-2:]
+        else:
+            w, h = image.size
+        max_wh = max(w, h)
+        hp = (max_wh - w) // 2
+        vp = (max_wh - h) // 2
+        padding = (hp, vp, max_wh - w - hp, max_wh - h - vp)
+        return F.pad(image, padding, fill=self.fill, padding_mode=self.padding_mode)
+
+
+class AddGaussianNoise(object):
+    """
+    Adds zero-mean Gaussian noise to a tensor in [0, 1] range,
+    clamped to maintain valid pixel values.
+    """
+    def __init__(self, mean=0.0, std=0.015, p=0.5):
+        self.mean = mean
+        self.std = std
+        self.p = p
+
+    def __call__(self, tensor):
+        if torch.is_tensor(tensor) and self.std > 0:
+            if torch.rand(1).item() < self.p:
+                noise = torch.randn_like(tensor) * self.std + self.mean
+                return torch.clamp(tensor + noise, 0.0, 1.0)
+        return tensor
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(mean={self.mean}, std={self.std}, p={self.p})"
+
+
+class AddSaltAndPepperNoise(object):
+    """
+    Adds Salt and Pepper (impulse) noise to a tensor in [0, 1] range.
+    Randomly sets a small fraction of pixels to 0 (pepper) or 1 (salt).
+    """
+    def __init__(self, amount=0.005, salt_ratio=0.5, p=0.5):
+        self.amount = amount          # Fraction of pixels to corrupt
+        self.salt_ratio = salt_ratio  # Ratio of salt vs pepper
+        self.p = p                    # Probability of applying to an image
+
+    def __call__(self, tensor):
+        if not torch.is_tensor(tensor) or self.amount <= 0 or torch.rand(1).item() >= self.p:
+            return tensor
+
+        tensor = tensor.clone()
+        c, h, w = tensor.shape[-3:]
+        rand_matrix = torch.rand(h, w, device=tensor.device)
+        salt_mask = rand_matrix < (self.amount * self.salt_ratio)
+        pepper_mask = (rand_matrix >= (self.amount * self.salt_ratio)) & (rand_matrix < self.amount)
+
+        tensor[..., :, salt_mask] = 1.0
+        tensor[..., :, pepper_mask] = 0.0
+        return tensor
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(amount={self.amount}, salt_ratio={self.salt_ratio}, p={self.p})"
+
+
+def _transform(n_px, mode='pad'):
+    if mode == 'crop':
+        return Compose([
+            Resize(n_px, interpolation=BICUBIC),
+            CenterCrop(n_px),
+            _convert_image_to_rgb,
+            ToTensor(),
+            Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
+        ])
+    elif mode == 'direct':
+        return Compose([
+            _convert_image_to_rgb,
+            Resize((n_px, n_px), interpolation=BICUBIC),
+            ToTensor(),
+            Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
+        ])
+    else:  # 'pad' (Option 2 - default: letterbox padding to square, zero cropping)
+        return Compose([
+            _convert_image_to_rgb,
+            SquarePad(),
+            Resize((n_px, n_px), interpolation=BICUBIC),
+            ToTensor(),
+            Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
+        ])
 
 
 def available_models() -> List[str]:
@@ -83,7 +170,7 @@ def available_models() -> List[str]:
     return list(_MODELS.keys())
 
 
-def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_available() else "cpu", jit: bool = False, download_root: str = None):
+def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_available() else "cpu", jit: bool = False, download_root: str = None, resize_mode: str = 'pad'):
     """Load a CLIP model
 
     Parameters
@@ -99,6 +186,9 @@ def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_a
 
     download_root: str
         path to download the model files; by default, it uses "~/.cache/clip"
+
+    resize_mode: str
+        Image resize mode: 'pad' (Option 2: letterbox to square, zero cropping), 'crop' (legacy center crop), or 'direct' (stretch/squash)
 
     Returns
     -------
@@ -130,7 +220,7 @@ def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_a
         model = build_model(state_dict or model.state_dict()).to(device)
         if str(device) == "cpu":
             model.float()
-        return model, _transform(model.visual.input_resolution)
+        return model, _transform(model.visual.input_resolution, mode=resize_mode)
 
     # patch the device names
     device_holder = torch.jit.trace(lambda: torch.ones([]).to(torch.device(device)), example_inputs=[])
@@ -182,7 +272,7 @@ def load(name: str, device: Union[str, torch.device] = "cuda" if torch.cuda.is_a
 
         model.float()
 
-    return model, _transform(model.input_resolution.item())
+    return model, _transform(model.input_resolution.item(), mode=resize_mode)
 
 
 def tokenize(texts: Union[str, List[str]], context_length: int = 77, truncate: bool = False) -> torch.LongTensor:

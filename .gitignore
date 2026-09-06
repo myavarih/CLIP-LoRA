@@ -16,7 +16,9 @@ docs/figures/
 *.jpg
 *.jpeg
 *.gif
+experiments_output/
 *.aux
 *.log
 *.out
 *.toc
+docs/main2.pdf

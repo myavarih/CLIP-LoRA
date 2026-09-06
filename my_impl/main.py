@@ -4,9 +4,12 @@ import clip
 from datasets import build_dataset
 from datasets.utils import build_data_loader
 
-from utils import *
-from run_utils import *
+import os
+import shutil
+from utils import Logger
+from run_utils import get_arguments, set_random_seed
 from lora import run_lora
+from train_coop import run_coop_lora
 
 
 def main():
@@ -15,8 +18,6 @@ def main():
     args = get_arguments()
     
     if args.clear_vis:
-        import os
-        import shutil
         if os.path.exists('visualizations'):
             Logger.info("Clearing old visualizations directory...")
             shutil.rmtree('visualizations')
@@ -24,7 +25,7 @@ def main():
     set_random_seed(args.seed)
     
     # CLIP
-    clip_model, preprocess = clip.load(args.backbone)
+    clip_model, preprocess = clip.load(args.backbone, resize_mode=args.resize_mode)
     clip_model = clip_model.float()
     clip_model.eval()
     logit_scale = 100
@@ -43,19 +44,63 @@ def main():
         
     train_loader = None
     if not args.eval_only:
-        train_tranform = transforms.Compose([
-            transforms.RandomResizedCrop(size=224, scale=(0.08, 1), interpolation=transforms.InterpolationMode.BICUBIC),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
-        ])
+        if args.resize_mode == 'crop':
+            train_tranform = transforms.Compose([
+                transforms.RandomResizedCrop(size=224, scale=(0.08, 1), interpolation=transforms.InterpolationMode.BICUBIC),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
+            ])
+        else:
+            aug_list = [transforms.Lambda(lambda img: img.convert('RGB'))]
+            if args.resize_mode == 'pad':
+                aug_list.append(clip.SquarePad())
+                aug_list.append(transforms.Resize((224, 224), interpolation=transforms.InterpolationMode.BICUBIC))
+            elif args.resize_mode == 'direct':
+                aug_list.append(transforms.Resize((224, 224), interpolation=transforms.InterpolationMode.BICUBIC))
+
+            # Horizontal flip
+            aug_list.append(transforms.RandomHorizontalFlip(p=0.5))
+
+            # Vertical flip (natural for agricultural/unoriented objects, auto-skipped for cars)
+            if getattr(args, 'vflip', True) and args.dataset not in ['stanford_cars', 'cars']:
+                aug_list.append(transforms.RandomVerticalFlip(p=0.5))
+
+            # Slight translation movement (~5px, no cropping)
+            shift_px = getattr(args, 'shift_px', 5)
+            if shift_px > 0:
+                max_trans = shift_px / 224.0
+                aug_list.append(transforms.RandomAffine(
+                    degrees=0,
+                    translate=(max_trans, max_trans),
+                    interpolation=transforms.InterpolationMode.BICUBIC,
+                    fill=0
+                ))
+
+            aug_list.append(transforms.ToTensor())
+
+            # Subtle Gaussian noise
+            noise_std = getattr(args, 'noise_std', 0.015)
+            if noise_std > 0:
+                aug_list.append(clip.AddGaussianNoise(std=noise_std, p=0.5))
+
+            # Salt and Pepper impulse noise
+            sp_amount = getattr(args, 'sp_noise_amount', 0.005)
+            if sp_amount > 0:
+                aug_list.append(clip.AddSaltAndPepperNoise(amount=sp_amount, p=0.5))
+
+            aug_list.append(transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711)))
+            train_tranform = transforms.Compose(aug_list)
         
         if args.dataset == 'imagenet':
             train_loader = torch.utils.data.DataLoader(dataset.train_x, batch_size=args.batch_size, num_workers=8, shuffle=True, pin_memory=True)
         else:
             train_loader = build_data_loader(data_source=dataset.train_x, batch_size=args.batch_size, tfm=train_tranform, is_train=True, shuffle=True, num_workers=8)
 
-    run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader)
+    if args.method in ['coop_lora', 'coop_only', 'rt_lora', 'csc_lora', 'coop_csc', 'res_cls_lora', 'plain_lora_res_cls']:
+        run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader)
+    else:
+        run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader)
 
 if __name__ == '__main__':
     main()

@@ -80,25 +80,107 @@ CLIP-LoRA/
 
 ## 🚀 Running Experiments
 
-### 1. Automated Multi-Shot Training Pipeline
-Run the full multi-shot training pipeline across 1, 2, 4, 8, 16, and 32 shots:
+### Benchmark Suite (4 Key Paradigms & 4 Datasets)
 
+All runs leverage semantic English class name mappings to provide rich textual priors to CLIP's text encoder:
+
+| Dataset Identifier | Domain / Crop | Classes | Task Nature & Class Mapping |
+|---|---|:---:|---|
+| **`walnut`** | Walnut | **6** | Color & Maturity: `dark meaty`, `high-quality brown`, `premium brown`, `standard white`, `premium white`, `luxury extra light` |
+| **`piarom_shape`** | Piarom Date | **5** | Morphological & Defect: `grade 1 premium`, `grade 2 standard`, `grade 3`, `small stunted`, `crushed bruised` |
+| **`pistachio_afat`** | Pistachio | **4** | Pest & Biological Defect: `healthy sound`, `empty puffy shell`, `insect pest damaged`, `black stained defect` |
+| **`stanford_cars`** | Cars | **196** | Fine-Grained Model Recognition: 196 makes/models (e.g., `2012 Tesla Model S`, `1997 BMW 3 Series`) |
+
+---
+
+### Paradigm Architectural Breakdown
+
+| Run | Method / Paradigm | Context Parameterization | Class Token Adaptation | Encoders with LoRA | Ordinal Cost Loss |
+|:---:|---|---|---|:---:|:---:|
+| **1** | **Infix CoOp-LoRA** | $M=4$ (`photo of a [CLASS] <item>`) | Residual ($\Delta w_c$, `1e-3`) | Vision only | ✅ $\lambda=1.0$ |
+| **2** | **Plain LoRA (Baseline)** | Fixed Natural Template | ❌ None (Fixed) | Vision + Text | ❌ None |
+| **3** | **CoOp-CSC Dual LoRA** | $K \times M$ Class-Specific Context | ❌ None (Base token) | Vision + Text | ❌ None |
+| **4** | **Plain LoRA + ResCls** | Fixed Natural Template | Residual ($\Delta w_c$, `1e-3`) | Vision + Text | ❌ None |
+
+#### Execute with Unified Multi-Seed Runner (Seeds 11, 12, 13):
+```bash
+# Run all 4 paradigms on all benchmark datasets across seeds 11, 12, 13:
+./run_experiments_suite.sh all all "11 12 13" 250
+
+# Run all 4 paradigms on a single dataset:
+./run_experiments_suite.sh all walnut "11 12 13" 250
+./run_experiments_suite.sh all piarom_shape "11 12 13" 250
+./run_experiments_suite.sh all pistachio_afat "11 12 13" 250
+./run_experiments_suite.sh all stanford_cars "11 12 13" 250
+
+# Or execute an individual paradigm on a specific dataset:
+./run_experiments_suite.sh 1 piarom_shape "11 12 13" 250   # Infix CoOp-LoRA + ResCls + Ordinal
+./run_experiments_suite.sh 2 stanford_cars "11 12 13" 250  # Plain LoRA Baseline
+./run_experiments_suite.sh 3 pistachio_afat "11 12 13" 250 # CoOp-CSC Dual LoRA
+./run_experiments_suite.sh 4 walnut "11 12 13" 250         # Plain LoRA + Residual Class Tokens
+```
+
+---
+
+### Individual Command Execution
+
+#### 1. Infix CoOp-LoRA ($M=4$) + Residual Class Tokens + Ordinal Loss
 ```bash
 python my_impl/run_experiments.py \
     --dataset walnut \
     --shots 1 2 4 8 16 32 \
-    --r 2 \
-    --alpha 1.0 \
-    --params q k v \
-    --encoder both \
-    --batch_size 32 \
-    --lr 2e-4 \
-    --n_iters 500
+    --method coop_lora \
+    --ctx_init "photo_of_a_{}_walnut" \
+    --learn_class_tokens \
+    --use_ordinal \
+    --lambda_ord 1.0 \
+    --encoder vision \
+    --n_iters 250 \
+    --output_dir experiments_output/run1_infix_coop_ordinal_rescls \
+    --checkpoints_dir checkpoints/run1_infix_coop_ordinal_rescls
 ```
 
-### 2. Single Run Entrypoint
-To train a single configuration manually:
+#### 2. Plain LoRA Baseline
+```bash
+python my_impl/run_experiments.py \
+    --dataset walnut \
+    --shots 1 2 4 8 16 32 \
+    --method lora \
+    --encoder both \
+    --n_iters 250 \
+    --output_dir experiments_output/run2_plain_lora \
+    --checkpoints_dir checkpoints/run2_plain_lora
+```
 
+#### 3. CoOp-CSC Dual LoRA
+```bash
+python my_impl/run_experiments.py \
+    --dataset walnut \
+    --shots 1 2 4 8 16 32 \
+    --method csc_lora \
+    --csc \
+    --encoder both \
+    --n_iters 250 \
+    --output_dir experiments_output/run3_coop_csc_dual_lora \
+    --checkpoints_dir checkpoints/run3_coop_csc_dual_lora
+```
+
+#### 4. Plain LoRA with Residual Class Token Learning
+```bash
+python my_impl/run_experiments.py \
+    --dataset walnut \
+    --method res_cls_lora \
+    --encoder both \
+    --learn_class_tokens \
+    --n_iters 250 \
+    --output_dir experiments_output/run4_plain_lora_rescls \
+    --checkpoints_dir checkpoints/run4_plain_lora_rescls
+```
+
+---
+
+### Single Configuration Manual Entrypoint
+To train a single configuration manually (e.g., 4-shot with custom $\alpha$):
 ```bash
 python my_impl/main.py \
     --dataset walnut \
@@ -107,7 +189,8 @@ python my_impl/main.py \
     --alpha 1.5 \
     --position all \
     --encoder both \
-    --params q k v
+    --params q k v \
+    --n_iters 250
 ```
 
 ---

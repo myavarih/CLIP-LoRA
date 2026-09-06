@@ -4,7 +4,6 @@ import os.path as osp
 import tarfile
 import zipfile
 from collections import defaultdict
-import gdown
 import json
 import torch
 from torch.utils.data import Dataset as TorchDataset
@@ -147,6 +146,10 @@ class DatasetBase:
     def num_classes(self):
         return self._num_classes
 
+    @property
+    def cost_matrix(self):
+        return getattr(self, '_cost_matrix', None)
+
     def get_num_classes(self, data_source):
         """Count number of classes.
 
@@ -190,6 +193,7 @@ class DatasetBase:
             os.makedirs(osp.dirname(dst))
 
         if from_gdrive:
+            import gdown
             gdown.download(url, dst, quiet=False)
         else:
             raise NotImplementedError
@@ -200,7 +204,7 @@ class DatasetBase:
             tar = tarfile.open(dst)
             tar.extractall(path=osp.dirname(dst))
             tar.close()
-        except:
+        except Exception:
             zip_ref = zipfile.ZipFile(dst, 'r')
             zip_ref.extractall(osp.dirname(dst))
             zip_ref.close()

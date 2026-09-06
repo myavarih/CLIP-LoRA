@@ -26,7 +26,7 @@ def get_arguments():
     parser.add_argument('--backbone', default='ViT-B/16', type=str)
     # Training arguments
     parser.add_argument('--lr', default=2e-4, type=float)
-    parser.add_argument('--n_iters', default=500, type=int)
+    parser.add_argument('--n_iters', '--num_iter', '--num_iters', default=250, type=int)
     parser.add_argument('--batch_size', default=32, type=int)
     # LoRA arguments
     parser.add_argument('--position', type=str, default='all', choices=['bottom', 'mid', 'up', 'half-up', 'half-bottom', 'all', 'top3'], help='where to put the LoRA modules')

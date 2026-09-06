@@ -5,7 +5,9 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
-from utils import *
+import clip
+from tqdm import tqdm
+from utils import cls_acc, clip_classifier, pre_load_features, Logger, save_run_info
 
 from loralib.utils import mark_only_lora_as_trainable, apply_lora, get_lora_parameters, lora_state_dict, save_lora, load_lora
 from loralib import layers as lora_layers
@@ -58,9 +60,9 @@ def generate_eigencam_maps(clip_model, images_tensor, max_samples=20):
             batch = samples[start_idx:start_idx+batch_size].to(device)
             if device == "cuda":
                 with torch.amp.autocast(device_type="cuda", dtype=torch.float16):
-                    batch_cam = cam(input_tensor=batch)
+                    batch_cam = cam(input_tensor=batch, targets=None)
             else:
-                batch_cam = cam(input_tensor=batch)
+                batch_cam = cam(input_tensor=batch, targets=None)
             cams.append(batch_cam)
         if device == "cuda":
             torch.cuda.empty_cache()
@@ -289,10 +291,6 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
             
             count_iters += 1
             
-            if count_iters % 100 == 0:
-                if args.save_path != None:
-                    save_lora(args, list_lora_layers, filename=f"{args.filename}_{count_iters}")
-            
             if count_iters == total_iters:
                 break
             
@@ -311,46 +309,12 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
             acc_val = evaluate_lora(args, clip_model, val_loader, dataset)[0]
             Logger.success("Val accuracy: {:.2f}%".format(acc_val))
         
-    
     train_time = time.time() - start_train_time
     Logger.info(f"Training completed in {train_time:.2f} seconds.")
     
-    if args.save_path != None and count_iters % 100 != 0:
-        save_lora(args, list_lora_layers, filename=f"{args.filename}_{count_iters}")
-        
-    saved_iters = [i for i in range(100, count_iters + 1, 100)]
-    if count_iters not in saved_iters:
-        saved_iters.append(count_iters)
-        
-    best_acc = -1
-    best_iter = -1
-    
-    Logger.info("Evaluating all saved checkpoints on the Test set...")
-    checkpoint_accuracies = {}
-    for it in saved_iters:
-        clip_model.train() # Unmerge previous weights
-        if args.save_path != None:
-            load_lora(args, list_lora_layers, filename=f"{args.filename}_{it}")
-        acc_test_iter = evaluate_lora(args, clip_model, test_loader, dataset)[0]
-        checkpoint_accuracies[it] = float(acc_test_iter)
-        Logger.info(f"Test accuracy at iter {it}: {acc_test_iter:.2f}%")
-        
-        if acc_test_iter >= best_acc:
-            best_acc = acc_test_iter
-            best_iter = it
-            
-    Logger.success(f"Best test accuracy: {best_acc:.2f}% at iter {best_iter}")
-    
-    os.makedirs('visualizations', exist_ok=True)
-    with open('visualizations/checkpoint_accuracies.json', 'w') as f:
-        json.dump(checkpoint_accuracies, f, indent=4)
-    
-    if args.save_path != None:
-        clip_model.train() # Unmerge previous weights before loading best
-        load_lora(args, list_lora_layers, filename=f"{args.filename}_{best_iter}")
+    # Save final model checkpoint
+    if args.save_path is not None:
         save_lora(args, list_lora_layers, filename=args.filename)
-        
-    acc_test = best_acc
 
     # Final Evaluation & Visualization
     Logger.step("Running final evaluation and generating plots...")

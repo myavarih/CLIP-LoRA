@@ -1,0 +1,305 @@
+\documentclass[letterpaper,11pt,leqno]{article}
+\usepackage{paper}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\bibliographystyle{paper}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usetikzlibrary{positioning, fit, arrows.meta, shapes.geometric, calc, backgrounds,
+                shadows, decorations.pathreplacing}
+\hypersetup{pdftitle={Report 4: Cross-Domain Generalization and the Cardinality Curse}}
+
+\newcommand{\bib}{paper.bib}
+
+% Custom colors
+\definecolor{bestgreen}{HTML}{C8E6C9}
+\definecolor{worstred}{HTML}{FFCDD2}
+\definecolor{midyellow}{HTML}{FFF9C4}
+\definecolor{sectionblue}{HTML}{E3F2FD}
+\definecolor{run1blue}{HTML}{4C72B0}
+\definecolor{run2orange}{HTML}{DD8452}
+\definecolor{run3green}{HTML}{55A868}
+\definecolor{run4red}{HTML}{C44E52}
+
+\begin{document}
+
+\title{\textbf{Cross-Domain Generalization and the Cardinality Curse:}\\[0.3em]
+\Large A Multi-Benchmark Empirical Investigation of Prompt Tuning, Plain LoRA, Class-Specific Context, and Residual Tokens Across Agricultural Grading and Fine-Grained Object Recognition}
+\author{Mohammad Yavari}
+\date{September 2026 \\[0.5em] \small Repository: \url{https://github.com/myavarih/CLIP-LoRA}}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Summary of Evaluated Runs}
+% ============================================================================
+
+\begin{table}[H]
+\centering
+\small
+\caption{Architectural and algorithmic specification of the four evaluated fine-tuning paradigms.}
+\label{tab:paradigms_summary}
+\begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.8cm}}
+\toprule
+\textbf{Run} & \textbf{Paradigm Name} & \textbf{Vision Adapter} & \textbf{Text Adapter} & \textbf{Prompt \& Class Formulation} & \textbf{Loss Objective} \\
+\midrule
+\textbf{Run 1} & Infix CoOp + Ordinal & LoRA ($r{=}2, \alpha{=}1.0$) & Frozen Backbone & Infix context ($M{=}4$) + Learnable class tokens $\Delta e_k$ & $\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ \\
+\addlinespace
+\textbf{Run 2} & Plain Dual LoRA & LoRA ($r{=}2, \alpha{=}1.0$) & LoRA ($r{=}2, \alpha{=}1.0$) & Static natural template, frozen BPE token embeddings & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\addlinespace
+\textbf{Run 3} & CoOp-CSC Dual LoRA & LoRA ($r{=}2, \alpha{=}1.0$) & LoRA ($r{=}2, \alpha{=}1.0$) & Class-Specific Context ($K \times M$ continuous prompt vectors) & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\addlinespace
+\textbf{Run 4} & Plain LoRA + ResCls & LoRA ($r{=}2, \alpha{=}1.0$) & LoRA ($r{=}2, \alpha{=}1.0$) & Static natural template + Learnable residual class offset $\delta_k$ & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3em}
+\raggedright\small \textit{Note: I forgot to set the flag for Run 3 to use ordinal loss despite the plan.}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Benchmark datasets and experimental evaluation suite matrix ($216$ initial runs on seeds $11, 12, 13$, plus $144$ runs on seeds $21, 22, 23$ with fixed data augmentation; $360$ evaluated runs total).}
+\label{tab:benchmark_suite}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Dataset} & \textbf{Classes ($K$)} & \textbf{Zero-Shot} & \textbf{Shots ($k$)} & \textbf{Seeds} \\
+\midrule
+\textbf{Walnut} (Initial Aug.) & 6 & 22.26\% & $\{1, 2, 4, 8, 16, 32\}$ & 11, 12, 13 \\
+\textbf{Walnut} (Fixed Aug.)\textsuperscript{*} & 6 & 22.26\% & $\{1, 2, 4, 8, 16, 32\}$ & 21, 22, 23 \\
+\textbf{Piarom} (Initial Aug.) & 5 & 24.91\% & $\{1, 2, 4, 8, 16, 32\}$ & 11, 12, 13 \\
+\textbf{Piarom} (Fixed Aug.)\textsuperscript{*} & 5 & 24.91\% & $\{1, 2, 4, 8, 16, 32\}$ & 21, 22, 23 \\
+\textbf{Cars} & 196 & 65.54\% & $\{1, 2, 4, 8, 16, 32\}$ & 11, 12, 13 \\
+\bottomrule
+\end{tabular*}
+\vspace{0.3em}
+\raggedright\small \textit{\textsuperscript{*}Note: Data augmentation was changed (fixed) in the 21, 22, 23 seed runs (letterbox square padding to eliminate object cropping, vertical flipping, subtle translation affine shift, and impulse/Gaussian noise).}
+\end{table}
+
+\newpage
+
+% ============================================================================
+\section{Multi-Dataset Benchmark Results}
+% ============================================================================
+
+\subsection{Cross-Dataset Performance Trajectory}
+
+Figure~\ref{fig:few_shot_curves} illustrates the test accuracy progression across shot counts ($k \in \{1, 2, 4, 8, 16, 32\}$) across benchmarks, including the newly evaluated Piarom Date Shape and Walnut Quality Grading suites with fixed non-cropping augmentations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures4/few_shot_curves_all_datasets.png}
+    \caption{Few-shot test accuracy trajectories across 1 to 32 shots on Walnut under initial and fixed data augmentations ($K=6$), Piarom Date Shape under initial and fixed data augmentations ($K=5$), and Stanford Cars ($K=196$). Shaded bands represent $\pm 1$ standard deviation. The dashed line marks the frozen Zero-Shot CLIP baseline.}
+    \label{fig:few_shot_curves}
+\end{figure}
+
+\subsection{The Numbers!}
+
+Tables~\ref{tab:walnut_results}, \ref{tab:walnut_fixed_results}, \ref{tab:piarom_results}, \ref{tab:piarom_fixed_results}, and \ref{tab:cars_results} record the exact numerical test accuracy (mean $\pm$ standard deviation across seeds) for each paradigm and shot level. The top-performing method at each shot is highlighted in green.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{\textbf{Walnut Quality Grading --- Initial Augmentation} ($K=6$ classes, Seeds 11, 12, 13). Zero-Shot CLIP Baseline: \textbf{22.26\%}.}
+\label{tab:walnut_results}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Shots} & \textbf{Run 1 (Infix CoOp+Ord)} & \textbf{Run 2 (Plain LoRA)} & \textbf{Run 3 (CoOp-CSC Dual)} & \textbf{Run 4 (Plain LoRA+ResCls)} \\
+\midrule
+ 1 shots & $29.37 \pm 0.35$ & \cellcolor{bestgreen}\textbf{39.12} $\pm$ 2.79 & $32.25 \pm 0.76$ & $30.61 \pm 2.20$ \\
+ 2 shots & $36.75 \pm 0.93$ & \cellcolor{bestgreen}\textbf{39.32} $\pm$ 1.54 & $38.93 \pm 2.03$ & $35.74 \pm 2.39$ \\
+ 4 shots & $45.10 \pm 1.11$ & \cellcolor{bestgreen}\textbf{45.96} $\pm$ 1.25 & $43.75 \pm 1.35$ & $43.59 \pm 1.83$ \\
+ 8 shots & $48.99 \pm 0.55$ & $48.99 \pm 0.84$ & $47.44 \pm 1.63$ & \cellcolor{bestgreen}\textbf{49.77} $\pm$ 1.75 \\
+16 shots & $55.17 \pm 0.68$ & \cellcolor{bestgreen}\textbf{57.65} $\pm$ 1.34 & $52.25 \pm 0.78$ & $55.44 \pm 0.94$ \\
+32 shots & \cellcolor{bestgreen}\textbf{62.24} $\pm$ 0.12 & $61.85 \pm 0.76$ & $59.32 \pm 1.43$ & $61.93 \pm 1.21$ \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{\textbf{Walnut Quality Grading --- Fixed Data Augmentation} ($K=6$ classes, Seeds 21, 22, 23). Zero-Shot CLIP Baseline: \textbf{22.26\%}.}
+\label{tab:walnut_fixed_results}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Shots} & \textbf{Run 1 (Infix CoOp+Ord)} & \textbf{Run 2 (Plain LoRA)} & \textbf{Run 3 (CoOp-CSC Dual)} & \textbf{Run 4 (Plain LoRA+ResCls)} \\
+\midrule
+ 1 shots & $35.28 \pm 0.41$ & \cellcolor{bestgreen}\textbf{38.42} $\pm$ 0.75 & $33.02 \pm 2.98$ & $34.62 \pm 1.11$ \\
+ 2 shots & $36.64 \pm 1.20$ & \cellcolor{bestgreen}\textbf{41.76} $\pm$ 0.70 & $35.70 \pm 1.71$ & $36.21 \pm 1.38$ \\
+ 4 shots & $43.05 \pm 0.49$ & \cellcolor{bestgreen}\textbf{44.25} $\pm$ 1.69 & $41.49 \pm 0.82$ & $42.39 \pm 1.06$ \\
+ 8 shots & \cellcolor{bestgreen}\textbf{50.08} $\pm$ 0.68 & $48.95 \pm 0.62$ & $47.90 \pm 1.40$ & $49.73 \pm 0.79$ \\
+16 shots & $55.21 \pm 0.47$ & \cellcolor{bestgreen}\textbf{57.54} $\pm$ 0.41 & $55.32 \pm 0.94$ & $54.78 \pm 1.12$ \\
+32 shots & $60.37 \pm 0.65$ & \cellcolor{bestgreen}\textbf{62.20} $\pm$ 1.50 & $60.49 \pm 1.23$ & $60.14 \pm 1.34$ \\
+\bottomrule
+\end{tabular*}
+\vspace{0.3em}
+\raggedright\small \textit{Note: The data augmentation pipeline was changed (fixed) in the 21, 22, 23 seed runs (letterbox square padding to eliminate object cropping, random vertical flips, translation shifts, and impulse/Gaussian noise).}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{\textbf{Piarom Date Shape Grading --- Initial Augmentation} ($K=5$ classes, Seeds 11, 12, 13). Zero-Shot CLIP Baseline: \textbf{24.91\%}.}
+\label{tab:piarom_results}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Shots} & \textbf{Run 1 (Infix CoOp+Ord)} & \textbf{Run 2 (Plain LoRA)} & \textbf{Run 3 (CoOp-CSC Dual)} & \textbf{Run 4 (Plain LoRA+ResCls)} \\
+\midrule
+ 1 shots & $32.59 \pm 2.05$ & $28.00 \pm 0.47$ & $31.97 \pm 5.72$ & \cellcolor{bestgreen}\textbf{33.40} $\pm$ 2.48 \\
+ 2 shots & $34.82 \pm 2.43$ & $36.25 \pm 1.03$ & \cellcolor{bestgreen}\textbf{39.71} $\pm$ 1.49 & $35.32 \pm 1.96$ \\
+ 4 shots & $40.77 \pm 3.02$ & $44.55 \pm 2.05$ & \cellcolor{bestgreen}\textbf{44.61} $\pm$ 1.83 & $42.13 \pm 3.86$ \\
+ 8 shots & $52.23 \pm 2.64$ & \cellcolor{bestgreen}\textbf{52.91} $\pm$ 1.99 & $48.27 \pm 3.02$ & $52.85 \pm 1.72$ \\
+16 shots & $60.72 \pm 0.60$ & $62.08 \pm 1.70$ & $61.59 \pm 0.84$ & \cellcolor{bestgreen}\textbf{62.45} $\pm$ 2.74 \\
+32 shots & $67.91 \pm 2.14$ & \cellcolor{bestgreen}\textbf{68.46} $\pm$ 0.39 & $67.91 \pm 2.18$ & $67.91 \pm 1.14$ \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{\textbf{Piarom Date Shape Grading --- Fixed Data Augmentation} ($K=5$ classes, Seeds 21, 22, 23). Zero-Shot CLIP Baseline: \textbf{24.91\%}.}
+\label{tab:piarom_fixed_results}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Shots} & \textbf{Run 1 (Infix CoOp+Ord)} & \textbf{Run 2 (Plain LoRA)} & \textbf{Run 3 (CoOp-CSC Dual)} & \textbf{Run 4 (Plain LoRA+ResCls)} \\
+\midrule
+ 1 shots & $30.42 \pm 2.54$ & $29.31 \pm 0.47$ & $29.43 \pm 4.30$ & \cellcolor{bestgreen}\textbf{34.88} $\pm$ 2.00 \\
+ 2 shots & $41.45 \pm 0.85$ & $40.77 \pm 2.45$ & $39.90 \pm 3.02$ & \cellcolor{bestgreen}\textbf{41.88} $\pm$ 0.60 \\
+ 4 shots & $48.08 \pm 0.75$ & \cellcolor{bestgreen}\textbf{51.49} $\pm$ 1.16 & $48.27 \pm 0.65$ & $50.43 \pm 2.14$ \\
+ 8 shots & $58.30 \pm 2.09$ & \cellcolor{bestgreen}\textbf{60.22} $\pm$ 0.67 & $55.51 \pm 1.06$ & $57.37 \pm 1.37$ \\
+16 shots & $67.60 \pm 0.84$ & \cellcolor{bestgreen}\textbf{68.15} $\pm$ 1.41 & $64.87 \pm 3.27$ & $66.67 \pm 1.14$ \\
+32 shots & $69.83 \pm 0.60$ & \cellcolor{bestgreen}\textbf{70.32} $\pm$ 0.75 & $69.52 \pm 1.70$ & $69.27 \pm 0.39$ \\
+\bottomrule
+\end{tabular*}
+\vspace{0.3em}
+\raggedright\small \textit{Note: The data augmentation pipeline was changed (fixed) in the 21, 22, 23 seed runs (letterbox square padding to eliminate object cropping, random vertical flips, translation shifts, and impulse/Gaussian noise).}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{\textbf{Stanford Cars Classification} ($K=196$ classes). Zero-Shot CLIP Baseline: \textbf{65.54\%}.}
+\label{tab:cars_results}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Shots} & \textbf{Run 1 (Infix CoOp+Ord)} & \textbf{Run 2 (Plain LoRA)} & \textbf{Run 3 (CoOp-CSC Dual)} & \textbf{Run 4 (Plain LoRA+ResCls)} \\
+\midrule
+ 1 shots & $45.85 \pm 0.63$ & \cellcolor{bestgreen}\textbf{69.30} $\pm$ 0.65 & $59.31 \pm 0.93$ & $45.74 \pm 1.46$ \\
+ 2 shots & $56.93 \pm 0.36$ & \cellcolor{bestgreen}\textbf{72.39} $\pm$ 0.28 & $64.85 \pm 1.03$ & $58.91 \pm 0.83$ \\
+ 4 shots & $68.95 \pm 0.67$ & \cellcolor{bestgreen}\textbf{76.34} $\pm$ 0.55 & $72.35 \pm 0.81$ & $70.05 \pm 1.34$ \\
+ 8 shots & $76.85 \pm 0.51$ & \cellcolor{bestgreen}\textbf{80.14} $\pm$ 0.56 & $78.82 \pm 1.03$ & $78.13 \pm 1.11$ \\
+16 shots & $84.35 \pm 0.28$ & $84.89 \pm 0.39$ & \cellcolor{bestgreen}\textbf{85.50} $\pm$ 0.15 & $85.33 \pm 0.23$ \\
+32 shots & $87.68 \pm 0.30$ & $88.01 \pm 0.22$ & $88.50 \pm 0.21$ & \cellcolor{bestgreen}\textbf{88.82} $\pm$ 0.06 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsection{Seed Sensitivity and Variance}
+
+Figure~\ref{fig:seed_variance} shows the standard deviation of test accuracy across random seeds ($11, 12, 13$).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures4/seed_variance_analysis.png}
+    \caption{Test accuracy standard deviation across random seeds ($11, 12, 13$).}
+    \label{fig:seed_variance}
+\end{figure}
+
+\newpage
+% ============================================================================
+\section{Training Accuracies}
+% ============================================================================
+
+Figure~\ref{fig:train_curves} and Table~\ref{tab:train_results} report the final training accuracy trajectories and exact numerical values (mean $\pm$ standard deviation across seeds) across shot counts ($k \in \{1, 2, 4, 8, 16, 32\}$) for each evaluated paradigm. The top-performing method at each shot is highlighted in green.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures4/train_curves_all_datasets.png}
+    \caption{Few-shot final training accuracy trajectories across 1 to 32 shots on Walnut under initial and fixed data augmentations ($K=6$), Piarom Date Shape under initial and fixed data augmentations ($K=5$), and Stanford Cars ($K=196$). Shaded bands represent $\pm 1$ standard deviation.}
+    \label{fig:train_curves}
+\end{figure}
+
+\newpage
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{0.85}
+\setlength{\tabcolsep}{6pt}
+\caption{\textbf{Final Training Accuracy Across Benchmarks} (mean $\pm$ standard deviation across seeds).}
+\label{tab:train_results}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Shots} & \textbf{Run 1 (Infix CoOp+Ord)} & \textbf{Run 2 (Plain LoRA)} & \textbf{Run 3 (CoOp-CSC Dual)} & \textbf{Run 4 (Plain LoRA+ResCls)} \\
+\midrule
+\multicolumn{5}{l}{\textbf{Walnut Quality Grading --- Initial Augmentation} ($K=6$ classes, Seeds 11, 12, 13)} \\
+\midrule
+ 1 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $94.44 \pm 9.62$ & $100.00 \pm 0.00$ \\
+ 2 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $97.22 \pm 4.81$ \\
+ 4 shots & $98.61 \pm 2.41$ & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 8 shots & \cellcolor{bestgreen}\textbf{99.31} $\pm$ 1.20 & $97.92 \pm 2.08$ & $99.31 \pm 1.20$ & $98.61 \pm 1.20$ \\
+ 16 shots & $98.61 \pm 1.20$ & \cellcolor{bestgreen}\textbf{99.65} $\pm$ 0.60 & $98.96 \pm 1.80$ & $98.96 \pm 1.04$ \\
+ 32 shots & $98.26 \pm 0.30$ & $98.09 \pm 1.20$ & $98.96 \pm 0.52$ & \cellcolor{bestgreen}\textbf{99.13} $\pm$ 0.30 \\
+\midrule
+\multicolumn{5}{l}{\textbf{Walnut Quality Grading --- Fixed Augmentation} ($K=6$ classes, Seeds 21, 22, 23)} \\
+\midrule
+ 1 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 2 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 4 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 8 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 16 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 32 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+\midrule
+\multicolumn{5}{l}{\textbf{Piarom Date Shape Grading --- Initial Augmentation} ($K=5$ classes, Seeds 11, 12, 13)} \\
+\midrule
+ 1 shots & $93.33 \pm 11.55$ & $93.33 \pm 11.55$ & $93.33 \pm 11.55$ & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 \\
+ 2 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $96.67 \pm 5.77$ \\
+ 4 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $95.00 \pm 0.00$ & $100.00 \pm 0.00$ & $98.33 \pm 2.89$ \\
+ 8 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $98.33 \pm 1.44$ & $99.17 \pm 1.44$ & $98.33 \pm 1.44$ \\
+ 16 shots & $98.75 \pm 1.25$ & \cellcolor{bestgreen}\textbf{99.58} $\pm$ 0.72 & $97.08 \pm 1.91$ & $98.33 \pm 0.72$ \\
+ 32 shots & $98.12 \pm 2.25$ & $98.75 \pm 0.62$ & $98.75 \pm 1.08$ & \cellcolor{bestgreen}\textbf{99.17} $\pm$ 0.36 \\
+\midrule
+\multicolumn{5}{l}{\textbf{Piarom Date Shape Grading --- Fixed Augmentation} ($K=5$ classes, Seeds 21, 22, 23)} \\
+\midrule
+ 1 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 2 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 4 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 8 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 16 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+ 32 shots & \cellcolor{bestgreen}\textbf{100.00} $\pm$ 0.00 & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ & $100.00 \pm 0.00$ \\
+\midrule
+\multicolumn{5}{l}{\textbf{Stanford Cars Classification} ($K=196$ classes, Seeds 11, 12, 13)} \\
+\midrule
+ 1 shots & $91.67 \pm 1.28$ & $64.63 \pm 1.06$ & $91.16 \pm 3.28$ & \cellcolor{bestgreen}\textbf{95.07} $\pm$ 1.64 \\
+ 2 shots & $91.41 \pm 0.39$ & $69.30 \pm 1.93$ & $92.94 \pm 1.03$ & \cellcolor{bestgreen}\textbf{94.56} $\pm$ 1.47 \\
+ 4 shots & $92.43 \pm 0.07$ & $73.64 \pm 1.06$ & $91.71 \pm 1.11$ & \cellcolor{bestgreen}\textbf{93.58} $\pm$ 1.40 \\
+ 8 shots & $89.63 \pm 0.04$ & $76.64 \pm 0.26$ & $90.26 \pm 0.36$ & \cellcolor{bestgreen}\textbf{93.11} $\pm$ 0.83 \\
+ 16 shots & $88.63 \pm 0.37$ & $78.86 \pm 1.22$ & $90.06 \pm 0.23$ & \cellcolor{bestgreen}\textbf{92.88} $\pm$ 0.61 \\
+ 32 shots & $88.50 \pm 0.61$ & $82.00 \pm 0.46$ & $90.70 \pm 1.08$ & \cellcolor{bestgreen}\textbf{92.02} $\pm$ 0.02 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\end{document}

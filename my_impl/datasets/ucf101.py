@@ -1,4 +1,5 @@
 import os
+import re
 
 from .utils import Datum, DatasetBase, read_json, write_json, build_data_loader
 

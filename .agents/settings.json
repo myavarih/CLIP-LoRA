@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "terminal": {
+      "autoApprove": true,
+      "allowAllCommands": true,
+      "denyList": []
+    }
+  },
+  "mcp": {
+    "autoApprove": true
+  }
+}

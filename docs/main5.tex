@@ -1,0 +1,581 @@
+\documentclass[letterpaper,11pt,leqno]{article}
+\usepackage{paper}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{listings}
+\usetikzlibrary{positioning, fit, arrows.meta, shapes.geometric, calc, backgrounds,
+                shadows, decorations.pathreplacing}
+
+\hypersetup{
+    pdftitle={Technical Specification: Pipelines, Augmentations, Architectures, and Hyperparameters Across Runs 1-4},
+    pdfauthor={Mohammad Yavari},
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+% Code listing styling
+\definecolor{codebg}{HTML}{F8F9FA}
+\definecolor{codeframe}{HTML}{E2E8F0}
+\definecolor{codekeyword}{HTML}{0033B3}
+\definecolor{codestring}{HTML}{067D17}
+\definecolor{codecomment}{HTML}{8C8C8C}
+\definecolor{codedecorator}{HTML}{9E5B00}
+
+\lstset{
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{codecomment}\itshape,
+    showstringspaces=false,
+    breaklines=true,
+    tabsize=4,
+    xleftmargin=1.5em,
+    framexleftmargin=1.5em,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt
+}
+
+% Custom table colors
+\definecolor{headerblue}{HTML}{E3F2FD}
+\definecolor{rowalt}{HTML}{F8F9FA}
+\definecolor{run1blue}{HTML}{E8F0FE}
+\definecolor{run2orange}{HTML}{FEF3E8}
+\definecolor{run3green}{HTML}{E8F8F0}
+\definecolor{run4red}{HTML}{FDE8E8}
+
+\begin{document}
+
+\title{\textbf{Technical Specification \& Methodological Reference:}\\[0.3em]
+\Large Exact Augmentations, Full End-to-End Pipelines, Architectures, Learning Rates, and Hyperparameters Across Adaptation Paradigms 1--4}
+\author{Mohammad Yavari}
+\date{September 2026 \\[0.5em] \small Repository: \url{https://github.com/myavarih/CLIP-LoRA}}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Executive Overview \& Paradigm Taxonomy}
+% ============================================================================
+
+This technical document details the implementation mechanics, data transformation pipelines, model architectures, loss formulations, optimization configurations, and exact hyperparameter settings across the four fine-tuning paradigms evaluated in the benchmark suite (Runs 1--4). 
+
+Each run represents a distinct balance between visual adaptation, language adaptation, continuous prompt tuning, and class token conditioning on top of the frozen OpenAI CLIP ViT-B/16 foundation model. Table~\ref{tab:paradigm_matrix} specifies the core algorithmic components of each paradigm.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Systematic architectural and algorithmic matrix across Evaluated Runs 1--4.}
+\label{tab:paradigm_matrix}
+\begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.6cm}}
+\toprule
+\textbf{Run} & \textbf{Paradigm} & \textbf{Vision Adapter} & \textbf{Text Adapter} & \textbf{Prompt \& Class Formulation} & \textbf{Loss Objective} \\
+\midrule
+\rowcolor{run1blue}
+\textbf{Run 1} & Infix CoOp + Ordinal & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Frozen Backbone & Infix continuous prompt ($M{=}4$) + Learnable residual class tokens $\Delta e_k$ & $\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ ($\lambda_{\mathrm{ord}}{=}1.0$ or $2.0$) \\
+\addlinespace
+\rowcolor{run2orange}
+\textbf{Run 2} & Plain Dual LoRA & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Handcrafted natural template, frozen BPE token embeddings & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\addlinespace
+\rowcolor{run3green}
+\textbf{Run 3} & CoOp-CSC Dual LoRA & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Class-Specific Context ($K \times M \times d$ continuous prompt vectors) & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\addlinespace
+\rowcolor{run4red}
+\textbf{Run 4} & Plain LoRA + ResCls & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Handcrafted natural template + Learnable residual class tokens $\delta_k$ & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3em}
+\raggedright\small \textit{Note: ViT-B/16 operates with vision dimension $d_v = 768$ (projected to 512) and text dimension $d_t = 512$. All LoRA modules inject into attention projection matrices with rank $r=2$ and scaling factor $\alpha=1.0$.}
+\end{table}
+
+\subsection{Parameter Footprint and Trainable Parameter Counts}
+
+Table~\ref{tab:parameter_counts} quantifies the exact parameter allocations across each paradigm, illustrating how the parameter count varies as a function of the number of classes $K \in \{5, 6, 196\}$.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Trainable parameter breakdown across adaptation paradigms for Walnut ($K=6$), Piarom Date ($K=5$), and Stanford Cars ($K=196$).}
+\label{tab:parameter_counts}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+\textbf{Parameter Component} & \textbf{Run 1} & \textbf{Run 2} & \textbf{Run 3} & \textbf{Run 4} \\
+\midrule
+Vision LoRA ($W_q, W_v \times 12$ layers) & 147,456 & 147,456 & 147,456 & 147,456 \\
+Text LoRA ($W_q, W_v \times 12$ layers)   & 0 (Frozen) & 98,304 & 98,304 & 98,304 \\
+Continuous Context Vectors               & 2,048 ($M=4$) & 0 & $K \times 2,048$ & 0 \\
+Class Token Residual Offsets             & $K \times 512$ & 0 & 0 & $K \times 512$ \\
+\midrule
+\textbf{Total Trainable ($K=5$, Piarom)}  & \textbf{152,064} & \textbf{245,760} & \textbf{255,992} & \textbf{248,320} \\
+\textbf{Total Trainable ($K=6$, Walnut)}  & \textbf{152,576} & \textbf{245,760} & \textbf{258,048} & \textbf{248,832} \\
+\textbf{Total Trainable ($K=196$, Cars)}  & \textbf{249,856} & \textbf{245,760} & \textbf{647,168} & \textbf{346,112} \\
+\bottomrule
+\end{tabular*}
+\vspace{0.3em}
+\raggedright\small \textit{Note: In Run 3, class-specific context parameters scale directly with class cardinality $K$ ($K \times M \times d = 196 \times 4 \times 512 = 401,408$ parameters for Stanford Cars), whereas Run 2 maintains a strictly constant parameter count irrespective of $K$.}
+\end{table}
+
+\newpage
+
+% ============================================================================
+\section{Data Preprocessing \& Augmentation Pipelines}
+% ============================================================================
+
+The benchmark evaluations compare two distinct image preprocessing and data augmentation regimes:
+\begin{enumerate}
+    \item \textbf{Initial Augmentation Suite (Seeds 11, 12, 13)}: Configured via \texttt{--resize\_mode crop}. This utilizes standard random resized cropping during training and center cropping during testing.
+    \item \textbf{Fixed Augmentation Suite (Seeds 21, 22, 23)}: Configured via \texttt{--resize\_mode pad}. This introduces aspect-ratio-preserving letterbox square padding (\texttt{SquarePad}), random vertical flipping, sub-pixel translation shifts, additive Gaussian noise, and impulse salt-and-pepper noise.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.1cm and 0.65cm,
+    block/.style={rectangle, draw=gray!80, fill=white, rounded corners=3pt, thick, text width=2.9cm, align=center, minimum height=1.1cm, font=\scriptsize},
+    transblock/.style={rectangle, draw=blue!70, fill=blue!5, rounded corners=3pt, thick, text width=2.9cm, align=center, minimum height=1.1cm, font=\scriptsize},
+    fixblock/.style={rectangle, draw=green!70!black, fill=green!5, rounded corners=3pt, thick, text width=2.9cm, align=center, minimum height=1.1cm, font=\scriptsize},
+    arrow/.style={-Latex, thick, draw=gray!80}
+]
+
+% Initial Pipeline
+\node[block] (inp1) {\textbf{Raw Input Image}\\$W \times H \times 3$};
+\node[transblock, right=of inp1] (rrc) {\textbf{RandomResizedCrop}\\$224 \times 224$, scale: $[0.08, 1.0]$\\Bicubic interpolation};
+\node[transblock, right=of rrc] (hflip1) {\textbf{RandomHorizontal-}\\ \textbf{Flip}\\Probability $p=0.5$};
+\node[transblock, right=of hflip1] (norm1) {\textbf{ToTensor \& Normalize}\\CLIP ImageNet stats};
+
+\draw[arrow] (inp1) -- (rrc);
+\draw[arrow] (rrc) -- (hflip1);
+\draw[arrow] (hflip1) -- (norm1);
+
+% Fixed Pipeline
+\node[block, below=1.8cm of inp1] (inp2) {\textbf{Raw Input Image}\\$W \times H \times 3$};
+\node[fixblock, right=of inp2] (pad) {\textbf{SquarePad}\\Zero constant fill\\$\max(W,H) \times \max(W,H)$};
+\node[fixblock, right=of pad] (res) {\textbf{Resize \& Flips}\\$224 \times 224$ (Bicubic)\\H-Flip + V-Flip ($p=0.5$)};
+\node[fixblock, right=of res] (noise) {\textbf{Affine, Noise, Norm}\\Shift $\le 5\text{px}$, Gauss $\sigma{=}0.015$\\SP $\gamma{=}0.005$, Normalize};
+
+\draw[arrow] (inp2) -- (pad);
+\draw[arrow] (pad) -- (res);
+\draw[arrow] (res) -- (noise);
+
+% Labels
+\node[above=0.2cm of rrc, font=\small\bfseries, color=blue!80!black] {Initial Pipeline (Seeds 11--13: Aggressive Cropping)};
+\node[above=0.2cm of pad, font=\small\bfseries, color=green!60!black] {Fixed Pipeline (Seeds 21--23: Non-Cropping SquarePad + Noise)};
+
+\end{tikzpicture}
+\caption{Architectural dataflow diagram comparing the Initial cropping augmentation pipeline against the Fixed aspect-ratio-preserving letterbox and noise augmentation pipeline.}
+\label{fig:pipeline_comparison}
+\end{figure}
+
+\subsection{Exact Mathematical Specifications of Augmentation Transforms}
+
+Table~\ref{tab:augmentation_specs} provides the precise parameter configurations, operational bounds, and mathematical formulations for each transform in the codebase.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Detailed technical specification of individual transformation steps in the pipelines.}
+\label{tab:augmentation_specs}
+\begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}p{3.0cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Transform Name} & \textbf{Applied Suite} & \textbf{Parameters} & \textbf{Mathematical Definition / Operation} \\
+\midrule
+\texttt{SquarePad} & Fixed (Train/Test) & $\text{fill}=0$, constant & Pads image tensor/PIL to $\max(W, H) \times \max(W, H)$ with symmetric margins: $h_p = \lfloor(\max-W)/2\rfloor$, $v_p = \lfloor(\max-H)/2\rfloor$. \\
+\addlinespace
+\texttt{RandomResizedCrop} & Initial (Train) & $\text{size}=224, \text{scale}=(0.08, 1.0)$ & Random area sample $\alpha \sim \mathcal{U}(0.08, 1.0)$, aspect ratio $r \sim \mathcal{U}(3/4, 4/3)$, cropped and scaled to $224 \times 224$. \\
+\addlinespace
+\texttt{CenterCrop} & Initial (Test) & $\text{size}=224$ & Central rectangular window crop: $\left[\frac{W-224}{2}, \frac{H-224}{2}, \frac{W+224}{2}, \frac{H+224}{2}\right]$ after resizing shortest edge to 224. \\
+\addlinespace
+\texttt{Resize} & Fixed (Train/Test) & $\text{size}=(224, 224)$ & Bicubic interpolation resizing square padded canvas to model input tensor grid. \\
+\addlinespace
+\texttt{RandomHorizontalFlip} & Both (Train) & $p = 0.5$ & Left-right reflection matrix applied with probability 0.5. \\
+\addlinespace
+\texttt{RandomVerticalFlip} & Fixed (Train) & $p = 0.5$ & Top-bottom reflection applied with probability 0.5 (enabled on agricultural datasets; disabled on Cars). \\
+\addlinespace
+\texttt{RandomAffine} & Fixed (Train) & $\text{degrees}=0, \text{trans}=(5/224, 5/224)$ & Translation displacement $(\Delta x, \Delta y) \in [-5, +5]$ pixels with bicubic interpolation and zero boundary fill. \\
+\addlinespace
+\texttt{AddGaussianNoise} & Fixed (Train) & $\mu=0.0, \sigma=0.015, p=0.5$ & $x' = \mathrm{clip}(x + \epsilon, 0, 1)$ where $\epsilon \sim \mathcal{N}(0, \sigma^2)$ applied on tensor prior to normalization. \\
+\addlinespace
+\texttt{AddSaltAndPepperNoise} & Fixed (Train) & $\gamma=0.005, \text{ratio}=0.5, p=0.5$ & Pixel mask $M \sim \mathcal{U}(0, 1)^{H \times W}$; sets pixels to 1.0 if $M < 0.0025$ and 0.0 if $0.0025 \le M < 0.005$. \\
+\addlinespace
+\texttt{Normalize} & Both (Train/Test) & $\mu=(0.481, 0.458, 0.408)$ \newline $\sigma=(0.269, 0.261, 0.276)$ & Standard OpenAI CLIP channel-wise normalization: $x_c' = (x_c - \mu_c) / \sigma_c$. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\newpage
+
+\subsection{Pipeline Implementation Listings}
+
+The complete transform compositions implemented in \path{my_impl/clip/clip.py} and \path{my_impl/main.py} are defined as follows:
+
+\begin{lstlisting}[language=Python, caption={Implementation of SquarePad, Noise transforms, and the full preprocessing pipelines in clip.py and main.py.}]
+class SquarePad(object):
+    """Pads image to square canvas preserving aspect ratio without cropping."""
+    def __init__(self, fill=0, padding_mode='constant'):
+        self.fill = fill
+        self.padding_mode = padding_mode
+
+    def __call__(self, image):
+        w, h = image.size if hasattr(image, 'size') else (image.shape[-1], image.shape[-2])
+        max_wh = max(w, h)
+        hp = (max_wh - w) // 2
+        vp = (max_wh - h) // 2
+        padding = (hp, vp, max_wh - w - hp, max_wh - h - vp)
+        return F.pad(image, padding, fill=self.fill, padding_mode=self.padding_mode)
+
+# Fixed Augmentation Pipeline (Seeds 21, 22, 23)
+train_transform_fixed = transforms.Compose([
+    transforms.Lambda(lambda img: img.convert('RGB')),
+    SquarePad(),
+    transforms.Resize((224, 224), interpolation=transforms.InterpolationMode.BICUBIC),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomVerticalFlip(p=0.5),  # Disabled for Stanford Cars
+    transforms.RandomAffine(degrees=0, translate=(5/224.0, 5/224.0),
+                           interpolation=transforms.InterpolationMode.BICUBIC, fill=0),
+    transforms.ToTensor(),
+    AddGaussianNoise(mean=0.0, std=0.015, p=0.5),
+    AddSaltAndPepperNoise(amount=0.005, salt_ratio=0.5, p=0.5),
+    transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073),
+                         std=(0.26862954, 0.26130258, 0.27577711))
+])
+
+# Fixed Evaluation Transform (Test & Val Splits)
+test_transform_fixed = transforms.Compose([
+    transforms.Lambda(lambda img: img.convert('RGB')),
+    SquarePad(),
+    transforms.Resize((224, 224), interpolation=transforms.InterpolationMode.BICUBIC),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073),
+                         std=(0.26862954, 0.26130258, 0.27577711))
+])
+\end{lstlisting}
+
+\newpage
+
+% ============================================================================
+\section{End-to-End Pipeline Specifications by Paradigm}
+% ============================================================================
+
+\subsection{Run 1: Infix CoOp + Residual Class Tokens + Ordinal Loss}
+
+\subsubsection{Architecture and Forward Computation}
+Run 1 combines continuous prefix/suffix prompt tuning, residual class token learning, vision encoder LoRA adaptation, and a partial ordinal cost penalty:
+\begin{enumerate}
+    \item \textbf{Vision Encoder}: LoRA low-rank decomposition matrices $A_v \in \mathbf{R}^{r \times d_{\mathrm{in}}}$ and $B_v \in \mathbf{R}^{d_{\mathrm{out}} \times r}$ are attached to the query ($W_q$) and value ($W_v$) projections across all 12 self-attention blocks of CLIP's ViT-B/16. The modified linear projection computes:
+    \begin{equation}
+        h_v = W_0 x + \frac{\alpha}{r} B_v A_v x, \quad \text{with } r = 2, \; \alpha = 1.0
+    \end{equation}
+    \item \textbf{Text Encoder}: The Transformer backbone is kept strictly frozen.
+    \item \textbf{Infix PromptLearner}: An infix template $\mathcal{T} = \texttt{"photo\_of\_a\_\{\}\_<item>"}$ is parsed into prefix and suffix tokens. $M=4$ continuous context vectors $\bm{V} = [\bm{v}_1, \bm{v}_2, \bm{v}_3, \bm{v}_4]$ are initialized from the tokenized prefix and suffix embeddings.
+    \item \textbf{Residual Class Tokens}: For each class $k \in \{1, \dots, K\}$, the base BPE embedding vector $e_k^0 \in \mathbf{R}^d$ is conditioned with a dedicated learnable residual vector $\Delta e_k \in \mathbf{R}^d$:
+    \begin{equation}
+        e_k = e_k^0 + \Delta e_k, \quad \Delta e_k \text{ initialized to } \bm{0}
+    \end{equation}
+    The full sequence of token embeddings fed to the text encoder for class $k$ is:
+    \begin{equation}
+        \bm{P}_k = [\bm{e}_{\mathrm{SOS}}, \bm{v}_1, \bm{v}_2, \bm{v}_3, e_k, \bm{v}_4, \bm{e}_{\mathrm{EOS}}, \bm{e}_{\mathrm{PAD}}, \dots] \in \mathbf{R}^{77 \times 512}
+    \end{equation}
+    \item \textbf{Loss Function}: The model optimizes a joint objective combining standard cross-entropy and expected ordinal risk using a domain cost matrix $\bm{C} \in \mathbf{R}^{K \times K}$:
+    \begin{equation}
+        \mathcal{L} = \mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}} \mathcal{L}_{\mathrm{ord}} = -\log P(y^* | \bm{x}) + \lambda_{\mathrm{ord}} \sum_{j=1}^K P(y=j | \bm{x}) C_{y^*, j}
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{Optimization and Parameter Grouping}
+\begin{itemize}
+    \item Vision LoRA parameters ($147{,}456$ params): $\eta_{\text{lora}} = 2 \times 10^{-4}$, weight decay $= 10^{-2}$.
+    \item Continuous Context vectors ($2{,}048$ params): $\eta_{\text{ctx}} = 2 \times 10^{-4}$, weight decay $= 0.0$.
+    \item Residual class parameters ($K \times 512$ params): $\eta_{\text{class}} = 1 \times 10^{-3}$, weight decay $= 0.0$.
+    \item Scheduler: CosineAnnealingLR to $\eta_{\min} = 10^{-6}$ over $250 \times k$ iterations.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={Run 1 Parameter groups and Composite Criterion initialization in train\_coop.py.}]
+trainable_params = [
+    {'params': get_lora_parameters(clip_model), 'lr': 2e-4, 'weight_decay': 1e-2},
+    {'params': [prompt_learner.ctx],           'lr': 2e-4, 'weight_decay': 0.0},
+    {'params': prompt_learner.class_deltas.parameters(), 'lr': 1e-3, 'weight_decay': 0.0}
+]
+optimizer = torch.optim.AdamW(trainable_params, betas=(0.9, 0.999), lr=2e-4)
+criterion = CompositeCriterion(
+    base_loss_type='ce', use_ordinal=True, 
+    cost_matrix=cost_matrix, lambda_ord=1.0 # (or 2.0)
+)
+\end{lstlisting}
+
+\newpage
+
+\subsection{Run 2: Plain Dual LoRA Baseline}
+
+\subsubsection{Architecture and Forward Computation}
+Run 2 constitutes the standard parameter-efficient fine-tuning baseline, adapting both visual and linguistic representations symmetrically without any continuous prompt vectors:
+\begin{enumerate}
+    \item \textbf{Vision Encoder}: LoRA modules ($r=2, \alpha=1.0$, dropout $p=0.25$) injected into $W_q, W_v$ across all 12 visual Transformer blocks.
+    \item \textbf{Text Encoder}: LoRA modules ($r=2, \alpha=1.0$, dropout $p=0.25$) injected into $W_q, W_v$ across all 12 textual Transformer blocks ($98{,}304$ parameters).
+    \item \textbf{Prompt Architecture}: Handcrafted static prompt templates (e.g.,\newline \texttt{"a photo of a \{\} walnut, a type of walnut."}). Class names are tokenized with frozen standard CLIP BPE tokenization.
+    \item \textbf{Loss Function}: Standard cross-entropy classification:
+    \begin{equation}
+        \mathcal{L} = \mathcal{L}_{\mathrm{ce}} = -\log \frac{\exp\left(100 \cdot \cos(f_{\bm{x}}, w_{y^*})\right)}{\sum_{k=1}^K \exp\left(100 \cdot \cos(f_{\bm{x}}, w_k)\right)}
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{Optimization Specification}
+\begin{itemize}
+    \item Parameter group: All LoRA parameters ($245{,}760$ total parameters across both encoders).
+    \item Optimizer: AdamW ($\beta_1=0.9, \beta_2=0.999$, weight decay $= 10^{-2}$).
+    \item Learning rate: $\eta = 2 \times 10^{-4}$ with CosineAnnealingLR decay down to $10^{-6}$.
+    \item Batch size: $32$, total iterations $= 250 \times k$.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={Run 2 Optimizer initialization in lora.py.}]
+list_lora_layers = apply_lora(args, clip_model) # Injects both vision & text
+mark_only_lora_as_trainable(clip_model)
+optimizer = torch.optim.AdamW(
+    get_lora_parameters(clip_model), 
+    lr=2e-4, weight_decay=1e-2, betas=(0.9, 0.999)
+)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, total_iters, eta_min=1e-6)
+\end{lstlisting}
+
+\newpage
+
+\subsection{Run 3: CoOp-CSC Dual LoRA}
+
+\subsubsection{Architecture and Forward Computation}
+Run 3 couples Dual LoRA adaptation with Class-Specific Context (CSC) continuous prompt vectors:
+\begin{enumerate}
+    \item \textbf{Dual LoRA Adaptation}: LoRA ($r=2, \alpha=1.0$) injected into $W_q, W_v$ of both the Vision Transformer and Text Transformer ($245{,}760$ adapter parameters).
+    \item \textbf{Class-Specific Context (CSC)}: Rather than sharing $M$ continuous context vectors across all classes, every class $k$ is allocated an independent set of $M=4$ continuous context vectors:
+    \begin{equation}
+        \bm{V}^{(k)} = [\bm{v}_{k, 1}, \bm{v}_{k, 2}, \bm{v}_{k, 3}, \bm{v}_{k, 4}] \in \mathbf{R}^{4 \times 512}
+    \end{equation}
+    The total parameter count of the context matrix is $K \times M \times d$.
+    \item \textbf{Prompt Assembly}: For each class $k$, the token embedding tensor fed to the text encoder is constructed as:
+    \begin{equation}
+        \bm{P}_k = [\bm{e}_{\mathrm{SOS}}, \bm{v}_{k, 1}, \bm{v}_{k, 2}, \bm{v}_{k, 3}, \bm{v}_{k, 4}, \bm{e}_{\mathrm{cls}}^{(k)}, \bm{e}_{\mathrm{EOS}}, \dots] \in \mathbf{R}^{77 \times 512}
+    \end{equation}
+    where $\bm{e}_{\mathrm{cls}}^{(k)}$ is the frozen BPE embedding of the $k$-th class name.
+    \item \textbf{Loss Function}: Standard cross-entropy loss $\mathcal{L}_{\mathrm{ce}}$ (ordinal loss flag was omitted during execution).
+\end{enumerate}
+
+\subsubsection{Optimization and Staging Mechanics}
+\begin{itemize}
+    \item Trainable parameters: LoRA parameters ($245{,}760$) with $\eta=2 \times 10^{-4}$ and weight decay $10^{-2}$; CSC context parameters ($K \times 2{,}048$) with $\eta=2 \times 10^{-4}$ and weight decay $0.0$.
+    \item Staged training option: The codebase supports freezing CSC prompts after $N_{\mathrm{csc}}$ iterations via \texttt{--csc\_iters}. In standard benchmark runs, `csc\_iters` defaults to $N_{\mathrm{iters}} = 250$, training end-to-end throughout all iterations.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={Run 3 PromptLearner initialization with Class-Specific Context (CSC) in train\_coop.py.}]
+prompt_learner = PromptLearner(
+    clip_model=clip_model,
+    classnames=dataset.classnames,
+    n_ctx=4,
+    csc=True,                       # Enables K x M x d independent context vectors
+    learn_class_tokens=False
+).cuda()
+
+trainable_params = [
+    {'params': get_lora_parameters(clip_model), 'lr': 2e-4, 'weight_decay': 1e-2},
+    {'params': [prompt_learner.ctx],           'lr': 2e-4, 'weight_decay': 0.0}
+]
+optimizer = torch.optim.AdamW(trainable_params, betas=(0.9, 0.999), lr=2e-4)
+\end{lstlisting}
+
+\newpage
+
+\subsection{Run 4: Plain LoRA + Residual Class Tokens (ResCls)}
+
+\subsubsection{Architecture and Forward Computation}
+Run 4 investigates the hypothesis that preserving the full natural language sentence template while providing localized capacity on the class name token embedding avoids prompt distortion:
+\begin{enumerate}
+    \item \textbf{Dual LoRA Adaptation}: Identical to Run 2, attaching LoRA ($r=2, \alpha=1.0$) to $W_q, W_v$ in both vision and text encoders ($245{,}760$ parameters).
+    \item \textbf{Residual Class Tokens}: Utilizes \texttt{ResidualTemplatePromptLearner} initialized with the complete natural template sentence:
+    \begin{equation}
+        \mathcal{T} = \texttt{"a photo of a \{\} <item>, a type of <item>."}
+    \end{equation}
+    The template tokens remain fixed, but for each class $k$, an additive residual vector $\delta_k \in \mathbf{R}^{L_k \times d}$ is learned over the class token span:
+    \begin{equation}
+        \bm{e}_{\mathrm{seq}}^{(k)}[s_k : s_k + L_k] = \bm{e}_{\mathrm{base}}^{(k)}[s_k : s_k + L_k] + \delta_k
+    \end{equation}
+    where $s_k$ is the exact BPE token starting index of class $k$, and $L_k$ is the token length of the class name.
+    \item \textbf{Loss Function}: Standard cross-entropy classification $\mathcal{L}_{\mathrm{ce}}$.
+\end{enumerate}
+
+\subsubsection{Optimization Specification}
+\begin{itemize}
+    \item LoRA parameter group: $\eta_{\text{lora}} = 2 \times 10^{-4}$, weight decay $= 10^{-2}$.
+    \item Residual class parameters ($K \times 512$ params): $\eta_{\text{class}} = 1 \times 10^{-3}$ ($5 \times$ higher learning rate), weight decay $= 0.0$.
+    \item Optimizer: AdamW ($\beta_1=0.9, \beta_2=0.999$).
+    \item Scheduler: CosineAnnealingLR over $250 \times k$ iterations.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={Run 4 ResidualTemplatePromptLearner and parameter groups in train\_coop.py.}]
+prompt_learner = ResidualTemplatePromptLearner(
+    clip_model=clip_model,
+    classnames=dataset.classnames,
+    template=dataset.template[0],
+    learn_template_tokens=False,    # Static natural template tokens
+    learn_class_tokens=True         # Additive class residual offsets
+).cuda()
+
+trainable_params = [
+    {'params': get_lora_parameters(clip_model),          'lr': 2e-4, 'weight_decay': 1e-2},
+    {'params': prompt_learner.class_deltas.parameters(), 'lr': 1e-3, 'weight_decay': 0.0}
+]
+optimizer = torch.optim.AdamW(trainable_params, betas=(0.9, 0.999), lr=2e-4)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer,
+    T_max=total_iters,
+    eta_min=1e-6
+)
+\end{lstlisting}
+
+\newpage
+
+% ============================================================================
+\section{Comprehensive Hyperparameter Reference Table}
+% ============================================================================
+
+Table~\ref{tab:master_hyperparameters} provides the definitive mapping of all hyperparameters across the four experimental runs and training pipelines.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{0.96}
+\setlength{\tabcolsep}{3.5pt}
+\caption{Comprehensive hyperparameter reference across all four adaptation paradigms.}
+\label{tab:master_hyperparameters}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{2.0cm} >{\raggedright\arraybackslash}p{2.0cm} >{\raggedright\arraybackslash}p{2.0cm} >{\raggedright\arraybackslash}p{2.0cm} >{\raggedright\arraybackslash\sloppy}X}
+\toprule
+\textbf{Hyperparameter} & \textbf{Run 1} & \textbf{Run 2} & \textbf{Run 3} & \textbf{Run 4} & \textbf{CLI Flag / Source} \\
+\midrule
+CLIP Backbone & ViT-B/16 & ViT-B/16 & ViT-B/16 & ViT-B/16 & \path{--backbone} \\
+LoRA Target Encoders & Vision only & Vision + Text & Vision + Text & Vision + Text & \path{--encoder} \\
+LoRA Rank ($r$) & 2 & 2 & 2 & 2 & \path{--r} \\
+LoRA Scaling ($\alpha$) & 1.0 & 1.0 & 1.0 & 1.0 & \path{--alpha} \\
+LoRA Projections & $W_q, W_v$ & $W_q, W_v$ & $W_q, W_v$ & $W_q, W_v$ & \path{--params q v} \\
+LoRA Dropout & 0.25 & 0.25 & 0.25 & 0.25 & \path{--dropout_rate} \\
+LoRA Learning Rate & $2 \times 10^{-4}$ & $2 \times 10^{-4}$ & $2 \times 10^{-4}$ & $2 \times 10^{-4}$ & \path{--lr} \\
+LoRA Weight Decay & $10^{-2}$ & $10^{-2}$ & $10^{-2}$ & $10^{-2}$ & Fixed in code \\
+\midrule
+Context Tokens ($M$) & 4 & 0 (N/A) & 4 & 0 (N/A) & \path{--n_ctx} \\
+Context Sharing & Unified (Infix) & N/A & Class-Specific & N/A & \path{--csc} \\
+Context Learning Rate & $2 \times 10^{-4}$ & N/A & $2 \times 10^{-4}$ & N/A & \path{--lr} \\
+Context Weight Decay & 0.0 & N/A & 0.0 & N/A & Fixed in code \\
+\midrule
+Class Token Learning & Residual ($\Delta e_k$) & None (Frozen) & None (Frozen) & Residual ($\delta_k$) & \path{--learn_class_tokens} \\
+Class LR ($\eta_{\text{class}}$) & $1 \times 10^{-3}$ & N/A & N/A & $1 \times 10^{-3}$ & \path{--lr_class} \\
+Class Weight Decay & 0.0 & N/A & N/A & 0.0 & Fixed in code \\
+\midrule
+Loss Formulation & $\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ & $\mathcal{L}_{\mathrm{ce}}$ & $\mathcal{L}_{\mathrm{ce}}$ & $\mathcal{L}_{\mathrm{ce}}$ & \path{--use_ordinal} \\
+Ordinal Weight ($\lambda_{\mathrm{ord}}$) & $1.0$ (or $2.0$) & N/A & N/A & N/A & \path{--lambda_ord} \\
+Cost Matrix Metric & Expected Cost & N/A & N/A & N/A & \path{--ordinal_loss_type} \\
+Logit Scale ($\tau^{-1}$) & 100.0 & 100.0 & 100.0 & 100.0 & Fixed CLIP scale \\
+\midrule
+Batch Size ($B$) & 32 & 32 & 32 & 32 & \path{--batch_size} \\
+Iterations / Shot & 250 & 250 & 250 & 250 & \path{--n_iters} \\
+Total Iterations ($N$) & $250 \times k$ & $250 \times k$ & $250 \times k$ & $250 \times k$ & Calculated \\
+Optimizer & AdamW & AdamW & AdamW & AdamW & \path{torch.optim.AdamW} \\
+Betas ($\beta_1, \beta_2$) & $(0.9, 0.999)$ & $(0.9, 0.999)$ & $(0.9, 0.999)$ & $(0.9, 0.999)$ & Fixed in code \\
+LR Scheduler & Cosine Anneal & Cosine Anneal & Cosine Anneal & Cosine Anneal & \path{CosineAnnealingLR} \\
+Minimum LR ($\eta_{\min}$) & $10^{-6}$ & $10^{-6}$ & $10^{-6}$ & $10^{-6}$ & Fixed in code \\
+Precision & FP16 (AMP) & FP16 (AMP) & FP16 (AMP) & FP16 (AMP) & \path{torch.amp.autocast} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================================
+\section{Command Line Execution Reference}
+% ============================================================================
+
+Below are the exact execution commands invoking \texttt{my\_impl/run\_experiments.py} for each paradigm across the benchmark suite:
+
+\subsection{Run 1: Infix CoOp + Ordinal (Vision LoRA)}
+\begin{lstlisting}[language=bash]
+python3 my_impl/run_experiments.py \
+    --root_path /kaggle/input/datasets/emmwhy3/few-shot-data/FewShotData \
+    --dataset walnut \
+    --shots 1 2 4 8 16 32 \
+    --seed 21 22 23 \
+    --method coop_lora \
+    --ctx_init "photo_of_a_{}_walnut" \
+    --learn_class_tokens \
+    --use_ordinal \
+    --lambda_ord 1.0 \
+    --encoder vision \
+    --r 2 --alpha 1.0 \
+    --lr 2e-4 --lr_class 1e-3 \
+    --n_iters 250 --batch_size 32 \
+    --output_dir /kaggle/working/experiments_output/run1_infix_coop_ordinal_walnut \
+    --checkpoints_dir /kaggle/working/checkpoints/run1_infix_coop_ordinal_walnut
+\end{lstlisting}
+
+\subsection{Run 2: Plain Dual LoRA Baseline}
+\begin{lstlisting}[language=bash]
+python3 my_impl/run_experiments.py \
+    --root_path /kaggle/input/datasets/emmwhy3/few-shot-data/FewShotData \
+    --dataset walnut \
+    --shots 1 2 4 8 16 32 \
+    --seed 21 22 23 \
+    --method lora \
+    --encoder both \
+    --r 2 --alpha 1.0 \
+    --lr 2e-4 \
+    --n_iters 250 --batch_size 32 \
+    --output_dir /kaggle/working/experiments_output/run2_plain_lora_walnut \
+    --checkpoints_dir /kaggle/working/checkpoints/run2_plain_lora_walnut
+\end{lstlisting}
+
+\subsection{Run 3: CoOp-CSC Dual LoRA}
+\begin{lstlisting}[language=bash]
+python3 my_impl/run_experiments.py \
+    --root_path /kaggle/input/datasets/emmwhy3/few-shot-data/FewShotData \
+    --dataset walnut \
+    --shots 1 2 4 8 16 32 \
+    --seed 21 22 23 \
+    --method csc_lora \
+    --csc --n_ctx 4 \
+    --encoder both \
+    --r 2 --alpha 1.0 \
+    --lr 2e-4 \
+    --n_iters 250 --batch_size 32 \
+    --output_dir /kaggle/working/experiments_output/run3_coop_csc_dual_lora_walnut \
+    --checkpoints_dir /kaggle/working/checkpoints/run3_coop_csc_dual_lora_walnut
+\end{lstlisting}
+
+\subsection{Run 4: Plain LoRA + Residual Class Tokens (ResCls)}
+\begin{lstlisting}[language=bash]
+python3 my_impl/run_experiments.py \
+    --root_path /kaggle/input/datasets/emmwhy3/few-shot-data/FewShotData \
+    --dataset walnut \
+    --shots 1 2 4 8 16 32 \
+    --seed 21 22 23 \
+    --method res_cls_lora \
+    --encoder both \
+    --learn_class_tokens \
+    --r 2 --alpha 1.0 \
+    --lr 2e-4 --lr_class 1e-3 \
+    --n_iters 250 --batch_size 32 \
+    --output_dir /kaggle/working/experiments_output/run4_plain_lora_rescls_walnut \
+    --checkpoints_dir /kaggle/working/checkpoints/run4_plain_lora_rescls_walnut
+\end{lstlisting}
+
+\end{document}
