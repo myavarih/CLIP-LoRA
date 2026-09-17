@@ -166,13 +166,17 @@ class CompositeCriterion(nn.Module):
                  lambda_ord=1.0, 
                  use_promptsrc=False, 
                  lambda_src=1.0, 
-                 src_temp=2.0):
+                 src_temp=2.0,
+                 use_kgcoop=False,
+                 lambda_kg=2.0):
         super().__init__()
         self.base_loss_type = base_loss_type
         self.use_ordinal = use_ordinal
         self.lambda_ord = lambda_ord
         self.use_promptsrc = use_promptsrc
         self.lambda_src = lambda_src
+        self.use_kgcoop = use_kgcoop
+        self.lambda_kg = lambda_kg
 
         if base_loss_type == 'contrastive':
             self.base_criterion = SymmetricContrastiveLoss()
@@ -232,5 +236,13 @@ class CompositeCriterion(nn.Module):
             loss_dict.update(src_metrics)
             total_loss = total_loss + self.lambda_src * src_loss
 
+        # 4. kgCoOp loss: penalizes deviation from zero-shot base anchor
+        if self.use_kgcoop and text_features is not None and zs_text_features is not None:
+            cos_sim_kg = F.cosine_similarity(text_features, zs_text_features, dim=-1)
+            kg_loss = (1.0 - cos_sim_kg).mean()
+            loss_dict['kg_loss'] = kg_loss.item()
+            total_loss = total_loss + self.lambda_kg * kg_loss
+
         loss_dict['total_loss'] = total_loss.item()
         return total_loss, loss_dict
+

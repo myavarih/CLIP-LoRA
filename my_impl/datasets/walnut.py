@@ -63,7 +63,7 @@ class Walnut(DatasetBase):
 
     def read_data(self, dir_path):
         items = []
-        existing_dirs = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
+        existing_dirs = sorted([d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))])
         # Preserve canonical order for classes present in the dataset
         classes = [c for c in CANONICAL_CLASSES if c in existing_dirs]
         for c in existing_dirs:
@@ -79,7 +79,7 @@ class Walnut(DatasetBase):
             # Map Fingilish names to descriptive English for the prompt
             english_classname = CLASS_MAP.get(classname, classname)
             
-            for img_name in os.listdir(class_dir):
+            for img_name in sorted(os.listdir(class_dir)):
                 if not img_name.startswith('.'):
                     impath = os.path.join(class_dir, img_name)
                     item = Datum(

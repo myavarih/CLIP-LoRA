@@ -42,7 +42,7 @@ class PiaromColor(DatasetBase):
             # Map Fingilish names to descriptive English for the prompt
             english_classname = CLASS_MAP.get(classname, classname)
             
-            for img_name in os.listdir(class_dir):
+            for img_name in sorted(os.listdir(class_dir)):
                 if not img_name.startswith('.'):
                     impath = os.path.join(class_dir, img_name)
                     item = Datum(

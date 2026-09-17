@@ -16,6 +16,7 @@ import seaborn as sns
 
 RUNS_DIR = os.path.expanduser('~/Downloads/runs')
 RUNS2_DIR = os.path.expanduser('~/Downloads/runs2')
+RUNS3_DIR = os.path.expanduser('~/Downloads/runs3')
 OUT_DIR = os.path.join(os.path.dirname(__file__), 'figures4')
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -39,6 +40,7 @@ PALETTE = {
     'Run 2: Plain LoRA Baseline (Dual LoRA)': '#DD8452',    # Orange
     'Run 3: CoOp-CSC Dual LoRA': '#55A868',                 # Green
     'Run 4: Plain LoRA + ResCls (Dual LoRA)': '#C44E52',    # Red
+    'Run 5: MLLM Feat-LoRA + kgCoOp (Vision LoRA)': '#8172B3', # Purple
 }
 
 SHORT_NAMES = {
@@ -46,6 +48,7 @@ SHORT_NAMES = {
     'Run 2: Plain LoRA Baseline (Dual LoRA)': 'Run 2 (Plain Dual LoRA)',
     'Run 3: CoOp-CSC Dual LoRA': 'Run 3 (CoOp-CSC Dual LoRA)',
     'Run 4: Plain LoRA + ResCls (Dual LoRA)': 'Run 4 (Plain LoRA + ResCls)',
+    'Run 5: MLLM Feat-LoRA + kgCoOp (Vision LoRA)': 'Run 5 (MLLM Feat-LoRA)',
 }
 
 MARKERS = {
@@ -53,6 +56,7 @@ MARKERS = {
     'Run 2: Plain LoRA Baseline (Dual LoRA)': 's',
     'Run 3: CoOp-CSC Dual LoRA': '^',
     'Run 4: Plain LoRA + ResCls (Dual LoRA)': 'D',
+    'Run 5: MLLM Feat-LoRA + kgCoOp (Vision LoRA)': 'v',
 }
 
 DATASET_NAMES = {
@@ -73,7 +77,7 @@ ZERO_SHOTS = {
 
 def load_data():
     records = []
-    def parse_obj(obj, fname, is_runs2=False):
+    def parse_obj(obj, fname, is_runs2=False, is_runs3=False):
         if not isinstance(obj, dict):
             return
         cp = obj.get('checkpoint', '')
@@ -81,7 +85,9 @@ def load_data():
         combined = f'{cp} {out} {fname}'
         
         p = 'Unknown'
-        if 'run1_infix_coop_ordinal' in combined or ('run1' in combined and ('coop' in combined or 'infix' in combined or 'summary-cars-run1' in fname or 'summary-piarom-run1' in fname or 'summary-walnut-run1' in fname or 'summary2' in fname or 'summary6' in fname)):
+        if 'mllm' in combined or 'mllm_variant2' in combined:
+            p = 'Run 5: MLLM Feat-LoRA + kgCoOp (Vision LoRA)'
+        elif 'run1_infix_coop_ordinal' in combined or ('run1' in combined and ('coop' in combined or 'infix' in combined or 'summary-cars-run1' in fname or 'summary-piarom-run1' in fname or 'summary-walnut-run1' in fname or 'summary2' in fname or 'summary6' in fname)):
             p = 'Run 1: Infix CoOp + Ordinal (Vision LoRA)'
         elif 'run3_coop_csc_dual_lora' in combined or ('run3' in fname and 'summary' in fname) or 'cars-run3' in fname or 'summary3' in fname or 'summary8' in fname:
             p = 'Run 3: CoOp-CSC Dual LoRA'
@@ -96,7 +102,7 @@ def load_data():
             elif 'piarom' in combined: ds = 'piarom_shape'
             elif 'walnut' in combined: ds = 'walnut'
 
-        if is_runs2:
+        if is_runs2 or is_runs3:
             if ds == 'piarom_shape': ds = 'piarom_shape_fixed'
             elif ds == 'walnut': ds = 'walnut_fixed'
 
@@ -134,9 +140,9 @@ def load_data():
                     continue
             if isinstance(data, list):
                 for item in data:
-                    parse_obj(item, f, is_runs2=False)
+                    parse_obj(item, f, is_runs2=False, is_runs3=False)
             elif isinstance(data, dict):
-                parse_obj(data, f, is_runs2=False)
+                parse_obj(data, f, is_runs2=False, is_runs3=False)
 
     if os.path.exists(RUNS2_DIR):
         for f in sorted(os.listdir(RUNS2_DIR)):
@@ -153,9 +159,28 @@ def load_data():
                     continue
             if isinstance(data, list):
                 for item in data:
-                    parse_obj(item, f, is_runs2=True)
+                    parse_obj(item, f, is_runs2=True, is_runs3=False)
             elif isinstance(data, dict):
-                parse_obj(data, f, is_runs2=True)
+                parse_obj(data, f, is_runs2=True, is_runs3=False)
+
+    if os.path.exists(RUNS3_DIR):
+        for f in sorted(os.listdir(RUNS3_DIR)):
+            p = os.path.join(RUNS3_DIR, f)
+            with open(p, 'r') as fp:
+                txt = fp.read()
+            try:
+                data = json.loads(txt)
+            except Exception:
+                try:
+                    data = ast.literal_eval(txt)
+                except Exception as e:
+                    print(f'Error reading {f}: {e}')
+                    continue
+            if isinstance(data, list):
+                for item in data:
+                    parse_obj(item, f, is_runs2=False, is_runs3=True)
+            elif isinstance(data, dict):
+                parse_obj(data, f, is_runs2=False, is_runs3=True)
 
     df = pd.DataFrame(records)
     return df
@@ -179,6 +204,12 @@ def plot_few_shot_curves(df):
         (1, 0, 'piarom_shape', 'Piarom Date (Initial Aug, s11-13)'),
         (1, 1, 'piarom_shape_fixed', 'Piarom Date (Fixed Aug, s21-23)'),
     ]
+
+    all_paradigms = sorted(df['paradigm'].unique())
+    legend_handles = [plt.Line2D([0], [0], color='#555555', linestyle=':', linewidth=1.5, label='Zero-Shot CLIP')]
+    for p in all_paradigms:
+        legend_handles.append(plt.Line2D([0], [0], marker=MARKERS.get(p, 'o'), markersize=6.5, linewidth=2.0,
+                                         color=PALETTE.get(p, '#333333'), label=SHORT_NAMES.get(p, p)))
 
     for r, c, ds, title in panels:
         ax = axes[r, c]
@@ -204,8 +235,8 @@ def plot_few_shot_curves(df):
         ax.set_xlabel('Shots per Class (k)', fontweight='bold')
         ax.set_ylabel('Test Accuracy (%)', fontweight='bold')
         ax.set_title(title, fontweight='bold', fontsize=11.5)
-        if r == 0 and c == 0:
-            ax.legend(loc='lower right', frameon=True, framealpha=0.92, fontsize=8.5)
+        if r == 0 and c == 1:
+            ax.legend(handles=legend_handles, loc='lower right', frameon=True, framealpha=0.92, fontsize=8.2)
 
     # Panel (1, 2): Net Gain from Fixed Augmentation (Walnut solid, Piarom dashed)
     ax_delta = axes[1, 2]
@@ -214,15 +245,17 @@ def plot_few_shot_curves(df):
         color = PALETTE.get(p)
         w_orig = df[(df['dataset'] == 'walnut') & (df['paradigm'] == p)].groupby('shots')['test_acc'].mean().reindex(shots)
         w_fix = df[(df['dataset'] == 'walnut_fixed') & (df['paradigm'] == p)].groupby('shots')['test_acc'].mean().reindex(shots)
-        w_diff = w_fix - w_orig
         
         p_orig = df[(df['dataset'] == 'piarom_shape') & (df['paradigm'] == p)].groupby('shots')['test_acc'].mean().reindex(shots)
         p_fix = df[(df['dataset'] == 'piarom_shape_fixed') & (df['paradigm'] == p)].groupby('shots')['test_acc'].mean().reindex(shots)
-        p_diff = p_fix - p_orig
         
         p_label = SHORT_NAMES.get(p).split('(')[1].replace(')', '')
-        ax_delta.plot(shots, w_diff, marker='o', markersize=6, linewidth=1.8, color=color, label=f'{p_label} (Walnut)')
-        ax_delta.plot(shots, p_diff, marker='s', markersize=6, linewidth=1.8, linestyle='--', color=color, alpha=0.85, label=f'{p_label} (Piarom)')
+        if not w_orig.dropna().empty and not w_fix.dropna().empty:
+            w_diff = w_fix - w_orig
+            ax_delta.plot(shots, w_diff, marker='o', markersize=6, linewidth=1.8, color=color, label=f'{p_label} (Walnut)')
+        if not p_orig.dropna().empty and not p_fix.dropna().empty:
+            p_diff = p_fix - p_orig
+            ax_delta.plot(shots, p_diff, marker='s', markersize=6, linewidth=1.8, linestyle='--', color=color, alpha=0.85, label=f'{p_label} (Piarom)')
 
     ax_delta.set_xscale('log', base=2)
     ax_delta.set_xticks(shots)
@@ -247,6 +280,10 @@ def plot_train_accuracy_curves(df):
         (1, 1, 'piarom_shape_fixed', 'Piarom Date (Fixed Aug, s21-23)', 80, 102),
     ]
 
+    all_paradigms = sorted(df['paradigm'].unique())
+    legend_handles = [plt.Line2D([0], [0], marker=MARKERS.get(p, 'o'), markersize=6.5, linewidth=2.0,
+                                 color=PALETTE.get(p, '#333333'), label=SHORT_NAMES.get(p, p)) for p in all_paradigms]
+
     for r, c, ds, title, ymin, ymax in panels:
         ax = axes[r, c]
         sub_ds = df[df['dataset'] == ds]
@@ -270,8 +307,8 @@ def plot_train_accuracy_curves(df):
         ax.set_ylabel('Final Training Accuracy (%)', fontweight='bold')
         ax.set_title(title, fontweight='bold', fontsize=11.5)
         ax.set_ylim(ymin, ymax)
-        if r == 0 and c == 0:
-            ax.legend(loc='lower left', frameon=True, framealpha=0.92, fontsize=8.5)
+        if r == 0 and c == 1:
+            ax.legend(handles=legend_handles, loc='lower left', frameon=True, framealpha=0.92, fontsize=8.2)
 
     # Panel (1, 2): Empty panel
     axes[1, 2].axis('off')
@@ -327,9 +364,13 @@ def plot_piarom_augmentation_comparison(df):
 
 def plot_delta_over_zero_shot(df):
     """Figure 2: Net Accuracy Delta over Zero-Shot Baseline (Gain / Degradation)."""
-    fig, axes = plt.subplots(1, 4, figsize=(23, 5.0), sharey=False)
-    datasets = ['walnut', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
+    fig, axes = plt.subplots(1, 5, figsize=(27, 5.0), sharey=False)
+    datasets = ['walnut', 'walnut_fixed', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
     shots = [1, 2, 4, 8, 16, 32]
+    
+    all_paradigms = sorted(df['paradigm'].unique())
+    legend_handles = [plt.Line2D([0], [0], marker=MARKERS.get(p, 'o'), markersize=6.5, linewidth=2.0,
+                                 color=PALETTE.get(p, '#333333'), label=SHORT_NAMES.get(p, p)) for p in all_paradigms]
     
     for i, ds in enumerate(datasets):
         ax = axes[i]
@@ -356,8 +397,8 @@ def plot_delta_over_zero_shot(df):
         ax.set_xlabel('Shots per Class (k)', fontweight='bold')
         ax.set_ylabel(r'$\Delta$ Accuracy vs. Zero-Shot (pp)', fontweight='bold')
         ax.set_title(f'{DATASET_NAMES[ds]}: Gain vs Zero-Shot', fontweight='bold', fontsize=11.5)
-        if i == 0:
-            ax.legend(loc='lower right', frameon=True, framealpha=0.92, facecolor='white', edgecolor='#DDDDDD')
+        if i == 1:
+            ax.legend(handles=legend_handles, loc='lower right', frameon=True, framealpha=0.92, facecolor='white', edgecolor='#DDDDDD')
             
     save(fig, 'delta_over_zero_shot.png')
 
@@ -415,8 +456,8 @@ def plot_pareto_frontier(df):
     """Figure 4: Computational Cost (Training Time) vs 32-Shot Test Accuracy."""
     fig, ax = plt.subplots(figsize=(9.0, 5.5))
     
-    datasets = ['walnut', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
-    ds_markers = {'walnut': 'o', 'piarom_shape': 's', 'piarom_shape_fixed': 'D', 'stanford_cars': '^'}
+    datasets = ['walnut', 'walnut_fixed', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
+    ds_markers = {'walnut': 'o', 'walnut_fixed': 'v', 'piarom_shape': 's', 'piarom_shape_fixed': 'D', 'stanford_cars': '^'}
     
     for ds in datasets:
         sub_ds = df[(df['dataset'] == ds) & (df['shots'] == 32)]
@@ -433,7 +474,7 @@ def plot_pareto_frontier(df):
                         textcoords='offset points', fontsize=8.5, alpha=0.85)
             
     # Legends
-    p_handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=PALETTE[p], markersize=9, label=SHORT_NAMES[p]) for p in sorted(PALETTE.keys())]
+    p_handles = [plt.Line2D([0], [0], marker=MARKERS[p], color='w', markerfacecolor=PALETTE[p], markersize=9, label=SHORT_NAMES[p]) for p in sorted(PALETTE.keys()) if p in df['paradigm'].values]
     ds_handles = [plt.Line2D([0], [0], marker=ds_markers[d], color='w', markerfacecolor='gray', markersize=9, label=DATASET_NAMES[d]) for d in datasets]
     
     leg1 = ax.legend(handles=p_handles, loc='lower right', title='Paradigm', frameon=True)
@@ -449,9 +490,13 @@ def plot_pareto_frontier(df):
 
 def plot_generalization_gap(df):
     """Figure 5: Generalization Gap (Train Acc - Test Acc) across shots."""
-    fig, axes = plt.subplots(1, 4, figsize=(23, 5.0), sharey=True)
-    datasets = ['walnut', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
+    fig, axes = plt.subplots(1, 5, figsize=(27, 5.0), sharey=True)
+    datasets = ['walnut', 'walnut_fixed', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
     shots = [1, 2, 4, 8, 16, 32]
+    
+    all_paradigms = sorted(df['paradigm'].unique())
+    legend_handles = [plt.Line2D([0], [0], marker=MARKERS.get(p, 'o'), markersize=6.5, linewidth=2.0,
+                                 color=PALETTE.get(p, '#333333'), label=SHORT_NAMES.get(p, p)) for p in all_paradigms]
     
     for i, ds in enumerate(datasets):
         ax = axes[i]
@@ -475,16 +520,21 @@ def plot_generalization_gap(df):
         ax.set_xlabel('Shots per Class (k)', fontweight='bold')
         if i == 0:
             ax.set_ylabel('Generalization Gap (% Train - % Test)', fontweight='bold')
-            ax.legend(loc='upper right', frameon=True, framealpha=0.92)
+        if i == 1:
+            ax.legend(handles=legend_handles, loc='upper right', frameon=True, framealpha=0.92)
         ax.set_title(DATASET_NAMES[ds], fontweight='bold', fontsize=11.5)
         
     save(fig, 'generalization_gap_curves.png')
 
 def plot_seed_stability(df):
     """Figure 6: Seed Variance Comparison (Std Dev of Test Accuracy)."""
-    fig, axes = plt.subplots(1, 4, figsize=(23, 4.8), sharey=True)
-    datasets = ['walnut', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
+    fig, axes = plt.subplots(1, 5, figsize=(27, 4.8), sharey=True)
+    datasets = ['walnut', 'walnut_fixed', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
     shots = [1, 2, 4, 8, 16, 32]
+    
+    all_paradigms = sorted(df['paradigm'].unique())
+    legend_handles = [plt.Line2D([0], [0], marker=MARKERS.get(p, 'o'), markersize=6.5, linewidth=2.0,
+                                 color=PALETTE.get(p, '#333333'), label=SHORT_NAMES.get(p, p)) for p in all_paradigms]
     
     for i, ds in enumerate(datasets):
         ax = axes[i]
@@ -502,15 +552,16 @@ def plot_seed_stability(df):
         ax.set_xlabel('Shots per Class (k)', fontweight='bold')
         if i == 0:
             ax.set_ylabel('Test Accuracy Standard Deviation (%)', fontweight='bold')
-            ax.legend(loc='upper right', frameon=True)
+        if i == 1:
+            ax.legend(handles=legend_handles, loc='upper right', frameon=True, fontsize=8.2)
         ax.set_title(f'{DATASET_NAMES[ds]}: Seed Sensitivity', fontweight='bold', fontsize=11.5)
         
     save(fig, 'seed_variance_analysis.png')
 
 def plot_heatmap(df):
     """Figure 7: Summary Heatmap across Datasets, Shots, and Paradigms."""
-    fig, axes = plt.subplots(1, 4, figsize=(25, 5.5))
-    datasets = ['walnut', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
+    fig, axes = plt.subplots(1, 5, figsize=(29, 5.5))
+    datasets = ['walnut', 'walnut_fixed', 'piarom_shape', 'piarom_shape_fixed', 'stanford_cars']
     
     for i, ds in enumerate(datasets):
         ax = axes[i]
@@ -519,7 +570,7 @@ def plot_heatmap(df):
         # Rename columns to short names
         piv.columns = [SHORT_NAMES.get(c, c).replace(' (Dual LoRA)', '').replace(' (Vision LoRA)', '') for c in piv.columns]
         
-        sns.heatmap(piv, annot=True, fmt='.1f', cmap='YlGnBu', cbar=(i == 3), ax=ax,
+        sns.heatmap(piv, annot=True, fmt='.1f', cmap='YlGnBu', cbar=(i == 4), ax=ax,
                     linewidths=0.5, linecolor='white')
         ax.set_title(DATASET_NAMES[ds], fontweight='bold', fontsize=11.5)
         ax.set_xlabel('')
@@ -528,7 +579,7 @@ def plot_heatmap(df):
     save(fig, 'performance_summary_heatmap.png')
 
 def main():
-    print(f'Loading data from {RUNS_DIR} and {RUNS2_DIR}...')
+    print(f'Loading data from {RUNS_DIR}, {RUNS2_DIR}, and {RUNS3_DIR}...')
     df = load_data()
     print(f'Successfully loaded {len(df)} total records.')
     

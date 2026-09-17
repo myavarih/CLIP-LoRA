@@ -92,20 +92,20 @@ Each run represents a distinct balance between visual adaptation, language adapt
 \textbf{Run} & \textbf{Paradigm} & \textbf{Vision Adapter} & \textbf{Text Adapter} & \textbf{Prompt \& Class Formulation} & \textbf{Loss Objective} \\
 \midrule
 \rowcolor{run1blue}
-\textbf{Run 1} & Infix CoOp + Ordinal & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Frozen Backbone & Infix continuous prompt ($M{=}4$) + Learnable residual class tokens $\Delta e_k$ & $\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ ($\lambda_{\mathrm{ord}}{=}1.0$ or $2.0$) \\
+\textbf{Run 1} & Infix CoOp + Ordinal & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Frozen Backbone & Infix continuous prompt ($M{=}4$) + Learnable residual class tokens $\Delta e_k$ & $\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ ($\lambda_{\mathrm{ord}}{=}1.0$) \\
 \addlinespace
 \rowcolor{run2orange}
 \textbf{Run 2} & Plain Dual LoRA & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Handcrafted natural template, frozen BPE token embeddings & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
 \addlinespace
 \rowcolor{run3green}
-\textbf{Run 3} & CoOp-CSC Dual LoRA & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Class-Specific Context ($K \times M \times d$ continuous prompt vectors) & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\textbf{Run 3} & CoOp-CSC Dual LoRA & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Class-Specific Context ($K \times M \times d$ continuous prompt vectors) & Standard $\mathcal{L}_{\mathrm{ce}}$\textsuperscript{*} \\
 \addlinespace
 \rowcolor{run4red}
-\textbf{Run 4} & Plain LoRA + ResCls & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Handcrafted natural template + Learnable residual class tokens $\delta_k$ & Standard $\mathcal{L}_{\mathrm{ce}}$ \\
+\textbf{Run 4} & Plain LoRA + ResCls & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & LoRA ($W_q, W_v$, $r{=}2, \alpha{=}1.0$) & Handcrafted natural template + Learnable residual class tokens $\delta_k$ & $\mathcal{L}_{\mathrm{ce}}$ / $(\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}})^{\dagger}$ \\
 \bottomrule
 \end{tabularx}
 \vspace{0.3em}
-\raggedright\small \textit{Note: ViT-B/16 operates with vision dimension $d_v = 768$ (projected to 512) and text dimension $d_t = 512$. All LoRA modules inject into attention projection matrices with rank $r=2$ and scaling factor $\alpha=1.0$.}
+\raggedright\small \textit{Note: ViT-B/16 operates with vision dimension $d_v = 768$ (projected to 512) and text dimension $d_t = 512$. All LoRA modules inject into attention projection matrices with rank $r=2$ and scaling factor $\alpha=1.0$. \textsuperscript{*}For Run 3, ordinal loss was planned but the flag was omitted during benchmark execution, defaulting to standard $\mathcal{L}_{\mathrm{ce}}$. $^{\dagger}$Run 4 was evaluated both without ordinal loss ($\mathcal{L}_{\mathrm{ce}}$) and with ordinal penalty ($\lambda_{\mathrm{ord}}{=}2.0$).}
 \end{table}
 
 \subsection{Parameter Footprint and Trainable Parameter Counts}
@@ -318,7 +318,7 @@ trainable_params = [
 optimizer = torch.optim.AdamW(trainable_params, betas=(0.9, 0.999), lr=2e-4)
 criterion = CompositeCriterion(
     base_loss_type='ce', use_ordinal=True, 
-    cost_matrix=cost_matrix, lambda_ord=1.0 # (or 2.0)
+    cost_matrix=cost_matrix, lambda_ord=1.0
 )
 \end{lstlisting}
 
@@ -374,7 +374,7 @@ Run 3 couples Dual LoRA adaptation with Class-Specific Context (CSC) continuous 
         \bm{P}_k = [\bm{e}_{\mathrm{SOS}}, \bm{v}_{k, 1}, \bm{v}_{k, 2}, \bm{v}_{k, 3}, \bm{v}_{k, 4}, \bm{e}_{\mathrm{cls}}^{(k)}, \bm{e}_{\mathrm{EOS}}, \dots] \in \mathbf{R}^{77 \times 512}
     \end{equation}
     where $\bm{e}_{\mathrm{cls}}^{(k)}$ is the frozen BPE embedding of the $k$-th class name.
-    \item \textbf{Loss Function}: Standard cross-entropy loss $\mathcal{L}_{\mathrm{ce}}$ (ordinal loss flag was omitted during execution).
+    \item \textbf{Loss Function}: Standard cross-entropy loss $\mathcal{L}_{\mathrm{ce}}$ (ordinal loss was originally planned for Run~3, but the \path{--use_ordinal} flag was omitted during benchmark execution).
 \end{enumerate}
 
 \subsubsection{Optimization and Staging Mechanics}
@@ -416,7 +416,7 @@ Run 4 investigates the hypothesis that preserving the full natural language sent
         \bm{e}_{\mathrm{seq}}^{(k)}[s_k : s_k + L_k] = \bm{e}_{\mathrm{base}}^{(k)}[s_k : s_k + L_k] + \delta_k
     \end{equation}
     where $s_k$ is the exact BPE token starting index of class $k$, and $L_k$ is the token length of the class name.
-    \item \textbf{Loss Function}: Standard cross-entropy classification $\mathcal{L}_{\mathrm{ce}}$.
+    \item \textbf{Loss Function}: Evaluated under both standard cross-entropy classification ($\mathcal{L}_{\mathrm{ce}}$, without ordinal) and joint ordinal cost loss ($\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ with $\lambda_{\mathrm{ord}} = 2.0$).
 \end{enumerate}
 
 \subsubsection{Optimization Specification}
@@ -485,9 +485,9 @@ Class Token Learning & Residual ($\Delta e_k$) & None (Frozen) & None (Frozen) &
 Class LR ($\eta_{\text{class}}$) & $1 \times 10^{-3}$ & N/A & N/A & $1 \times 10^{-3}$ & \path{--lr_class} \\
 Class Weight Decay & 0.0 & N/A & N/A & 0.0 & Fixed in code \\
 \midrule
-Loss Formulation & $\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ & $\mathcal{L}_{\mathrm{ce}}$ & $\mathcal{L}_{\mathrm{ce}}$ & $\mathcal{L}_{\mathrm{ce}}$ & \path{--use_ordinal} \\
-Ordinal Weight ($\lambda_{\mathrm{ord}}$) & $1.0$ (or $2.0$) & N/A & N/A & N/A & \path{--lambda_ord} \\
-Cost Matrix Metric & Expected Cost & N/A & N/A & N/A & \path{--ordinal_loss_type} \\
+Loss Formulation & $\mathcal{L}_{\mathrm{ce}} + \lambda_{\mathrm{ord}}\mathcal{L}_{\mathrm{ord}}$ & $\mathcal{L}_{\mathrm{ce}}$ & $\mathcal{L}_{\mathrm{ce}}$\textsuperscript{*} & $\mathcal{L}_{\mathrm{ce}}$ / $(\mathcal{L}_{\mathrm{ce}} + \lambda\mathcal{L}_{\mathrm{ord}})^{\dagger}$ & \path{--use_ordinal} \\
+Ordinal Weight ($\lambda_{\mathrm{ord}}$) & $1.0$ & N/A & Omitted\textsuperscript{*} & None / $2.0^{\dagger}$ & \path{--lambda_ord} \\
+Cost Matrix Metric & Expected Cost & N/A & N/A & Expected Cost$^{\dagger}$ & \path{--ordinal_loss_type} \\
 Logit Scale ($\tau^{-1}$) & 100.0 & 100.0 & 100.0 & 100.0 & Fixed CLIP scale \\
 \midrule
 Batch Size ($B$) & 32 & 32 & 32 & 32 & \path{--batch_size} \\
@@ -500,6 +500,8 @@ Minimum LR ($\eta_{\min}$) & $10^{-6}$ & $10^{-6}$ & $10^{-6}$ & $10^{-6}$ & Fix
 Precision & FP16 (AMP) & FP16 (AMP) & FP16 (AMP) & FP16 (AMP) & \path{torch.amp.autocast} \\
 \bottomrule
 \end{tabularx}
+\vspace{0.3em}
+\raggedright\small \textit{\textsuperscript{*}For Run 3, ordinal loss was planned but the \path{--use_ordinal} flag was omitted during benchmark execution, defaulting to standard $\mathcal{L}_{\mathrm{ce}}$. $^{\dagger}$For Run 4, experiments were evaluated both without ordinal loss ($\mathcal{L}_{\mathrm{ce}}$) and with ordinal penalty ($\lambda_{\mathrm{ord}} = 2.0$).}
 \end{table}
 
 % ============================================================================

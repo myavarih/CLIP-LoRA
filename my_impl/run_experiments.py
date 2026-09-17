@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument('--force', action='store_true', help='Force re-run even if saved experiment exists')
     
     # Method & Prompt Tuning
-    parser.add_argument('--method', type=str, default='coop_lora', choices=['lora', 'coop_lora', 'coop_only', 'rt_lora', 'csc_lora', 'coop_csc', 'res_cls_lora', 'plain_lora_res_cls'], help='Training method')
+    parser.add_argument('--method', type=str, default='coop_lora', choices=['lora', 'coop_lora', 'coop_only', 'rt_lora', 'csc_lora', 'coop_csc', 'res_cls_lora', 'plain_lora_res_cls', 'mllm_feat_lora'], help='Training method')
     parser.add_argument('--n_ctx', type=int, default=4, help='Number of learnable context tokens M')
     parser.add_argument('--csc', action='store_true', help='Use Class-Specific Context (CSC) where context is learned per class separately')
     parser.add_argument('--csc_iters', '--n_iters_csc', type=int, default=None, help='Number of iterations per shot to train CSC prompt before freezing it (default: full n_iters)')
@@ -46,6 +46,8 @@ def parse_args():
     parser.add_argument('--learn_template_tokens', action='store_true', default=True, help='Make template tokens learnable')
     parser.add_argument('--lr_class', type=float, default=1e-3, help='Learning rate for class residual tokens')
     parser.add_argument('--lr_template', type=float, default=1e-4, help='Learning rate for template residual tokens')
+    parser.add_argument('--use_mllm_prompts', action='store_true', help='Use MLLM fine-grained prompt ensembles (UniFGVC CDV-Captioner)')
+    parser.add_argument('--lr_prompt', type=float, default=1e-4, help='Learning rate for feature-space prompt residual delta_w (default: 1e-4)')
     
     # Loss flags
     parser.add_argument('--base_loss', type=str, default='ce', choices=['ce', 'contrastive'])
@@ -55,6 +57,8 @@ def parse_args():
     parser.add_argument('--use_promptsrc', action='store_true', help='Enable PromptSRC self-consistency regularizer')
     parser.add_argument('--lambda_src', type=float, default=1.0)
     parser.add_argument('--src_temp', type=float, default=2.0)
+    parser.add_argument('--use_kgcoop', action='store_true', help='Enable kgCoOp knowledge-guided anchor consistency regularizer')
+    parser.add_argument('--lambda_kg', type=float, default=2.0, help='Weight for kgCoOp anchor loss (default: 2.0)')
     return parser.parse_args()
 
 
@@ -238,6 +242,13 @@ def run_experiments(args):
                         cmd.append('--use_ordinal')
                     if args.use_promptsrc:
                         cmd.append('--use_promptsrc')
+                    if getattr(args, 'use_mllm_prompts', False) or args.method == 'mllm_feat_lora':
+                        cmd.append('--use_mllm_prompts')
+                    if getattr(args, 'use_kgcoop', False) or args.method == 'mllm_feat_lora':
+                        cmd.append('--use_kgcoop')
+                        cmd.extend(['--lambda_kg', str(args.lambda_kg)])
+                    if getattr(args, 'lr_prompt', None) is not None:
+                        cmd.extend(['--lr_prompt', str(args.lr_prompt)])
                     if args.root_path:
                         cmd.extend(['--root_path', str(args.root_path)])
                     if args.vflip is not None:

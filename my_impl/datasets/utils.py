@@ -363,7 +363,8 @@ def build_data_loader(
     is_train=True,
     shuffle=False,
     dataset_wrapper=None,
-    num_workers=8
+    num_workers=8,
+    generator=None
 ):
 
     if dataset_wrapper is None:
@@ -377,7 +378,8 @@ def build_data_loader(
         num_workers=num_workers,
         shuffle=shuffle,
         drop_last=False,
-        pin_memory=(torch.cuda.is_available())
+        pin_memory=(torch.cuda.is_available()),
+        generator=generator
     )
     assert len(data_loader) > 0
 

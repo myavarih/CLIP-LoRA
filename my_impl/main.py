@@ -92,15 +92,20 @@ def main():
             aug_list.append(transforms.Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711)))
             train_tranform = transforms.Compose(aug_list)
         
-        if args.dataset == 'imagenet':
-            train_loader = torch.utils.data.DataLoader(dataset.train_x, batch_size=args.batch_size, num_workers=8, shuffle=True, pin_memory=True)
-        else:
-            train_loader = build_data_loader(data_source=dataset.train_x, batch_size=args.batch_size, tfm=train_tranform, is_train=True, shuffle=True, num_workers=8)
+        train_generator = torch.Generator()
+        train_generator.manual_seed(args.seed)
 
-    if args.method in ['coop_lora', 'coop_only', 'rt_lora', 'csc_lora', 'coop_csc', 'res_cls_lora', 'plain_lora_res_cls']:
-        run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader)
+        if args.dataset == 'imagenet':
+            train_loader = torch.utils.data.DataLoader(dataset.train_x, batch_size=args.batch_size, num_workers=8, shuffle=True, pin_memory=True, generator=train_generator)
+            train_eval_loader = torch.utils.data.DataLoader(dataset.train_x, batch_size=args.batch_size, num_workers=8, shuffle=False, pin_memory=True)
+        else:
+            train_loader = build_data_loader(data_source=dataset.train_x, batch_size=args.batch_size, tfm=train_tranform, is_train=True, shuffle=True, num_workers=8, generator=train_generator)
+            train_eval_loader = build_data_loader(data_source=dataset.train_x, batch_size=args.batch_size, is_train=False, tfm=preprocess, shuffle=False, num_workers=8)
+
+    if args.method in ['coop_lora', 'coop_only', 'rt_lora', 'csc_lora', 'coop_csc', 'res_cls_lora', 'plain_lora_res_cls', 'mllm_feat_lora']:
+        run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader, train_eval_loader=train_eval_loader)
     else:
-        run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader)
+        run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader, train_eval_loader=train_eval_loader)
 
 if __name__ == '__main__':
     main()

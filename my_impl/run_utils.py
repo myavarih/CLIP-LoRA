@@ -47,7 +47,7 @@ def get_arguments():
     parser.add_argument('--clear_vis', default=False, action='store_true', help='delete old visualizations folder before running')
     
     # Method Selection
-    parser.add_argument('--method', type=str, default='coop_lora', choices=['lora', 'coop_lora', 'coop_only', 'rt_lora', 'csc_lora', 'coop_csc', 'res_cls_lora', 'plain_lora_res_cls'], help='Training method: legacy LoRA, CoOp Text + Vision LoRA, CoOp Only, Residual-Template Dual-LoRA (rt_lora), Class-Specific Context (csc_lora), or Plain LoRA with Residual Class Tokens (res_cls_lora)')
+    parser.add_argument('--method', type=str, default='coop_lora', choices=['lora', 'coop_lora', 'coop_only', 'rt_lora', 'csc_lora', 'coop_csc', 'res_cls_lora', 'plain_lora_res_cls', 'mllm_feat_lora'], help='Training method: legacy LoRA, CoOp Text + Vision LoRA, CoOp Only, Residual-Template Dual-LoRA (rt_lora), Class-Specific Context (csc_lora), Plain LoRA with Residual Class Tokens (res_cls_lora), or MLLM Feature-Space Residual + Vision LoRA (mllm_feat_lora)')
     
     # Prompt Tuning Arguments
     parser.add_argument('--n_ctx', type=int, default=4, help='Number of learnable context tokens M (default: 4)')
@@ -60,6 +60,8 @@ def get_arguments():
     parser.add_argument('--learn_template_tokens', default=True, action='store_true', help='Make template token embeddings learnable via residual (rt_lora)')
     parser.add_argument('--lr_class', type=float, default=1e-3, help='Learning rate for class residual tokens (default: 1e-3)')
     parser.add_argument('--lr_template', type=float, default=1e-4, help='Learning rate for template residual tokens (default: 1e-4)')
+    parser.add_argument('--use_mllm_prompts', default=False, action='store_true', help='Use MLLM fine-grained prompt ensembles (UniFGVC CDV-Captioner)')
+    parser.add_argument('--lr_prompt', type=float, default=1e-4, help='Learning rate for feature-space prompt residual delta_w (default: 1e-4)')
     
     # Loss Arguments
     parser.add_argument('--base_loss', type=str, default='ce', choices=['ce', 'contrastive'], help='Base classification loss')
@@ -69,6 +71,9 @@ def get_arguments():
     parser.add_argument('--use_promptsrc', default=False, action='store_true', help='Enable PromptSRC self-consistency and feature regularization')
     parser.add_argument('--lambda_src', type=float, default=1.0, help='Weight for PromptSRC loss')
     parser.add_argument('--src_temp', type=float, default=2.0, help='Distillation temperature for PromptSRC KL loss')
+    parser.add_argument('--use_kgcoop', default=False, action='store_true', help='Enable kgCoOp knowledge-guided anchor consistency regularizer')
+    parser.add_argument('--lambda_kg', type=float, default=2.0, help='Weight for kgCoOp anchor loss (default: 2.0)')
+
     
     args = parser.parse_args()
 

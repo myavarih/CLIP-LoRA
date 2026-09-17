@@ -130,7 +130,7 @@ def evaluate_lora(args, clip_model, loader, dataset):
     return acc, all_preds, all_targets, all_images, text_features, all_probs
 
 
-def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader):
+def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader, train_eval_loader=None):
     clip_model = clip_model.float()
     VALIDATION = False
     
@@ -157,8 +157,9 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
     os.makedirs('visualizations', exist_ok=True)
     
     # --- Zero-shot Train ---
-    if train_loader is not None:
-        zs_acc_train, zs_preds_train, zs_targets_train, zs_images_train, zs_text_features_train, zs_probs_train = evaluate_lora(args, clip_model, train_loader, dataset)
+    eval_loader_train = train_eval_loader if train_eval_loader is not None else train_loader
+    if eval_loader_train is not None:
+        zs_acc_train, zs_preds_train, zs_targets_train, zs_images_train, zs_text_features_train, zs_probs_train = evaluate_lora(args, clip_model, eval_loader_train, dataset)
         
         train_pred_indices = get_prediction_indices(len(zs_images_train), first_n=10, random_n=10)
         
@@ -173,7 +174,7 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
                 pred_cls = dataset.classnames[zs_preds_train[idx]]
                 visualize_attention(zs_images_train[idx], zs_cam_maps_train[idx], f'visualizations/zs_train_attention/img_{idx}.png', split_name="Train", class_name=pred_cls)
                 
-        train_features, train_labels = pre_load_features(clip_model, train_loader)
+        train_features, train_labels = pre_load_features(clip_model, eval_loader_train)
         plot_embeddings(train_features.cpu(), textual_features.t().cpu(), train_labels.cpu(), dataset.classnames, 'visualizations/zs_train_tsne.png', method='tsne', split_name="Train")
         plot_embeddings(train_features.cpu(), textual_features.t().cpu(), train_labels.cpu(), dataset.classnames, 'visualizations/zs_train_pca.png', method='pca', split_name="Train")
 
@@ -248,6 +249,13 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
     count_iters = 0
     
     start_train_time = time.time()
+    # Reset train generator and global seeds to ensure identical epoch permutation ordering across all run methods
+    if hasattr(train_loader, 'generator') and train_loader.generator is not None:
+        train_loader.generator.manual_seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
+
     while count_iters < total_iters:
         clip_model.train()
         acc_train = 0
@@ -325,9 +333,10 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
     
     # 2. Final Evaluation (Train)
     acc_train_final = 0.0
-    if train_loader is not None:
+    eval_loader_train = train_eval_loader if train_eval_loader is not None else train_loader
+    if eval_loader_train is not None:
         Logger.info("Evaluating on Train set...")
-        acc_train_final, train_preds, train_targets, final_train_images, final_train_text_features, train_probs = evaluate_lora(args, clip_model, train_loader, dataset)
+        acc_train_final, train_preds, train_targets, final_train_images, final_train_text_features, train_probs = evaluate_lora(args, clip_model, eval_loader_train, dataset)
         Logger.success("Final Train accuracy: {:.2f}%".format(acc_train_final))
         
         train_pred_indices = get_prediction_indices(len(final_train_images), first_n=10, random_n=10)
@@ -343,7 +352,7 @@ def run_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, t
                 pred_cls = dataset.classnames[train_preds[idx]]
                 visualize_attention(final_train_images[idx], train_cam_maps[idx], f'visualizations/final_train_attention/img_{idx}.png', split_name="Train", class_name=pred_cls)
                 
-        trained_train_features, trained_train_labels = pre_load_features(clip_model, train_loader)
+        trained_train_features, trained_train_labels = pre_load_features(clip_model, eval_loader_train)
         plot_embeddings(trained_train_features, final_train_text_features.cpu(), trained_train_labels, dataset.classnames, 'visualizations/final_train_tsne.png', method='tsne', split_name="Train")
         plot_embeddings(trained_train_features, final_train_text_features.cpu(), trained_train_labels, dataset.classnames, 'visualizations/final_train_pca.png', method='pca', split_name="Train")
 

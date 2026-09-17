@@ -9,7 +9,8 @@ from tqdm import tqdm
 
 from utils import Logger, cls_acc, clip_classifier, pre_load_features, compute_ordinal_metrics, save_run_info
 from loralib.utils import mark_only_lora_as_trainable, apply_lora, get_lora_parameters, save_lora, load_lora
-from prompt_learner import PromptLearner, CustomCoOpCLIP, ResidualTemplatePromptLearner
+from prompt_learner import PromptLearner, CustomCoOpCLIP, ResidualTemplatePromptLearner, FeatureResidualPromptLearner
+from mllm_prompts import get_mllm_prompts
 from losses import CompositeCriterion
 from vis_utils import plot_metrics, plot_confusion_matrix, plot_predictions, plot_embeddings, visualize_attention
 from pytorch_grad_cam import EigenCAM
@@ -146,13 +147,20 @@ def load_coop_checkpoint(args, list_lora_layers, prompt_learner, filename):
         prompt_learner.load_state_dict(prompt_state)
 
 
-def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader):
+def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_loader, test_loader, train_eval_loader=None):
     clip_model = clip_model.float()
     cost_matrix = getattr(dataset, 'cost_matrix', None)
     
     # 1. Compute and evaluate Zero-shot baseline
     Logger.step("Getting zero-shot textual features as baseline classifier.")
-    zs_textual_features = clip_classifier(dataset.classnames, dataset.template, clip_model)
+    use_mllm = getattr(args, 'use_mllm_prompts', False) or (args.method == 'mllm_feat_lora')
+    mllm_dict = get_mllm_prompts(args.dataset, dataset.classnames) if use_mllm else None
+    if mllm_dict is not None:
+        Logger.step("Using MLLM Fine-Grained Prompt Ensemble (UniFGVC) for Zero-Shot and Anchor.")
+        eval_template = mllm_dict
+    else:
+        eval_template = dataset.template
+    zs_textual_features = clip_classifier(dataset.classnames, eval_template, clip_model)
     
     Logger.step("Loading visual features and labels from test set for zero-shot baseline.")
     test_features, test_labels = pre_load_features(clip_model, test_loader)
@@ -173,7 +181,11 @@ def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_load
     
     # 2. Setup PromptLearner / ResidualTemplatePromptLearner
     csc_flag = getattr(args, 'csc', False) or (args.method in ['csc_lora', 'coop_csc'])
-    if args.method in ['rt_lora', 'res_cls_lora', 'plain_lora_res_cls']:
+    if args.method == 'mllm_feat_lora':
+        Logger.step("Initializing FeatureResidualPromptLearner (MLLM Anchor + Learnable Feature Residual delta_w)...")
+        zs_anchor = zs_textual_features.t().float().cuda() # [K, D]
+        prompt_learner = FeatureResidualPromptLearner(base_features=zs_anchor).cuda()
+    elif args.method in ['rt_lora', 'res_cls_lora', 'plain_lora_res_cls']:
         template_str = dataset.template[0] if hasattr(dataset, 'template') and dataset.template else "a photo of a {} walnut, a type of walnut."
         learn_template = getattr(args, 'learn_template_tokens', True) if args.method == 'rt_lora' else False
         learn_class = getattr(args, 'learn_class_tokens', True)
@@ -208,7 +220,7 @@ def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_load
         args.encoder = encoder_target
         list_lora_layers = apply_lora(args, clip_model)
         mark_only_lora_as_trainable(clip_model)
-    elif args.method in ['coop_lora', 'csc_lora', 'coop_csc']:
+    elif args.method in ['coop_lora', 'csc_lora', 'coop_csc', 'mllm_feat_lora']:
         encoder_target = getattr(args, 'encoder', 'vision') or 'vision'
         Logger.step(f"Applying LoRA to {encoder_target.upper()} Encoder(s) (r={args.r}, alpha={args.alpha}, params={args.params})...")
         args.encoder = encoder_target
@@ -264,6 +276,13 @@ def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_load
         if len(embed_params) > 0:
             trainable_params.append({'params': embed_params, 'lr': args.lr, 'weight_decay': 0.0})
 
+    # Feature-space residual parameter (args.lr_prompt, default 1e-4)
+    feat_deltas = getattr(prompt_learner, 'feature_deltas', None)
+    if feat_deltas is not None:
+        lr_prompt = getattr(args, 'lr_prompt', 1e-4)
+        trainable_params.append({'params': [feat_deltas], 'lr': lr_prompt, 'weight_decay': 1e-2})
+        Logger.info(f"Param Group: FeatureResidual deltas with lr={lr_prompt}")
+
     total_iters = args.n_iters * args.shots
     optimizer = torch.optim.AdamW(trainable_params, betas=(0.9, 0.999), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, total_iters, eta_min=1e-6)
@@ -299,7 +318,9 @@ def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_load
         lambda_ord=args.lambda_ord,
         use_promptsrc=args.use_promptsrc,
         lambda_src=args.lambda_src,
-        src_temp=args.src_temp
+        src_temp=args.src_temp,
+        use_kgcoop=getattr(args, 'use_kgcoop', False) or (args.method == 'mllm_feat_lora'),
+        lambda_kg=getattr(args, 'lambda_kg', 2.0)
     )
 
     # Pre-compute fixed zero-shot text features for PromptSRC anchor if needed
@@ -311,6 +332,13 @@ def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_load
     start_train_time = time.time()
 
     Logger.step(f"Starting Training: Total Iters = {total_iters}, Base Loss = {args.base_loss}, Ordinal Loss = {args.use_ordinal} ({args.ordinal_loss_type}), PromptSRC = {args.use_promptsrc}...")
+
+    # Reset train generator and global seeds to ensure identical epoch permutation ordering across all run methods
+    if hasattr(train_loader, 'generator') and train_loader.generator is not None:
+        train_loader.generator.manual_seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
 
     while count_iters < total_iters:
         custom_model.train()
@@ -395,8 +423,9 @@ def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_load
 
     # Train Split Visualizations
     acc_train_final = 0.0
-    if train_loader is not None:
-        acc_train_final, train_preds, train_targets, train_images, train_text_feats, train_probs, train_metrics = evaluate_coop(args, custom_model, train_loader, dataset)
+    eval_loader_train = train_eval_loader if train_eval_loader is not None else train_loader
+    if eval_loader_train is not None:
+        acc_train_final, train_preds, train_targets, train_images, train_text_feats, train_probs, train_metrics = evaluate_coop(args, custom_model, eval_loader_train, dataset)
         train_indices = get_prediction_indices(len(train_images), first_n=10, random_n=10)
         plot_confusion_matrix(train_targets.numpy(), train_preds.numpy(), dataset.classnames, 'visualizations/final_train_confusion_matrix.png', split_name="Train")
         plot_predictions(train_images[train_indices], train_targets.numpy()[train_indices], train_preds.numpy()[train_indices], dataset.classnames, 'visualizations/final_train_predictions.png', probabilities=train_probs[train_indices], split_name="Train")
@@ -409,7 +438,7 @@ def run_coop_lora(args, clip_model, logit_scale, dataset, train_loader, val_load
                 pred_cls = dataset.classnames[train_preds[idx]]
                 visualize_attention(train_images[idx], train_cam_maps[idx], f'visualizations/final_train_attention/img_{idx}.png', split_name="Train", class_name=pred_cls)
 
-        trained_train_feats, trained_train_labs = pre_load_features(clip_model, train_loader)
+        trained_train_feats, trained_train_labs = pre_load_features(clip_model, eval_loader_train)
         plot_embeddings(trained_train_feats, train_text_feats.cpu(), trained_train_labs, dataset.classnames, 'visualizations/final_train_tsne.png', method='tsne', split_name="Train")
         plot_embeddings(trained_train_feats, train_text_feats.cpu(), trained_train_labs, dataset.classnames, 'visualizations/final_train_pca.png', method='pca', split_name="Train")
 

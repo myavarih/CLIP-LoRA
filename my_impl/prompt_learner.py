@@ -247,6 +247,8 @@ class CustomCoOpCLIP(nn.Module):
         return self.clip_model.dtype
 
     def encode_text(self, prompts=None):
+        if hasattr(self.prompt_learner, 'encode_text'):
+            return self.prompt_learner.encode_text()
         if prompts is None:
             prompts = self.prompt_learner() # [K, 77, ctx_dim]
             
@@ -378,4 +380,30 @@ class ResidualTemplatePromptLearner(nn.Module):
             prompts.append(p)
             
         return torch.stack(prompts, dim=0) # [num_classes, 77, ctx_dim]
+
+
+class FeatureResidualPromptLearner(nn.Module):
+    """
+    Feature-Space Residual Prompt Learner (UniFGVC + kgCoOp):
+    - Base features: Precomputed MLLM ensemble normalized text features [K, D] (frozen anchor).
+    - Learnable residual: delta_w in R^{K, D}, initialized to 0.
+    - Output: w_c = Normalize(base_w_c + delta_w_c)
+    - Fast: No backpropagation through CLIP's text transformer.
+    """
+    def __init__(self, base_features, dtype=torch.float32):
+        super().__init__()
+        # base_features expected shape: [num_classes, feature_dim]
+        self.num_classes, self.feature_dim = base_features.shape
+        self.dtype = dtype
+        self.register_buffer('base_features', base_features.clone().type(dtype))
+        self.feature_deltas = nn.Parameter(torch.zeros(self.num_classes, self.feature_dim, dtype=dtype))
+
+    def encode_text(self):
+        weights = self.base_features + self.feature_deltas
+        weights = weights / weights.norm(dim=-1, keepdim=True)
+        return weights
+
+    def forward(self):
+        return self.encode_text()
+
 

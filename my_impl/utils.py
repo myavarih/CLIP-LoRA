@@ -18,9 +18,18 @@ def clip_classifier(classnames, template, clip_model):
         clip_weights = []
         for classname in classnames:
             # Tokenize the prompts
-            classname = classname.replace('_', ' ')
-            texts = [t.format(classname) for t in template]
-            texts = clip.tokenize(texts).to(device)
+            clean_name = classname.replace('_', ' ')
+            if isinstance(template, dict):
+                # Look up in dictionary by raw or clean name
+                texts = template.get(classname, template.get(clean_name, None))
+                if texts is None:
+                    texts = [f"a photo of a {clean_name}"]
+            elif isinstance(template, (list, tuple)):
+                texts = [t.format(clean_name) for t in template]
+            else:
+                texts = [str(template).format(clean_name)]
+
+            texts = clip.tokenize(texts, truncate=True).to(device)
             class_embeddings = clip_model.encode_text(texts)
             class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)
             class_embedding = class_embeddings.mean(dim=0)
@@ -29,6 +38,7 @@ def clip_classifier(classnames, template, clip_model):
         clip_weights = torch.stack(clip_weights, dim=1).to(device)
         
     return clip_weights
+
 
 
 def pre_load_features(clip_model, loader):
